@@ -12,6 +12,7 @@ load_dotenv()
 
 JWT_KEY = os.getenv('JWT_SECRET_KEY')
 PORT = os.getenv('PORT')
+HOST = os.getenv('HOST')
 MONGO_PORT = os.getenv('MONGO_PORT')
 MONGO_HOST = os.getenv('MONGO_HOST')
 
@@ -36,4 +37,4 @@ def login():
     }, 200
  
 if __name__ == '__main__':
-   app.run(port)
+   app.run(HOST, PORT)
