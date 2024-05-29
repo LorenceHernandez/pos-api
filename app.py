@@ -36,5 +36,12 @@ def login():
       'error': 'wrong username or password'
     }, 200
  
+
+@app.route('/', methods=['GET'])
+def home():
+  return {
+    'api is running'
+  }, 200
+ 
 if __name__ == '__main__':
    app.run(HOST, PORT)
