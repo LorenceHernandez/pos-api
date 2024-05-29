@@ -39,9 +39,7 @@ def login():
 
 @app.route('/', methods=['GET'])
 def home():
-  return {
-    'api is running'
-  }, 200
+  return 'hello world'
  
 if __name__ == '__main__':
    app.run(HOST, PORT)
