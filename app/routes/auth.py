@@ -10,7 +10,7 @@ JWT_KEY = os.getenv('JWT_SECRET_KEY')
 login = Blueprint("login", __name__)
 
 @login.route('/login', methods=['POST'])
-def authenticate():
+def _authenticate():
  user = list(users.find({"email_address": request.form['email_address']}))
  
  if len(user) > 0:   

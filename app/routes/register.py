@@ -3,13 +3,12 @@ from flask import Blueprint, request
 from app.database.config import users
 import jwt
 import os
-from app.database.config import users
 import bcrypt
 
 register = Blueprint("/user/register", __name__)
 
 @register.route('/user/register', methods=['POST'])
-def create_account():
+def _create_account():
    email = request.form['email_address']
    password = request.form['password']
 
@@ -27,6 +26,7 @@ def create_account():
      doc = users.insert_one({
         "email_address": email,
         "password": string_password + "/" + salt.decode('utf8'),
+        "role": None
      })
      return {
         'message': 'successfully registered',
