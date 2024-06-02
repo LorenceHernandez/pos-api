@@ -5,7 +5,9 @@ from pymongo import MongoClient
 import jwt
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
+
 from app.routes.auth import login
 from app.routes.register import register
 
