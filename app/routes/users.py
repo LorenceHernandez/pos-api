@@ -5,17 +5,16 @@ import jwt
 import os
 import bcrypt
 from bson.objectid import ObjectId
+from bson.json_util import dumps, loads 
 
 JWT_SECRET = os.getenv('JWT_SECRET')
 
-update_role = Blueprint("/user/edit", __name__)
+get_users = Blueprint("/users", __name__)
 
-@update_role.route('/user/edit', methods=['POST'])
-def _update_role():
+@get_users.route('/users', methods=['GET'])
+def _get_users():
    headers = request.headers
    bearer = headers.get('Authorization')
-   role_id = request.form['role_id']
-   user_id = request.form['user_id']
 # role_id = None
 #    if 'role_id' in request.form:
 #     role_id = request.form['role_id']
@@ -30,26 +29,27 @@ def _update_role():
       token = auth[1]
       try:
        decoded_token = jwt.decode(token, options={"verify_signature": False})
+       res = users.find()
+
+       ret = []
+       for record in res:
+         ret.append({
+          "_id": str(record["_id"]),
+          "email_address": record["email_address"],
+          "role": record["role"]
+        })
+
+       print(ret)
+       return {
+          'data': ret,
+        }, 200
       except:
        return {
           'message': 'Invalid token',
           'code': 9
        }
       #todo verify signature
-      filter = { '_id': ObjectId(user_id) }
-      new_val = { "$set": { 'role': int(role_id) } }
-
-      res = users.update_one(filter, new_val)
-      if res.modified_count > 0:
-       return {
-          'message': 'update success',
-          'code': 6
-       }, 200
-      else:
-       return {
-          'message': 'something went wrong',
-          'code': 5
-       }
+   
    else:
      return {
         'message': 'User unauthenticated',

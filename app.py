@@ -11,6 +11,7 @@ load_dotenv()
 from app.routes.auth import login
 from app.routes.register import register
 from app.routes.update_role import update_role
+from app.routes.users import get_users
 
 
 PORT = os.getenv('PORT')
@@ -25,6 +26,7 @@ def home():
 app.register_blueprint(login)
 app.register_blueprint(register)
 app.register_blueprint(update_role)
+app.register_blueprint(get_users)
 
 
 

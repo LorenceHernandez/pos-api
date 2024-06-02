@@ -12,10 +12,16 @@ login = Blueprint("login", __name__)
 @login.route('/login', methods=['POST'])
 def _authenticate():
  user = list(users.find({"email_address": request.form['email_address']}))
- 
+ if user[0]['role'] == None:
+    return {
+      'message': 'undefined role',
+      'code': 10,
+    }, 200
  if len(user) > 0:   
+   print(user[0]['password'])
    splitpw = user[0]['password'].split(' ')
    pwd_bytes = request.form['password'].encode('utf-8')
+
    salt = splitpw[1].encode('utf-8')
 
    hashed = bcrypt.hashpw(pwd_bytes, salt)
@@ -24,13 +30,16 @@ def _authenticate():
    if string_password == splitpw[0]: 
     token = jwt.encode({"user_id": str(user[0]['_id'])}, JWT_KEY, algorithm="HS256")
     return {
-      'token': token
+      'token': token,
+      'data': {
+        'role': user[0]['role']
+      }
     }, 200
    else: 
     return {
-      'error': 'wrong username or password'
+      'message': 'wrong username or password'
     }, 200
  else: 
     return {
-      'error': 'wrong username or password'
+      'message': 'wrong username or password'
     }, 200
