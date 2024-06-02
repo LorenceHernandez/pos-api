@@ -12,13 +12,14 @@ login = Blueprint("login", __name__)
 @login.route('/login', methods=['POST'])
 def _authenticate():
  user = list(users.find({"email_address": request.form['email_address']}))
- if user[0]['role'] == None:
-    return {
-      'message': 'undefined role',
-      'code': 10,
-    }, 200
+
  if len(user) > 0:   
-   print(user[0]['password'])
+   if user[0]['role'] == None:
+    return {
+     'message': 'undefined role',
+     'code': 10,
+    }, 200
+  
    splitpw = user[0]['password'].split(' ')
    pwd_bytes = request.form['password'].encode('utf-8')
 
