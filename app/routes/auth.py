@@ -38,9 +38,11 @@ def _authenticate():
     }, 200
    else: 
     return {
-      'message': 'wrong username or password'
+      'message': 'wrong username or password',
+      'code': 11
     }, 200
  else: 
     return {
-      'message': 'wrong username or password'
+      'message': 'wrong username or password',
+      'code': 11
     }, 200
