@@ -14,7 +14,7 @@ def _authenticate():
  user = list(users.find({"email_address": request.form['email_address']}))
  
  if len(user) > 0:   
-   splitpw = user[0]['password'].split('/')
+   splitpw = user[0]['password'].split(' ')
    pwd_bytes = request.form['password'].encode('utf-8')
    salt = splitpw[1].encode('utf-8')
 

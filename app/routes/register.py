@@ -25,7 +25,7 @@ def _create_account():
      string_password = hashed.decode('utf8')
      doc = users.insert_one({
         "email_address": email,
-        "password": string_password + "/" + salt.decode('utf8'),
+        "password": string_password + " " + salt.decode('utf8'),
         "role": None
      })
      return {
