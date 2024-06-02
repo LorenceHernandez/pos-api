@@ -28,7 +28,6 @@ def _update_role():
       #todo verify signature
 
       filter = { '_id': ObjectId(decoded_token['user_id']) }
-      filter = { 'email_address': 'lghernandez' }
       new_val = { "$set": { 'role': int(role_id) } }
       res = users.update_one(filter, new_val)
       if res.modified_count > 0:
