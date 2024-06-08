@@ -17,9 +17,9 @@ from app.routes.products.read import get_products
 from app.routes.products.read_one import get_product
 from app.routes.products.update import update_product
 from app.routes.register import register
-from app.routes.update_role import update_role
 from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
+from app.routes.users.update import update_role
 
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')

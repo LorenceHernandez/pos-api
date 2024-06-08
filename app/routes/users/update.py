@@ -16,10 +16,18 @@ def _update_role():
       'message': 'data format is invalid',
       'code': 23
     }, 401
-  
+   
+   update_val = {}
+   if 'role_id' in request.form:
+      update_val['role_id'] = role_id
    role_id = request.form['role_id']
    user_id = request.form['user_id']
 
+   if not update_val:
+        return {
+            'message': 'atleast one field is required when updating a product',
+            'code': 24
+        }, 200
    filter = { '_id': ObjectId(user_id) }
    new_val = { "$set": { 'role': int(role_id) } }
 

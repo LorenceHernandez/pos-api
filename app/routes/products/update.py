@@ -26,7 +26,13 @@ def _update_product():
       update_val['name'] = request.form['name']
    if 'sku' in request.form:
       update_val['sku'] = request.form['sku']
-
+   
+   if not update_val:
+        return {
+            'message': 'atleast one field is required when updating a user',
+            'code': 25
+        }, 200
+      
    filter = { '_id': ObjectId(id) }
    new_val = { "$set": update_val }
 
@@ -38,7 +44,7 @@ def _update_product():
       }, 200
    else:
       return {
-         'message': 'unable to update user',
+         'message': 'unable to update product',
          'code': 16
       }
 
