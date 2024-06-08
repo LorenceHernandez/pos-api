@@ -8,8 +8,10 @@ update_role = Blueprint("/user/edit", __name__)
 
 @update_role.route('/user/edit', methods=['POST'])
 def _update_role():
+   role_id = request.form['role_id']
+   user_id = request.form['user_id']
    try: 
-      ObjectId(request.form['user_id'])
+      ObjectId(user_id)
       int(role_id)
    except:
     return {
@@ -20,8 +22,6 @@ def _update_role():
    update_val = {}
    if 'role_id' in request.form:
       update_val['role_id'] = role_id
-   role_id = request.form['role_id']
-   user_id = request.form['user_id']
 
    if not update_val:
         return {
