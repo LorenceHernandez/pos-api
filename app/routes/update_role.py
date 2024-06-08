@@ -1,58 +1,37 @@
 
-from flask import Blueprint, request
-from app.database.config import users
-import jwt
-import os
-import bcrypt
 from bson.objectid import ObjectId
+from flask import Blueprint, request
 
-JWT_SECRET = os.getenv('JWT_SECRET')
+from app.database.config import users
 
 update_role = Blueprint("/user/edit", __name__)
 
 @update_role.route('/user/edit', methods=['POST'])
 def _update_role():
-   headers = request.headers
-   bearer = headers.get('Authorization')
+   try: 
+      ObjectId(request.form['user_id'])
+      int(role_id)
+   except:
+    return {
+      'message': 'data format is invalid',
+      'code': 23
+    }, 401
+  
    role_id = request.form['role_id']
    user_id = request.form['user_id']
-# role_id = None
-#    if 'role_id' in request.form:
-#     role_id = request.form['role_id']
-#     if role_id.isnumeric() == False:
-#       return {
-#         'message': 'invalid role id',
-#         'code': 4
-#       }, 200
-   if bearer:
-    auth = bearer.split(' ')
-    if len(auth) > 1:
-      token = auth[1]
-      try:
-       decoded_token = jwt.decode(token, options={"verify_signature": False})
-      except:
-       return {
-          'message': 'Invalid token',
-          'code': 9
-       }
-      #todo verify signature
-      filter = { '_id': ObjectId(user_id) }
-      new_val = { "$set": { 'role': int(role_id) } }
 
-      res = users.update_one(filter, new_val)
-      if res.modified_count > 0:
-       return {
-          'message': 'update success',
-          'code': 6
-       }, 200
-      else:
-       return {
-          'message': 'something went wrong',
-          'code': 5
-       }
+   filter = { '_id': ObjectId(user_id) }
+   new_val = { "$set": { 'role': int(role_id) } }
+
+   res = users.update_one(filter, new_val)
+   if res.modified_count > 0:
+      return {
+         'message': 'user update success',
+         'code': 6
+      }, 200
    else:
-     return {
-        'message': 'User unauthenticated',
-        'code': 3,
-     }, 401
+      return {
+         'message': 'unable to update user',
+         'code': 16
+      }
 

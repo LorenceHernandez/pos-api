@@ -1,9 +1,11 @@
 
-from flask import Blueprint, request
-from app.database.config import users
-import jwt
 import os
+
 import bcrypt
+import jwt
+from flask import Blueprint, request
+
+from app.database.config import users
 
 register = Blueprint("/user/register", __name__)
 
@@ -28,8 +30,14 @@ def _create_account():
         "password": string_password + " " + salt.decode('utf8'),
         "role": None
      })
-     return {
-        'message': 'successfully registered',
-        'code': 2,
-     }, 200
+     if doc.inserted_id:
+         return {
+            'message': 'successfully registered',
+            'code': 2,
+         }, 200
+     else:
+         return {
+            'message': 'unable to register user',
+            'code': 16,
+         }
 
