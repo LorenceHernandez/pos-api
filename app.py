@@ -11,14 +11,15 @@ load_dotenv()
 
 from app.middlewares.request_validator import request_validator
 from app.middlewares.token_validator import token_validator
-from app.routes.auth import login
 from app.routes.products.create import create_product
 from app.routes.products.read import get_products
 from app.routes.products.read_one import get_product
 from app.routes.products.update import update_product
-from app.routes.register import register
+from app.routes.roles.read import get_roles
+from app.routes.users.auth import login
 from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
+from app.routes.users.register import register
 from app.routes.users.update import update_role
 
 PORT = os.getenv('PORT')
@@ -61,6 +62,7 @@ app.register_blueprint(update_product)
 app.register_blueprint(get_products)
 app.register_blueprint(get_product)
 app.register_blueprint(get_user)
+app.register_blueprint(get_roles)
 
 
  

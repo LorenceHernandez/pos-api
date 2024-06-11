@@ -16,8 +16,13 @@ def _get_products():
          ret.append({
           "_id": str(record["_id"]),
           "sku": record["sku"],
+          "name": record["name"],
           "price": record["price"],
-          "name": record["name"]
+          "description": record["description"],
+          "category": str(record["category"]),
+          "inventory_prerequisite": record["inventory_prerequisite"],
+          "created_by": record["created_by"],
+          "created_at": record["created_at"]
          })
        return {
           'data': ret,

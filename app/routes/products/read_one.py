@@ -16,15 +16,20 @@ def _get_product():
             'code': 23
         }, 401
 
-   product = products.find_one({"_id": ObjectId(request.args.get('id'))})
+   record = products.find_one({"_id": ObjectId(request.args.get('id'))})
 
-   if product: 
+   if record: 
        return {
           'data': {
-            "_id": str(product["_id"]),
-            "sku": product["sku"],
-            "price": product["price"],
-            "name": product["name"]
+          "_id": str(record["_id"]),
+          "sku": record["sku"],
+          "name": record["name"],
+          "price": record["price"],
+          "description": record["description"],
+          "category": str(record["category"]),
+          "inventory_prerequisite": record["inventory_prerequisite"],
+          "created_by": record["created_by"],
+          "created_at": record["created_at"]
           },
        }, 200 
    else:

@@ -23,13 +23,18 @@ def _get_user():
             'code': 23
         }, 401
     
-    user = users.find_one({"_id": ObjectId(request.args.get('id'))})
-    if user:
+    record = users.find_one({"_id": ObjectId(request.args.get('id'))})
+    if record:
         return {
             'data': {
-                "_id": str(user["_id"]),
-                "email_address": user["email_address"],
-                "role": user["role"]
+                "_id": str(record["_id"]),
+                "username": record["username"],
+                "role": record["role"],
+                "first_name": record["first_name"],
+                "last_name": record["last_name"],
+                "is_active": record["is_active"],
+                "created_by": record["created_by"],
+                "created_at": record["created_at"],
             },
         }, 200
     else:

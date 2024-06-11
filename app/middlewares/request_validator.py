@@ -7,13 +7,19 @@ from flask import Blueprint, request
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 route_constraints = [
-  { 'route': '/login', 'params': ['email_address', 'password'], 'method': 'POST' },
-  { 'route': '/user/register', 'params': ['email_address', 'password'], 'method': 'POST' },
-  { 'route': '/user/edit', 'params': ['role_id', 'user_id'], 'method': 'POST' },
-  { 'route': '/product/create', 'params': ['sku', 'price', 'name'], 'method': 'POST' },
-  { 'route': '/product/edit', 'params': ['id'], 'method': 'POST' },
-  { 'route': '/product', 'params': ['id'], 'method': 'GET' },
-  { 'route': '/user', 'params': ['id'], 'method': 'GET' },
+  { 'route': '/login', 'params': ['username', 'password'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/user/register', 'params': ['username', 'password', 'first_name', 'last_name', 'role_id'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/user/edit', 'params': ['role_id', 'user_id'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/product/create', 'params': ['sku', 'price', 'name', 'inventoryPrerequisite', 'category', 'description'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/product/edit', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/product', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
+  { 'route': '/user', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
+]
+
+field_constraints = [
+  { 'field': ['price'], 'type': 'float' },
+  { 'field': ['id'], 'type': 'string', 'min': 24, max: '24' }, #for ObjectId
+  { 'field': ['id'], 'type': 'string', 'length': 24 }
 ]
 
 def request_validator():
@@ -21,10 +27,16 @@ def request_validator():
   if i['route'] == request.path:
     for p in i['params']:
      if i['method'] == 'POST': 
-      if p not in request.form:
-       return { 
-        'message': p + ' field is required' 
-       }, 400
+      if i['content-type'] == 'urlencoded':
+        if p not in request.form:
+          return { 
+            'message': p + ' field is required' 
+          }, 400
+      elif i['content-type'] == 'json':
+        if p not in request.get_json():
+          return { 
+            'message': p + ' field is required' 
+          }, 400
      elif i['method'] == 'GET':
       if p not in request.args:
        return { 

@@ -7,8 +7,7 @@ from flask import Blueprint, g, request
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 excluded_routes_for_validator = [
-  '/login',
-  '/user/register'   
+  '/login',  
 ]
 
 def token_validator(): 

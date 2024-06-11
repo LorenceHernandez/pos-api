@@ -23,8 +23,14 @@ def _get_users():
        for record in res:
          ret.append({
           "_id": str(record["_id"]),
-          "email_address": record["email_address"],
-          "role": record["role"]
+          "username": record["username"],
+          "role": record["role"],
+          "first_name": record["first_name"],
+          "last_name": record["last_name"],
+          "is_active": record["is_active"],
+          "created_by": record["created_by"],
+          "created_at": record["created_at"],
+
         })
        return {
           'data': ret,

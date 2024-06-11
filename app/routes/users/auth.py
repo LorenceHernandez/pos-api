@@ -1,9 +1,11 @@
 
-from flask import Blueprint, request
-from app.database.config import users
-import jwt
 import os
+
 import bcrypt
+import jwt
+from flask import Blueprint, request
+
+from app.database.config import users
 
 JWT_KEY = os.getenv('JWT_SECRET_KEY')
 
@@ -11,12 +13,12 @@ login = Blueprint("login", __name__)
 
 @login.route('/login', methods=['POST'])
 def _authenticate():
- user = list(users.find({"email_address": request.form['email_address']}))
+ user = list(users.find({"username": request.form['username']}))
 
  if len(user) > 0:   
    if user[0]['role'] == None:
     return {
-     'message': 'undefined role',
+     'message': 'User has no role',
      'code': 10,
     }, 200
   
@@ -33,6 +35,9 @@ def _authenticate():
     return {
       'token': token,
       'data': {
+        'username': user[0]['username'],
+        'first_name': user[0]['first_name'],
+        'last_name': user[0]['last_name'],
         'role': user[0]['role']
       }
     }, 200
