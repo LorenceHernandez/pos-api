@@ -46,10 +46,7 @@ def _create_account():
         "password": string_password + " " + salt.decode('utf8'),
         "first_name": first_name,
         "last_name": last_name,
-        "role": {
-           'id': role_id,
-           'alias': roles[int(role_id) - 1]
-        },
+        "role": roles[int(role_id) - 1],
         "created_by": created_by,
         "created_at": create_at,
         "is_active": 1
