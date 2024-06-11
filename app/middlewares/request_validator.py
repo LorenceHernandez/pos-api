@@ -13,7 +13,7 @@ route_constraints = [
   { 'route': '/product/create', 'params': ['sku', 'price', 'name', 'inventoryPrerequisite', 'category', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/edit', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'POST' },
   { 'route': '/product', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
-  { 'route': '/user', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
+  #{ 'route': '/user', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
 ]
 
 field_constraints = [

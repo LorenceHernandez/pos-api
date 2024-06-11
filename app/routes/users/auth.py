@@ -35,6 +35,7 @@ def _authenticate():
     return {
       'token': token,
       'data': {
+        'id': str(user[0]['_id']) ,
         'username': user[0]['username'],
         'first_name': user[0]['first_name'],
         'last_name': user[0]['last_name'],

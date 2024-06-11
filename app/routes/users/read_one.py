@@ -5,7 +5,7 @@ import bcrypt
 import jwt
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, g, request
 
 from app.database.config import users
 
@@ -23,7 +23,11 @@ def _get_user():
             'code': 23
         }, 401
     
-    record = users.find_one({"_id": ObjectId(request.args.get('id'))})
+    id = g.user_id
+    if 'id' in request.args:
+        id = request.args.get('id')
+
+    record = users.find_one({"_id": ObjectId(id)})
     if record:
         return {
             'data': {
