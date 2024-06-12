@@ -11,6 +11,10 @@ load_dotenv()
 
 from app.middlewares.request_validator import request_validator
 from app.middlewares.token_validator import token_validator
+from app.routes.doctors.create import create_doctor
+from app.routes.doctors.read import get_doctors
+from app.routes.doctors.read_one import get_doctor
+from app.routes.doctors.update import update_doctor
 from app.routes.products.create import create_product
 from app.routes.products.read import get_products
 from app.routes.products.read_one import get_product
@@ -63,6 +67,10 @@ app.register_blueprint(get_products)
 app.register_blueprint(get_product)
 app.register_blueprint(get_user)
 app.register_blueprint(get_roles)
+app.register_blueprint(create_doctor)
+app.register_blueprint(get_doctor)
+app.register_blueprint(get_doctors)
+app.register_blueprint(update_doctor)
 
 
  
