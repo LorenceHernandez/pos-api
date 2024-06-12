@@ -1,0 +1,39 @@
+
+import os
+from datetime import datetime
+from operator import itemgetter
+
+import bcrypt
+import jwt
+from flask import Blueprint, g, request
+
+from app.database.config import product_categories
+
+create_product_category = Blueprint("/product/category/create", __name__)
+
+@create_product_category.route('/product/category/create', methods=['POST'])
+def _create_product_category():
+   name, desc = request.form['name'], request.form['description']
+   created_by = g.user_id
+   created_at = datetime.now()
+   
+   doc = product_categories.insert_one({
+      "name": name,
+      "description": desc,
+      "isActive": True,
+      "created_by": created_by,
+      "created_at": created_at
+   })
+   
+   if doc.inserted_id:
+      return {
+         'message': 'Product category successfully created',
+         'code': 15,
+      }, 200
+   else:
+      return {
+         'message': 'Unable to add product category.',
+         'code': 30,
+      }, 200
+
+

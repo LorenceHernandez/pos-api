@@ -16,7 +16,9 @@ route_constraints = [
   { 'route': '/doctor/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', "address", "isMember"], 'content-type': 'urlencoded', 'method': 'POST' },
   { 'route': '/doctor', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
   { 'route': '/doctor/edit', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'POST' },
-
+  { 'route': '/product/category/create', 'params': ['name', 'description'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/product/category', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
+  { 'route': '/product/category/edit', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'POST' },
 ]
 
 field_constraints = [
