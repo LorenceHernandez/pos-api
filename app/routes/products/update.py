@@ -1,5 +1,6 @@
 
 import os
+from datetime import datetime
 
 import bcrypt
 import jwt
@@ -12,30 +13,42 @@ update_product = Blueprint("/product/edit", __name__)
 
 @update_product.route('/product/edit', methods=['POST'])
 def _update_product():
-   id = request.form['id']
+   request_data = request.get_json()
+   id = request_data['id']
    update_val = {}
-   if 'price' in request.form:
-      try:
-        update_val['price'] = format(float(request.form['price']), '.2f')
-      except ValueError:
-        return {
-            'message': 'price format is not allowed',
-            'code': 19
-        }, 200
-   if 'name' in request.form:
-      update_val['name'] = request.form['name']
-   if 'sku' in request.form:
-      update_val['sku'] = request.form['sku']
+
+   try:
+      ObjectId(id) 
+      if 'price' in request.form:
+         update_val['price'] = format(float(request.form['price']), '.2f')
+   except:
+      return {
+         'message': 'data format is invalid',
+         'code': 23
+   }, 200
+
+   if 'name' in request_data:
+      update_val['name'] = request_data['name']
+   if 'description' in request_data:
+      update_val['description'] = request_data['description']
+   if 'category' in request_data:
+      update_val['category'] = request_data['category']
+   if 'inventoryPrerequisite' in request_data:
+      inventoryPrerequisite = request_data['inventoryPrerequisite']
+      update_val['inventory_prerequisite'] = inventoryPrerequisite
+   if 'sku' in request_data:
+      update_val['sku'] = request_data['sku']
    
    if not update_val:
         return {
             'message': 'atleast one field is required when updating a user',
             'code': 25
         }, 200
-      
    filter = { '_id': ObjectId(id) }
    new_val = { "$set": update_val }
+   #array_filt = {"arrayFilters": [{'[0].id': '1'}]}
 
+   print(new_val)
    res = products.update_one(filter, new_val)
    if res.modified_count > 0:
       return {
