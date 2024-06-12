@@ -54,12 +54,12 @@ def _create_account():
      
      if doc.inserted_id:
          return {
-            'message': 'successfully registered',
+            'message': 'User successfully registered',
             'code': 2,
          }, 200
      else:
          return {
-            'message': 'unable to register user',
+            'message': 'Unable to register user',
             'code': 16,
          }
 

@@ -51,12 +51,12 @@ def _create_product():
    
    if doc.inserted_id:
       return {
-         'message': 'successfully added',
+         'message': 'Product successfully added.',
          'code': 15,
       }, 200
    else:
       return {
-         'message': 'unable to add product',
+         'message': 'Unable to add product',
          'code': 16,
       }, 200
 
