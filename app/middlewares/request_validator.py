@@ -19,6 +19,9 @@ route_constraints = [
   { 'route': '/product/category/create', 'params': ['name', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/category', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
   { 'route': '/product/category/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/branch/create', 'params': ['name', 'address'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/branch', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/branch/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
 ]
 
 field_constraints = [

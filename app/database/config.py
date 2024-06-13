@@ -19,3 +19,4 @@ users = db.users
 products = db.products
 doctors = db.doctors
 product_categories = db.product_categories
+branches = db.branches

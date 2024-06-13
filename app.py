@@ -11,6 +11,10 @@ load_dotenv()
 
 from app.middlewares.request_validator import request_validator
 from app.middlewares.token_validator import token_validator
+from app.routes.branches.create import create_branch
+from app.routes.branches.read import get_branches
+from app.routes.branches.read_one import get_branch
+from app.routes.branches.update import update_branch
 from app.routes.doctors.create import create_doctor
 from app.routes.doctors.read import get_doctors
 from app.routes.doctors.read_one import get_doctor
@@ -71,6 +75,10 @@ app.register_blueprint(create_product_category)
 app.register_blueprint(get_product_category)
 app.register_blueprint(get_product_categories)
 app.register_blueprint(update_product_category)
+app.register_blueprint(create_branch)
+app.register_blueprint(get_branch)
+app.register_blueprint(get_branches)
+app.register_blueprint(update_branch)
  
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)
