@@ -8,7 +8,7 @@ JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 route_constraints = [
   { 'route': '/login', 'params': ['username', 'password'], 'content-type': 'urlencoded', 'method': 'POST' },
-  { 'route': '/user/register', 'params': ['username', 'password', 'first_name', 'last_name', 'role_id'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/user/register', 'params': ['branchId', 'username', 'password', 'firstName', 'lastName', 'roleId'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/user/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/create', 'params': ['sku', 'price', 'name', 'inventoryPrerequisite', 'category', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },

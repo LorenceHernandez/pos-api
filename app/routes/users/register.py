@@ -4,6 +4,7 @@ from datetime import datetime
 
 import bcrypt
 import jwt
+from bson.objectid import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import users
@@ -13,16 +14,19 @@ register = Blueprint("/user/register", __name__)
 
 @register.route('/user/register', methods=['POST'])
 def _create_account():
-   username = request.form['username']
-   password = request.form['password']
-   first_name = request.form['first_name']
-   last_name = request.form['last_name']
-   role_id = request.form['role_id']
+   request_data = request.get_json()
+   username = request_data['username']
+   password = request_data['password']
+   first_name = request_data['firstName']
+   last_name = request_data['lastName']
+   role_id = request_data['roleId']
+   branch_id = request_data['branchId']
    created_by = g.user_id
    create_at = datetime.now()
 
    try:
       int(role_id)
+      ObjectId(branch_id)
    except:
       return {
          'message': 'data format is invalid',
@@ -49,7 +53,8 @@ def _create_account():
         "role": roles[int(role_id) - 1],
         "created_by": created_by,
         "created_at": create_at,
-        "is_active": 1
+        "branch_id": branch_id,
+        "is_active": True
      })
      
      if doc.inserted_id:

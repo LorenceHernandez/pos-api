@@ -16,7 +16,9 @@ def _update_role():
    try: 
       ObjectId(id)
       if 'roleId' in request_data:
-         int(request_data['roleId'])
+         update_val['role'] = roles[int(request_data['roleId']) - 1]
+      if 'branchId' in request_data:
+         ObjectId(request_data['branchId'])
    except:
     return {
       'message': 'data format is invalid',
@@ -29,8 +31,6 @@ def _update_role():
       update_val['first_name'] = request_data['firstName']
    if 'lastName' in request_data:
       update_val['last_name'] = request_data['lastName']
-   if 'roleId' in request_data:
-      update_val['role'] = roles[int(request_data['roleId']) - 1]
    if 'isActive' in request_data:
       update_val['is_active'] = request_data['isActive']
 
