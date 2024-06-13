@@ -16,6 +16,7 @@ def _update_product_category():
    id = request.form['id']
    update_val = {}
 
+   print(request.form)
    try:
         if 'isActive' in request.form:
             update_val['isActive'] = bool(request.form['isActive'])
