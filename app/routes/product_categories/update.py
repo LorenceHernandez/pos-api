@@ -18,7 +18,7 @@ def _update_product_category():
 
    try:
         if 'isActive' in request.form:
-            update_val['isActive'] = bool(int(request.form['isActive']))
+            update_val['isActive'] = bool(request.form['isActive'])
    except:
       return {
          'message': 'data format is invalid',
