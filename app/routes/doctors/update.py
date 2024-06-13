@@ -13,30 +13,32 @@ update_doctor = Blueprint("/doctor/edit", __name__)
 
 @update_doctor.route('/doctor/edit', methods=['POST'])
 def _update_doctor():
-   id = request.form['id']
+   request_data = request.get_json()
+   print(request_data)
+   id = request_data['id']
    update_val = {}
 
    try:
-        if 'age' in request.form:
-            update_val['age'] = int(request.form['age'])
-        if 'isMember' in request.form:
-            update_val['isMember'] = bool(int(request.form['isMember']))
+        if 'age' in request_data:
+            update_val['age'] = int(request_data['age'])
+        if 'isMember' in request_data:
+            update_val['isMember'] = bool(int(request_data['isMember']))
    except:
       return {
          'message': 'data format is invalid',
          'code': 23
    }, 200
 
-   if 'firstName' in request.form:
-      update_val['firstName'] = request.form['firstName']
-   if 'lastName' in request.form:
-      update_val['lastName'] = request.form['lastName']
-   if 'middleName' in request.form:
-      update_val['middleName'] = request.form['middleName']
-   if 'gender' in request.form:
-      update_val['gender'] = request.form['gender']
-   if 'address' in request.form:
-      update_val['address'] = request.form['address']
+   if 'firstName' in request_data:
+      update_val['firstName'] = request_data['firstName']
+   if 'lastName' in request_data:
+      update_val['lastName'] = request_data['lastName']
+   if 'middleName' in request_data:
+      update_val['middleName'] = request_data['middleName']
+   if 'gender' in request_data:
+      update_val['gender'] = request_data['gender']
+   if 'address' in request_data:
+      update_val['address'] = request_data['address']
    
    if not update_val:
         return {

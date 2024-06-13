@@ -13,23 +13,23 @@ update_product_category = Blueprint("/product/category/edit", __name__)
 
 @update_product_category.route('/product/category/edit', methods=['POST'])
 def _update_product_category():
-   id = request.form['id']
+   request_data = request.get_json()
    update_val = {}
+   id = request_data['id']
 
-   print(request.form)
    try:
-        if 'isActive' in request.form:
-            update_val['isActive'] = bool(request.form['isActive'])
+        if 'isActive' in request_data:
+            update_val['isActive'] = bool(request_data['isActive'])
    except:
       return {
          'message': 'data format is invalid',
          'code': 23
    }, 200
 
-   if 'name' in request.form:
-      update_val['name'] = request.form['name']
-   if 'description' in request.form:
-      update_val['description'] = request.form['description']
+   if 'name' in request_data:
+      update_val['name'] = request_data['name']
+   if 'description' in request_data:
+      update_val['description'] = request_data['description']
    
    if not update_val:
         return {

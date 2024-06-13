@@ -35,16 +35,8 @@ HOST = os.getenv('HOST')
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, origins=["*", "*"])
 
-excluded_routes_for_validator = [
-  '/login'
-  '/user/register'   
-]
-from flask import Flask
-
-app = Flask(__name__)
-cors = CORS(app)
 @app.before_request
 def hook():
    token_validator_result = token_validator()

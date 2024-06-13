@@ -13,7 +13,8 @@ create_product_category = Blueprint("/product/category/create", __name__)
 
 @create_product_category.route('/product/category/create', methods=['POST'])
 def _create_product_category():
-   name, desc = request.form['name'], request.form['description']
+   request_data = request.get_json()
+   name, desc = request_data['name'], request_data['description']
    created_by = g.user_id
    created_at = datetime.now()
    

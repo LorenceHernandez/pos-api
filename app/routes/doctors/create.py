@@ -13,12 +13,13 @@ create_doctor = Blueprint("/doctor/create", __name__)
 
 @create_doctor.route('/doctor/create', methods=['POST'])
 def _create_doctor():
-   firstName, middleName, lastName, age, gender, address = request.form['firstName'], request.form['middleName'], request.form['lastName'], request.form['age'] ,request.form['gender'] ,request.form['address']
+   request_data = request.get_json()
+   firstName, middleName, lastName, age, gender, address = request_data['firstName'], request_data['middleName'], request_data['lastName'], request_data['age'] ,request_data['gender'] ,request_data['address']
 
-   isMember = request.form['isMember']
+   isMember = request_data['isMember']
    try:
-        int(age)
-        isMember = bool(int(isMember))
+      int(age)
+      isMember = bool(isMember)
    except:
         return {
             'message': 'data format is invalid',

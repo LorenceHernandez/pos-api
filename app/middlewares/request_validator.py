@@ -13,12 +13,12 @@ route_constraints = [
   { 'route': '/product/create', 'params': ['sku', 'price', 'name', 'inventoryPrerequisite', 'category', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
-  { 'route': '/doctor/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', "address", "isMember"], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/doctor/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', "address", "isMember"], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/doctor', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
-  { 'route': '/doctor/edit', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'POST' },
-  { 'route': '/product/category/create', 'params': ['name', 'description'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/doctor/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/product/category/create', 'params': ['name', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/category', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
-  { 'route': '/product/category/edit', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'POST' },
+  { 'route': '/product/category/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
 ]
 
 field_constraints = [
