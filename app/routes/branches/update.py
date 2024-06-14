@@ -28,8 +28,18 @@ def _update_branch():
 
    if 'name' in request_data:
       update_val['name'] = request_data['name']
-   if 'address' in request_data:
-      update_val['address'] = request_data['address']
+   if 'streetAddress' in request_data:
+      update_val['street_address'] = request_data['streetAddress']
+   if 'city' in request_data:
+      update_val['city'] = request_data['city']
+   if 'state' in request_data:
+      update_val['state'] = request_data['state']
+   if 'postalCode' in request_data:
+      update_val['postal_code'] = request_data['postalCode']
+   if 'contactNo' in request_data:
+      update_val['postal_code'] = request_data['contactNo']
+   if 'emailAddress' in request_data:
+      update_val['email_address'] = request_data['emailAddress']
    
    if not update_val:
         return {

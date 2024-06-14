@@ -23,7 +23,12 @@ def _get_branch():
           'data': {
             "_id": str(record["_id"]),
             "name": record["name"],
-            "address": record["address"],
+            "streetAddress": record["street_address"],
+            "city": record["city"],
+            "state": record["state"],
+            "postalCode": record["postal_code"],
+            "contactNumber": record["contact_number"],
+            "emailAddress": record["email_address"],
             "isActive": record["is_active"],
           },
        }, 200 

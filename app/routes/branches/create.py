@@ -14,14 +14,19 @@ create_branch = Blueprint("/branch/create", __name__)
 @create_branch.route('/branch/create', methods=['POST'])
 def _create_branch():
    request_data = request.get_json()
-   name, address = request_data['name'], request_data['address']
+   name, street_address, city, state, postal_code, contact, email = request_data['name'], request_data['streetAddress'], request_data['city'], request_data['state'], request_data['postalCode'], request_data['contactNo'], request_data['emailAddress']
    created_by = g.user_id
    created_at = datetime.now()
    
    doc = branches.insert_one({
       "name": name,
-      "address": address,
+      "street_address": street_address,
+      "city": city,
+      "state": state,
+      "postal_code": postal_code,
       "is_active": True,
+      "contact_number": contact,
+      "email_address": email,
       "created_by": created_by,
       "created_at": created_at
    })
