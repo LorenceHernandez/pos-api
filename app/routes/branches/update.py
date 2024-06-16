@@ -18,6 +18,7 @@ def _update_branch():
    id = request_data['id']
 
    try:
+        ObjectId(id)
         if 'isActive' in request_data:
             update_val['is_active'] = bool(request_data['isActive'])
    except:

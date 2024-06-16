@@ -4,6 +4,7 @@ from datetime import datetime
 
 import bcrypt
 import jwt
+from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import products
@@ -16,7 +17,7 @@ def _create_product():
    name = request_data['name']
    desc = request_data['description']
    price = request_data['price']
-   category = request_data['category']
+   category_id = request_data['categoryId']
    inventory_prerequisite = request_data['inventoryPrerequisite']
    sku = request_data['sku']
    created_by = g.user_id
@@ -24,6 +25,7 @@ def _create_product():
 
    try:
         float(price)
+        ObjectId(category_id)
    except:
         return {
             'message': 'data format is invalid',
@@ -41,7 +43,7 @@ def _create_product():
    doc = products.insert_one({
       "name": name,
       "description": desc,
-      "category": category,
+      "category": category_id,
       "inventory_prerequisite": inventory_prerequisite,
       "price": price,
       "sku": sku,

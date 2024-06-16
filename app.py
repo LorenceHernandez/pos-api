@@ -15,6 +15,14 @@ from app.routes.branches.create import create_branch
 from app.routes.branches.read import get_branches
 from app.routes.branches.read_one import get_branch
 from app.routes.branches.update import update_branch
+from app.routes.corporates.create import create_company
+from app.routes.corporates.read import get_companies
+from app.routes.corporates.read_one import get_company
+from app.routes.corporates.update import update_company
+from app.routes.customers.create import create_customer
+from app.routes.customers.read import get_customers
+from app.routes.customers.read_one import get_customer
+from app.routes.customers.update import update_customer
 from app.routes.doctors.create import create_doctor
 from app.routes.doctors.read import get_doctors
 from app.routes.doctors.read_one import get_doctor
@@ -50,8 +58,6 @@ def hook():
    if request_validator_result is not None:
       return request_validator_result
    
-   
-
 
 @app.route('/', methods=['GET'])
 def home():
@@ -79,6 +85,14 @@ app.register_blueprint(create_branch)
 app.register_blueprint(get_branch)
 app.register_blueprint(get_branches)
 app.register_blueprint(update_branch)
+app.register_blueprint(get_companies)
+app.register_blueprint(get_company)
+app.register_blueprint(create_company)
+app.register_blueprint(update_company)
+app.register_blueprint(create_customer)
+app.register_blueprint(get_customer)
+app.register_blueprint(get_customers)
+app.register_blueprint(update_customer)
  
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)

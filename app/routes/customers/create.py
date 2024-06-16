@@ -1,0 +1,56 @@
+
+import os
+from datetime import datetime
+from operator import itemgetter
+
+import bcrypt
+import jwt
+from flask import Blueprint, g, request
+
+from app.database.config import customers
+
+create_customer = Blueprint("/customer/create", __name__)
+
+@create_customer.route('/customer/create', methods=['POST'])
+def _create_customer():
+   request_data = request.get_json()
+   name = request_data['name']
+   age = request_data['age']
+   gender = request_data['gender']
+   address = request_data['address']
+   customer_type = request_data['customerType']
+   discount = request_data['discount']
+   discount_type = request_data['discountType']
+   corporate_id = request_data['corporateId']
+   is_corporate = request_data['isCorporate']
+
+   created_by = g.user_id
+   created_at = datetime.now()
+   
+
+   doc = customers.insert_one({
+      "name": name,
+      "age": age,
+      "gender": gender,
+      "address": address,
+      "customer_type": customer_type,
+      "discount": discount,
+      "discount_type": discount_type,
+      "corporate_id": corporate_id,
+      "is_corporate": is_corporate,
+      "created_by": created_by,
+      "created_at": created_at
+   })
+   
+   if doc.inserted_id:
+      return {
+         'message': 'Customer successfully created',
+         'code': 15,
+      }, 200
+   else:
+      return {
+         'message': 'Unable to add customer.',
+         'code': 30,
+      }, 200
+
+

@@ -19,6 +19,7 @@ def _update_product():
 
    try:
       ObjectId(id) 
+      ObjectId(request_data['categoryId'])
       if 'price' in request_data:
          update_val['price'] = format(float(request_data['price']), '.2f')
    except:
@@ -32,7 +33,7 @@ def _update_product():
    if 'description' in request_data:
       update_val['description'] = request_data['description']
    if 'category' in request_data:
-      update_val['category'] = request_data['category']
+      update_val['category_id'] = request_data['categoryId']
    if 'inventoryPrerequisite' in request_data:
       inventoryPrerequisite = request_data['inventoryPrerequisite']
       update_val['inventory_prerequisite'] = inventoryPrerequisite

@@ -19,6 +19,7 @@ def _update_doctor():
    update_val = {}
 
    try:
+        ObjectId(id)
         if 'age' in request_data:
             update_val['age'] = int(request_data['age'])
         if 'isMember' in request_data:

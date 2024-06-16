@@ -2,7 +2,7 @@ from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
 
-from app.database.config import products
+from app.database.config import product_categories, products
 
 get_product = Blueprint("/product", __name__)
 
@@ -19,14 +19,25 @@ def _get_product():
    record = products.find_one({"_id": ObjectId(request.args.get('id'))})
 
    if record: 
-       return {
+        category = None
+        try: 
+              p_cat_record = product_categories.find_one({"_id": ObjectId(record["category"])})
+              if p_cat_record: 
+                  category = {
+                      "id": str(p_cat_record['_id']),
+                      "name": p_cat_record['name'],
+                      "description": p_cat_record['description']
+                    }
+        except: 
+            category = None
+        return {
           'data': {
           "_id": str(record["_id"]),
           "sku": record["sku"],
           "name": record["name"],
           "price": record["price"],
           "description": record["description"],
-          "category": str(record["category"]),
+          "category": category,
           "inventory_prerequisite": record["inventory_prerequisite"],
           "created_by": record["created_by"],
           "created_at": record["created_at"]

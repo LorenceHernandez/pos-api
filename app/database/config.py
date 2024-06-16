@@ -20,3 +20,5 @@ products = db.products
 doctors = db.doctors
 product_categories = db.product_categories
 branches = db.branches
+corporates = db.corporates
+customers = db.customers
