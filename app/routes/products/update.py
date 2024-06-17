@@ -38,6 +38,11 @@ def _update_product():
       inventoryPrerequisite = request_data['inventoryPrerequisite']
       update_val['inventory_prerequisite'] = inventoryPrerequisite
    if 'sku' in request_data:
+      if len(request_data['sku']) == 0:
+         return {
+            'message': 'SKU is required',
+            'code': 45
+         }, 200
       update_val['sku'] = request_data['sku']
    
    if not update_val:

@@ -23,6 +23,11 @@ def _create_product():
    created_by = g.user_id
    create_at = datetime.now()
 
+   if len(sku) == 0:
+       return {
+           'message': 'SKU is required',
+           'code': 45
+       }, 200
    try:
         float(price)
         ObjectId(category_id)
