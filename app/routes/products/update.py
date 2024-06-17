@@ -19,7 +19,8 @@ def _update_product():
 
    try:
       ObjectId(id) 
-      ObjectId(request_data['categoryId'])
+      if 'categoryId' in request_data:
+         ObjectId(request_data['categoryId'])
       if 'price' in request_data:
          update_val['price'] = float(request_data['price'])
    except:
