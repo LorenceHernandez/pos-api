@@ -21,7 +21,7 @@ def _get_product():
    if record: 
         category = None
         try: 
-              p_cat_record = product_categories.find_one({"_id": ObjectId(record["category"])})
+              p_cat_record = product_categories.find_one({"_id": ObjectId(record["category_id"])})
               if p_cat_record: 
                   category = {
                       "id": str(p_cat_record['_id']),

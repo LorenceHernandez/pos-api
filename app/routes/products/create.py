@@ -43,7 +43,7 @@ def _create_product():
    doc = products.insert_one({
       "name": name,
       "description": desc,
-      "category": category_id,
+      "category_id": category_id,
       "inventory_prerequisite": inventory_prerequisite,
       "price": price,
       "sku": sku,
