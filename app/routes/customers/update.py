@@ -31,8 +31,12 @@ def _update_customer():
          'code': 23
    }, 200
 
-   if 'name' in request_data:
-      update_val['name'] = request_data['name']
+   if 'firstName' in request_data:
+      update_val['first_name'] = request_data['firstName']
+   if 'middleName' in request_data:
+      update_val['middle-name'] = request_data['middleName']
+   if 'lastName' in request_data:
+      update_val['last_name'] = request_data['lastName']
    if 'age' in request_data:
       update_val['age'] = request_data['age']
    if 'gender' in request_data:

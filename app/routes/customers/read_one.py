@@ -32,7 +32,9 @@ def _get_customer():
        return {
           'data': {
             "_id": str(record["_id"]),
-            "name": record["name"],
+            "firstName": record["first_name"],
+            "middleName": record["middle_name"],
+            "lastName": record["last_name"],
             "age": record["age"],
             "gender": record["gender"],
             "address": record["address"],

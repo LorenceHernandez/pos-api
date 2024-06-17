@@ -23,9 +23,11 @@ def _get_customers():
                 }
        except: 
          corporate = None
-         ret.append({
+       ret.append({
             "_id": str(record["_id"]),
-            "name": record["name"],
+            "firstName": record["first_name"],
+            "middleName": record["middle_name"],
+            "lastName": record["last_name"],
             "age": record["age"],
             "gender": record["gender"],
             "address": record["address"],
@@ -36,6 +38,6 @@ def _get_customers():
             "isCorporate": record["is_corporate"]
           })
    return {
-          'data': ret,
-        }, 200
-      
+       'data': ret,
+    }, 200
+              

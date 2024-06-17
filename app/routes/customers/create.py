@@ -14,7 +14,9 @@ create_customer = Blueprint("/customer/create", __name__)
 @create_customer.route('/customer/create', methods=['POST'])
 def _create_customer():
    request_data = request.get_json()
-   name = request_data['name']
+   f_name = request_data['firstName']
+   m_name = request_data['middleName']
+   l_name = request_data['lastName']
    age = request_data['age']
    gender = request_data['gender']
    address = request_data['address']
@@ -36,7 +38,9 @@ def _create_customer():
         }, 401
 
    doc = customers.insert_one({
-      "name": name,
+      "first_name": f_name,
+      "middle_name": m_name,
+      "last_name": l_name,
       "age": age,
       "gender": gender,
       "address": address,
