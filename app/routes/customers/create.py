@@ -27,6 +27,13 @@ def _create_customer():
    created_by = g.user_id
    created_at = datetime.now()
    
+   try: 
+       float(discount)
+   except:
+        return {
+            'message': 'data format is invalid',
+            'code': 23
+        }, 401
 
    doc = customers.insert_one({
       "name": name,
@@ -34,7 +41,7 @@ def _create_customer():
       "gender": gender,
       "address": address,
       "customer_type": customer_type,
-      "discount": discount,
+      "discount": float(discount),
       "discount_type": discount_type,
       "corporate_id": corporate_id,
       "is_corporate": is_corporate,

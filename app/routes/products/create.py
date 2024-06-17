@@ -50,7 +50,7 @@ def _create_product():
       "description": desc,
       "category_id": category_id,
       "inventory_prerequisite": inventory_prerequisite,
-      "price": price,
+      "price": float(price),
       "sku": sku,
       "created_by": created_by,
       "created_at": create_at,

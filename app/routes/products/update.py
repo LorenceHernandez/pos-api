@@ -21,7 +21,7 @@ def _update_product():
       ObjectId(id) 
       ObjectId(request_data['categoryId'])
       if 'price' in request_data:
-         update_val['price'] = format(float(request_data['price']), '.2f')
+         update_val['price'] = float(request_data['price'])
    except:
       return {
          'message': 'data format is invalid',

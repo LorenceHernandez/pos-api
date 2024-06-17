@@ -19,9 +19,12 @@ def _update_customer():
 
    try:
         ObjectId(id)
-        ObjectId(request_data['corporateId'])
+        if 'corporateId' in request_data:
+            update_val['corporate_id'] = request_data['corporateId']
         if 'isActive' in request_data:
             update_val['is_active'] = bool(request_data['isActive'])
+        if 'discount' in request_data:
+           update_val['discount'] = float(request_data['discount'])
    except:
       return {
          'message': 'data format is invalid',
@@ -38,12 +41,8 @@ def _update_customer():
       update_val['address'] = request_data['address']
    if 'customerType' in request_data:
       update_val['customer_type'] = request_data['customerType']
-   if 'discount' in request_data:
-      update_val['discount'] = request_data['discount']
    if 'discountType' in request_data:
       update_val['discount_type'] = request_data['discountType']
-   if 'corporateId' in request_data:
-      update_val['corporate_id'] = request_data['corporateId']
    if 'isCorporate' in request_data:
       update_val['is_corporate'] = request_data['isCorporate']
    
