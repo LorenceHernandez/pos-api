@@ -22,3 +22,4 @@ product_categories = db.product_categories
 branches = db.branches
 corporates = db.corporates
 customers = db.customers
+packages = db.packages

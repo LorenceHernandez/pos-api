@@ -27,6 +27,10 @@ from app.routes.doctors.create import create_doctor
 from app.routes.doctors.read import get_doctors
 from app.routes.doctors.read_one import get_doctor
 from app.routes.doctors.update import update_doctor
+from app.routes.packages.create import create_package
+from app.routes.packages.read import get_packages
+from app.routes.packages.read_one import get_package
+from app.routes.packages.update import update_package
 from app.routes.product_categories.create import create_product_category
 from app.routes.product_categories.read import get_product_categories
 from app.routes.product_categories.read_one import get_product_category
@@ -92,7 +96,10 @@ app.register_blueprint(update_company)
 app.register_blueprint(create_customer)
 app.register_blueprint(get_customer)
 app.register_blueprint(get_customers)
-app.register_blueprint(update_customer)
- 
+app.register_blueprint(create_package)
+app.register_blueprint(get_package)
+app.register_blueprint(get_packages)
+app.register_blueprint(update_package)
+
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)

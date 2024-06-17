@@ -25,9 +25,12 @@ route_constraints = [
   { 'route': '/corporate/create', 'params': ['name'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/customer/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', 'address', 'customerType', 'discountType', 'discount', 'corporateId', 'isCorporate'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/customer/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', 'address', 'customerType', 'discountType', 'discount', 'isCorporate'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/customer/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/customer', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/package/create', 'params': ['name', 'description', 'discount', 'discountType', 'applyDiscountBy', 'packageType', 'labTest'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/package/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/package', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
 ]
 
 

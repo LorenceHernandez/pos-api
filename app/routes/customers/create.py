@@ -23,12 +23,17 @@ def _create_customer():
    customer_type = request_data['customerType']
    discount = request_data['discount']
    discount_type = request_data['discountType']
-   corporate_id = request_data['corporateId']
-   is_corporate = request_data['isCorporate']
+   corporate_id = None
+   is_corporate = False #request_data['isCorporate']
 
    created_by = g.user_id
    created_at = datetime.now()
    
+   if 'corporateId' in request_data:
+      corporate_id = request_data['corporateId']
+   
+   if 'isCorporate' in request_data:
+      is_corporate = request_data['isCorporate']
    try: 
        float(discount)
    except:
