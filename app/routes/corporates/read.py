@@ -16,6 +16,12 @@ def _get_companies():
 
          ret.append({
             "_id": str(record["_id"]),
+            "streetAddress": record["street_address"],
+            "city": record["city"],
+            "state": record["state"],
+            "postalCode": record["postal_code"],
+            "contactNumber": record["contact_number"],
+            "emailAddress": record["email_address"],
             "name": record["name"]
           })
    return {

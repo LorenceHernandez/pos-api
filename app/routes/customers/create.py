@@ -5,6 +5,7 @@ from operator import itemgetter
 
 import bcrypt
 import jwt
+from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import customers
@@ -21,21 +22,28 @@ def _create_customer():
    gender = request_data['gender']
    address = request_data['address']
    customer_type = request_data['customerType']
-   discount = request_data['discount']
-   discount_type = request_data['discountType']
+   discount = 0
+   discount_type = None
    corporate_id = None
-   is_corporate = False #request_data['isCorporate']
+   is_corporate = False 
 
    created_by = g.user_id
    created_at = datetime.now()
    
-   if 'corporateId' in request_data:
-      corporate_id = request_data['corporateId']
-   
    if 'isCorporate' in request_data:
       is_corporate = request_data['isCorporate']
+   if 'discount' in request_data:
+      discount = request_data['discount']
+   if 'discountType' in request_data:
+      discount_type = request_data['discountType']
+   if 'corporateId' in request_data:
+      corporate_id = request_data['corporateId']
+
    try: 
        float(discount)
+       if 'corporateId' in request_data:
+          ObjectId(corporate_id)
+
    except:
         return {
             'message': 'data format is invalid',
