@@ -34,11 +34,11 @@ def _get_user():
                 "_id": str(record["_id"]),
                 "username": record["username"],
                 "role": record["role"],
-                "first_name": record["first_name"],
-                "last_name": record["last_name"],
-                "is_active": record["is_active"],
-                "created_by": record["created_by"],
-                "created_at": record["created_at"],
+                "firstName": record["first_name"],
+                "lastName": record["last_name"],
+                "isActive": record["is_active"],
+                "createdBy": record["created_by"],
+                "createdAt": record["created_at"],
             },
         }, 200
     else:
