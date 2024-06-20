@@ -36,7 +36,7 @@ def _update_package():
       update_val['apply_discount_by'] = request_data['applyDiscountBy']
    if 'packageType' in request_data:
       update_val['package_type'] = request_data['packageType']
-   if 'contactNo' in request_data:
+   if 'labTest' in request_data:
       update_val['lab_test'] = request_data['labTest']
    
    if not update_val:
@@ -44,6 +44,7 @@ def _update_package():
             'message': 'atleast one field is required when updating a user',
             'code': 25
         }, 200
+   update_val['updated_at'] = datetime.now()
    filter = { '_id': ObjectId(id) }
    new_val = { "$set": update_val }
    #array_filt = {"arrayFilters": [{'[0].id': '1'}]}
