@@ -42,6 +42,7 @@ from app.routes.products.update import update_product
 from app.routes.roles.create import create_role
 from app.routes.roles.read import get_roles
 from app.routes.roles.read_one import get_role
+from app.routes.roles.read_resources import get_resources
 from app.routes.roles.update import update_role
 from app.routes.users.auth import login
 from app.routes.users.read import get_users
@@ -107,6 +108,7 @@ app.register_blueprint(create_role)
 app.register_blueprint(get_role)
 app.register_blueprint(update_role)
 app.register_blueprint(update_user)
-
+app.register_blueprint(get_resources)
+get_resources
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)

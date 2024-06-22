@@ -11,8 +11,6 @@ from app.database.config import roles
 
 create_role = Blueprint("/role/create", __name__)
 
-apis = ['branches', 'corporates', 'customer', 'doctors' , 'packages', 'products', 'product_categories', 'users']
-permission = ['update', 'read', 'create', 'delete']
 
 @create_role.route('/role/create', methods=['POST'])
 def _create_role():
