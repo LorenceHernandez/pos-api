@@ -23,3 +23,4 @@ branches = db.branches
 corporates = db.corporates
 customers = db.customers
 packages = db.packages
+roles = db.roles

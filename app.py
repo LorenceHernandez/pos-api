@@ -39,12 +39,15 @@ from app.routes.products.create import create_product
 from app.routes.products.read import get_products
 from app.routes.products.read_one import get_product
 from app.routes.products.update import update_product
+from app.routes.roles.create import create_role
 from app.routes.roles.read import get_roles
+from app.routes.roles.read_one import get_role
+from app.routes.roles.update import update_role
 from app.routes.users.auth import login
 from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
 from app.routes.users.register import register
-from app.routes.users.update import update_role
+from app.routes.users.update import update_user
 
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
@@ -69,7 +72,6 @@ def home():
 
 app.register_blueprint(login)
 app.register_blueprint(register)
-app.register_blueprint(update_role)
 app.register_blueprint(get_users)
 app.register_blueprint(create_product)
 app.register_blueprint(update_product)
@@ -101,6 +103,10 @@ app.register_blueprint(create_package)
 app.register_blueprint(get_package)
 app.register_blueprint(get_packages)
 app.register_blueprint(update_package)
+app.register_blueprint(create_role)
+app.register_blueprint(get_role)
+app.register_blueprint(update_role)
+app.register_blueprint(update_user)
 
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)

@@ -31,13 +31,15 @@ route_constraints = [
   { 'route': '/package/create', 'params': ['name', 'description', 'discount', 'labTest', 'packageType', 'discountType', 'applyDiscountBy'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/package/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/package', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/roles/create', 'params': ['name', 'authorizations'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/roles/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/role', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
 ]
 
 
 field_constraints = [
-  { 'field': ['price'], 'type': 'float' },
-  { 'field': ['id'], 'type': 'string', 'min': 24, max: '24' }, #for ObjectId
-  { 'field': ['id'], 'type': 'string', 'length': 24 }
+  { 'fields': ['price', 'discount', ], 'type': 'float' },
+  { 'fields': ['id'], 'type': 'objectId' }
 ]
 
 def request_validator():

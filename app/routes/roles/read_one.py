@@ -4,21 +4,28 @@ from flask import Blueprint, request
 
 from app.database.config import roles
 
-get_roles = Blueprint("/roles", __name__)
+get_role = Blueprint("/role", __name__)
 
-@get_roles.route('/roles', methods=['GET'])
-def _get_roles():
+@get_role.route('/role', methods=['GET'])
+def _get_role():
 
-   res = roles.find()
+   try: 
+        ObjectId(request.args.get('id'))
+   except:
+        return {
+            'message': 'data format is invalid',
+            'code': 23
+        }, 401
+   record = roles.find_one({"_id": ObjectId(request.args.get('id'))})
 
    ret = []
-   for record in res:
-
+   if record:
          ret.append({
             "_id": str(record["_id"]),
             "name": record["name"],
             "authorizations": record["authorizations"]
           })
+        
    return {
           'data': ret,
         }, 200

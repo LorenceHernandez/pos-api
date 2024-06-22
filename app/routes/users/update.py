@@ -5,10 +5,10 @@ from flask import Blueprint, request
 from app.database.config import users
 from app.utils.utils import roles
 
-update_role = Blueprint("/user/edit", __name__)
+update_user = Blueprint("/user/edit", __name__)
 
-@update_role.route('/user/edit', methods=['POST'])
-def _update_role():
+@update_user.route('/user/edit', methods=['POST'])
+def _update_user():
    request_data = request.get_json()
    id = request_data['id']
 
