@@ -16,7 +16,7 @@ def _update_user():
    try: 
       ObjectId(id)
       if 'roleId' in request_data:
-         update_val['role'] = roles[int(request_data['roleId']) - 1]
+         update_val['role'] = request_data['roleId']
       if 'branchId' in request_data:
          ObjectId(request_data['branchId'])
    except:

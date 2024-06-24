@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import users
+from app.models.User import User
 from app.utils.utils import roles
 
 register = Blueprint("/user/register", __name__)
@@ -25,13 +26,15 @@ def _create_account():
    create_at = datetime.now()
 
    try:
-      int(role_id)
+      ObjectId(role_id)
       ObjectId(branch_id)
    except:
       return {
          'message': 'data format is invalid',
          'code': 23
       }, 401
+   
+
    
    user = list(users.find({"username": username}))
 
@@ -50,7 +53,7 @@ def _create_account():
         "password": string_password + " " + salt.decode('utf8'),
         "first_name": first_name,
         "last_name": last_name,
-        "role": roles[int(role_id) - 1],
+        "role": role_id,
         "created_by": created_by,
         "created_at": create_at,
         "branch_id": branch_id,

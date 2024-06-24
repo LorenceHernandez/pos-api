@@ -25,7 +25,7 @@ def token_validator():
                 return {
                     'message': 'Unauthorized',
                     'code': 9
-                }, 200
+                }, 401
             else:
                print(decoded_token['user_id'] + ' authorized')
                g.user_id = decoded_token['user_id']
@@ -34,4 +34,4 @@ def token_validator():
          return {
              'message': 'Unauthorized',
              'code': 9
-          }, 200 
+          }, 401

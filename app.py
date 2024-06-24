@@ -9,6 +9,7 @@ from flask_cors import CORS, cross_origin
 
 load_dotenv()
 
+from app.middlewares.authorization_validator import authorization_validator
 from app.middlewares.request_validator import request_validator
 from app.middlewares.token_validator import token_validator
 from app.routes.branches.create import create_branch
@@ -44,6 +45,10 @@ from app.routes.roles.read import get_roles
 from app.routes.roles.read_one import get_role
 from app.routes.roles.read_resources import get_resources
 from app.routes.roles.update import update_role
+from app.routes.transaction.create import create_transaction
+from app.routes.transaction.read import get_transactions
+from app.routes.transaction.read_one import get_transaction
+from app.routes.transaction.update import update_transaction
 from app.routes.users.auth import login
 from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
@@ -56,15 +61,14 @@ JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 app = Flask(__name__)
 cors = CORS(app, origins=["*", "*"])
-
 @app.before_request
 def hook():
-   token_validator_result = token_validator()
-   if token_validator_result is not None:
-      return token_validator_result
-   request_validator_result = request_validator()
-   if request_validator_result is not None:
-      return request_validator_result
+   validators = [token_validator, request_validator]
+   for validator in validators:
+      res = validator()
+      if res is not None:
+         return res 
+   
    
 
 @app.route('/', methods=['GET'])
@@ -109,6 +113,11 @@ app.register_blueprint(get_role)
 app.register_blueprint(update_role)
 app.register_blueprint(update_user)
 app.register_blueprint(get_resources)
+app.register_blueprint(create_transaction)
+app.register_blueprint(get_transaction)
+app.register_blueprint(get_transactions)
+app.register_blueprint(update_transaction)
+
 get_resources
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)

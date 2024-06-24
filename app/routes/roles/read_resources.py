@@ -4,7 +4,33 @@ from flask import Blueprint, request
 
 from app.database.config import roles
 
-apis = ['branches', 'corporates', 'customer', 'doctors' , 'packages', 'products', 'product_categories', 'users']
+apis = ['/resource',
+         '/branch/create', 
+         '/branch/edit', 
+         '/branch', 
+         '/branches', 
+         '/corporate', 
+         '/customer', 
+         '/doctor' , 
+         '/package', 
+         '/product', 
+         '/product', 
+         '/product', 
+         '/product/', 
+         '/product/category/create',
+         '/product/category/edit',
+         '/product/category',
+         '/product/categories', 
+         '/user/register',
+         '/user/edit',
+         '/user',
+         '/users',
+         '/transaction/edit',
+         '/transaction/create',
+         '/transaction',
+         '/transactions',
+         ]
+
 permission = ['update', 'read', 'create', 'delete']
 
 get_resources = Blueprint("/resources", __name__)

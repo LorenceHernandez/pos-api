@@ -34,6 +34,9 @@ route_constraints = [
   { 'route': '/roles/create', 'params': ['name', 'authorizations'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/roles/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/role', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/transaction/create', 'params': ['branchId'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/transaction/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/transaction', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
 ]
 
 
