@@ -63,11 +63,12 @@ app = Flask(__name__)
 cors = CORS(app, origins=["*", "*"])
 @app.before_request
 def hook():
-   validators = [token_validator, request_validator]
-   for validator in validators:
-      res = validator()
-      if res is not None:
-         return res 
+   token_validator_result = token_validator()
+   if token_validator_result is not None:
+      return token_validator_result
+   request_validator_result = request_validator()
+   if request_validator_result is not None:
+      return request_validator_result
    
    
 
