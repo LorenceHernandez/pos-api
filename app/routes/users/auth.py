@@ -2,10 +2,11 @@
 import os
 
 import bcrypt
+from bson import ObjectId
 import jwt
 from flask import Blueprint, request
 
-from app.database.config import users
+from app.database.config import roles, users
 
 JWT_KEY = os.getenv('JWT_SECRET_KEY')
 
@@ -32,6 +33,8 @@ def _authenticate():
 
    if string_password == splitpw[0]: 
     token = jwt.encode({"user_id": str(user[0]['_id'])}, JWT_KEY, algorithm="HS256")
+    role = roles.find_one({"_id": ObjectId(user[0]["role"])})
+
     return {
       'token': token,
       'data': {
@@ -39,7 +42,10 @@ def _authenticate():
         'username': user[0]['username'],
         'first_name': user[0]['first_name'],
         'last_name': user[0]['last_name'],
-        'role': user[0]['role']
+        'role': {
+          "_id": str(role["_id"]),
+          "name": role["name"],
+        }
       }
     }, 200
    else: 

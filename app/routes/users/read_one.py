@@ -7,7 +7,7 @@ from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, g, request
 
-from app.database.config import branches, users
+from app.database.config import branches, users, roles
 
 JWT_SECRET = os.getenv('JWT_SECRET')
 
@@ -29,11 +29,18 @@ def _get_user():
 
     record = users.find_one({"_id": ObjectId(id)})
     user_branch = None
+    user_role = None
 
     if record:
         try: 
+
+            role = roles.find_one({"_id": ObjectId(record["role"])})
+            user_role = {
+                "_id": str(role["_id"]),
+                "name": role["name"],
+            }
+
             branch = branches.find_one({"_id": ObjectId(record["branch_id"])})
-            print(branch)
             if branch:
                 user_branch = {
                     "_id": str(branch["_id"]),
@@ -52,7 +59,7 @@ def _get_user():
             'data': {
                 "_id": str(record["_id"]),
                 "username": record["username"],
-                "role": record["role"],
+                "role": user_role,
                 "firstName": record["first_name"],
                 "branch": user_branch,
                 "lastName": record["last_name"],
