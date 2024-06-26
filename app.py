@@ -4,7 +4,7 @@ import os
 
 import jwt
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
 load_dotenv()
@@ -63,6 +63,9 @@ app = Flask(__name__)
 cors = CORS(app, origins=["*", "*"])
 @app.before_request
 def hook():
+   
+   if request.method.lower() == 'options':
+      return Response()
    token_validator_result = token_validator()
    if token_validator_result is not None:
       return token_validator_result
