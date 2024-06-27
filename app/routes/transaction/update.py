@@ -39,6 +39,8 @@ def _update_transaction():
       update_val['status'] = request_data['status']
    if 'customerId' in request_data:
       update_val['customer_id'] = request_data['customerId']
+   if 'services' in request_data:
+      update_val['services'] = request_data['services']
    if 'requestedBy' in request_data:
       update_val['requested_by'] = request_data['requestedBy']
    if 'referredBy' in request_data:
