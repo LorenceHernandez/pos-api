@@ -36,7 +36,7 @@ def _update_company():
    if 'postalCode' in request_data:
       update_val['postal_code'] = request_data['postalCode']
    if 'contactNo' in request_data:
-      update_val['postal_code'] = request_data['contactNo']
+      update_val['contact_number'] = request_data['contactNo']
    if 'emailAddress' in request_data:
       update_val['email_address'] = request_data['emailAddress']
    
