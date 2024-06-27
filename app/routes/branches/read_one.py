@@ -26,6 +26,7 @@ def _get_branch():
             "streetAddress": record["street_address"],
             "city": record["city"],
             "state": record["state"],
+            "tin":  record["tin"],
             "postalCode": record["postal_code"],
             "contactNumber": record["contact_number"],
             "emailAddress": record["email_address"],

@@ -29,6 +29,8 @@ def _update_branch():
 
    if 'name' in request_data:
       update_val['name'] = request_data['name']
+   if 'tin' in request_data:
+      update_val['tin'] = request_data['tin']
    if 'streetAddress' in request_data:
       update_val['street_address'] = request_data['streetAddress']
    if 'city' in request_data:

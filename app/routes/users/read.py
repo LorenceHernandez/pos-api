@@ -28,8 +28,11 @@ def _get_users():
               user_role = {
                 "_id": str(role["_id"]),
                 "name": role["name"],
+                "authorizations": role['authorizations']
               } 
-              
+          except:
+            user_role = None
+          try: 
               branch = branches.find_one({"_id": ObjectId(record["branch"])})
               if branch:
                   user_branch = {
@@ -37,6 +40,7 @@ def _get_users():
                       "name": branch["name"],
                       "streetAddress": branch["street_address"],
                       "city": branch["city"],
+                      'tin': branch.get('tin'),
                       "state": branch["state"],
                       "postalCode": branch["postal_code"],
                       "contactNumber": branch["contact_number"],

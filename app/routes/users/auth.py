@@ -6,7 +6,7 @@ from bson import ObjectId
 import jwt
 from flask import Blueprint, request
 
-from app.database.config import roles, users
+from app.database.config import roles, users, branches
 
 JWT_KEY = os.getenv('JWT_SECRET_KEY')
 
@@ -33,8 +33,37 @@ def _authenticate():
 
    if string_password == splitpw[0]: 
     token = jwt.encode({"user_id": str(user[0]['_id'])}, JWT_KEY, algorithm="HS256")
-    role = roles.find_one({"_id": ObjectId(user[0]["role"])})
+    
+    user_role = None
+    user_branch = None
+    try:
+        role = roles.find_one({"_id": ObjectId(user[0]["role"])})
+        user_role = {
+            "_id": str(role["_id"]),
+            "name": role["name"],
+            "authorizations": role['authorizations']
+        }
+    except:
+        user_role = None
 
+    try: 
+            branch = branches.find_one({"_id": ObjectId(user[0]["branch"])})
+            if branch:
+                user_branch = {
+                    "_id": str(branch["_id"]),
+                    "name": branch["name"],
+                    "streetAddress": branch["street_address"],
+                    "city": branch["city"],
+                    "state": branch["state"],
+                    'tin': branch.get('tin'),
+                    "postalCode": branch["postal_code"],
+                    "contactNumber": branch["contact_number"],
+                    "emailAddress": branch["email_address"],
+                    "isActive": branch["is_active"],
+                }
+    except Exception as e:
+        print(e)
+        user_branch = None
     return {
       'token': token,
       'data': {
@@ -42,10 +71,8 @@ def _authenticate():
         'username': user[0]['username'],
         'first_name': user[0]['first_name'],
         'last_name': user[0]['last_name'],
-        'role': {
-          "_id": str(role["_id"]),
-          "name": role["name"],
-        }
+        'role': user_role,
+        'branch': user_branch
       }
     }, 200
    else: 

@@ -15,6 +15,7 @@ create_branch = Blueprint("/branch/create", __name__)
 def _create_branch():
    request_data = request.get_json()
    name, street_address, city, state, postal_code, contact, email = request_data['name'], request_data['streetAddress'], request_data['city'], request_data['state'], request_data['postalCode'], request_data['contactNo'], request_data['emailAddress']
+   tin = request_data = ['tin']
    created_by = g.user_id
    created_at = datetime.now()
    
@@ -27,6 +28,7 @@ def _create_branch():
       "is_active": True,
       "contact_number": contact,
       "email_address": email,
+      "tin": tin,
       "created_by": created_by,
       "created_at": created_at
    })
