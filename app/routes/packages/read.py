@@ -18,9 +18,9 @@ def _get_packages():
             "_id": str(record["_id"]),
             "name": record["name"],
             "description": record["description"],
-            "discount": record["discount"],
-            "discountType": record["discount_type"],
-            "applyDiscountBy": record["apply_discount_by"],
+            # "discount": record["discount"],
+            # "discountType": record["discount_type"],
+            # "applyDiscountBy": record["apply_discount_by"],
             "packageType": record["package_type"],
             "labTest": record["lab_test"]
           })

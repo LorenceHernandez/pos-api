@@ -29,9 +29,9 @@ def _create_package():
    doc = packages.insert_one({
       "name": name,
       "description": desc,
-      "discount": discount,
-      "discount_type": discount_type,
-      "apply_discount_by": apply_discount_by,
+      # "discount": discount,
+      # "discount_type": discount_type,
+      # "apply_discount_by": apply_discount_by,
       "package_type": package_type,
       "lab_test": lab_test,
       "created_by": created_by,

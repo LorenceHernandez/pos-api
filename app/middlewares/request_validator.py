@@ -37,6 +37,9 @@ route_constraints = [
   { 'route': '/transaction/create', 'params': ['branchId'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/transaction/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/transaction', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/discount/create', 'params': ['name', 'description', 'value', 'type'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/discount/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/discount', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
 ]
 
 

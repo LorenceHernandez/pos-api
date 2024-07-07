@@ -12,7 +12,7 @@ if LOCAL:
  client = client = MongoClient(MONGO_HOST_PY, int(MONGO_PORT)) 
 else:  
   host = 'mongodb://' + MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST_PY + ':' + MONGO_PORT + '/?authSource=pos'
-  client = MongoClient(host)   
+  client = MongoClient(host)    
 
 db = client.pos
 users = db.users
@@ -25,3 +25,4 @@ customers = db.customers
 packages = db.packages
 roles = db.roles
 transactions = db.transactions
+discounts = db.discounts

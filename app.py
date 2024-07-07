@@ -24,6 +24,10 @@ from app.routes.customers.create import create_customer
 from app.routes.customers.read import get_customers
 from app.routes.customers.read_one import get_customer
 from app.routes.customers.update import update_customer
+from app.routes.discounts.create import create_discount
+from app.routes.discounts.read import get_discounts
+from app.routes.discounts.read_one import get_discount
+from app.routes.discounts.update import update_discount
 from app.routes.doctors.create import create_doctor
 from app.routes.doctors.read import get_doctors
 from app.routes.doctors.read_one import get_doctor
@@ -121,6 +125,11 @@ app.register_blueprint(create_transaction)
 app.register_blueprint(get_transaction)
 app.register_blueprint(get_transactions)
 app.register_blueprint(update_transaction)
+
+app.register_blueprint(create_discount)
+app.register_blueprint(get_discount)
+app.register_blueprint(get_discounts)
+app.register_blueprint(update_discount)
 
 get_resources
 if __name__ == '__main__':
