@@ -41,6 +41,7 @@ def _create_transaction():
    if doc.inserted_id:
       return {
          'data': {
+            "id": str(doc.inserted_id),
             "transactionNo": transaction_no,
             "transactionDate": created_at,
             "status": status,
