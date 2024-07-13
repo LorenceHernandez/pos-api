@@ -14,17 +14,10 @@ create_package = Blueprint("/package/create", __name__)
 @create_package.route('/package/create', methods=['POST'])
 def _create_package():
    request_data = request.get_json()
-   name, desc, discount, discount_type, apply_discount_by, package_type, lab_test = request_data['name'], request_data['description'], request_data['discount'], request_data['discountType'], request_data['applyDiscountBy'], request_data['packageType'], request_data['labTest']
+   name, desc, package_type, lab_test = request_data['name'], request_data['description'], request_data['packageType'], request_data['labTest']
    created_by = g.user_id
    created_at = datetime.now()
 
-   try:
-        float(discount)
-   except:
-      return {
-         'message': 'data format is invalid',
-         'code': 23
-   }, 200
 
    doc = packages.insert_one({
       "name": name,
