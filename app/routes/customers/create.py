@@ -22,9 +22,11 @@ def _create_customer():
    gender = request_data['gender']
    address = request_data['address']
    customer_type = request_data['customerType']
+   contact_number = request_data['contactNumber']
    discount = 0
    discount_type = None
    corporate_id = None
+   tin_number = None
    is_corporate = False 
 
    created_by = g.user_id
@@ -38,6 +40,8 @@ def _create_customer():
       discount_type = request_data['discountType']
    if 'corporateId' in request_data:
       corporate_id = request_data['corporateId']
+   if 'tinNumber' in request_data:
+      tin_number = request_data['tinNumber']
 
    try: 
        float(discount)
@@ -61,6 +65,8 @@ def _create_customer():
       "discount": float(discount),
       "discount_type": discount_type,
       "corporate_id": corporate_id,
+      "tin_number": tin_number,
+      "contact_number": contact_number,
       "is_corporate": is_corporate,
       "created_by": created_by,
       "created_at": created_at

@@ -49,7 +49,11 @@ def _update_customer():
       update_val['discount_type'] = request_data['discountType']
    if 'isCorporate' in request_data:
       update_val['is_corporate'] = request_data['isCorporate']
-   
+   if 'tinNumber' in request_data:
+      update_val['tin_number'] = request_data['tinNumber']
+   if 'contactNumber' in request_data:
+      update_val['contact_number'] = request_data['contactNumber']
+
    if not update_val:
         return {
             'message': 'atleast one field is required when updating a user',
