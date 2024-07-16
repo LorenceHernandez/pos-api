@@ -35,6 +35,7 @@ route_constraints = [
   { 'route': '/roles/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/role', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/transaction/create', 'params': ['branchId'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/transaction/active', 'params': [], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/transaction/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/transaction', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/discount/create', 'params': ['name', 'description', 'value', 'type'], 'content-type': 'json', 'method': 'POST' },

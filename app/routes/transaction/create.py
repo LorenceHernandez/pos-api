@@ -10,6 +10,7 @@ from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import transactions
+from app.routes.transaction.read_active import get_pending_transaction
 
 create_transaction = Blueprint("/transaction/create", __name__)
 
@@ -19,6 +20,11 @@ def _create_transaction():
    branch_id = request_data['branchId']
    created_by = g.user_id
    created_at = datetime.now()
+
+   pending_record = get_pending_transaction()
+   if pending_record:
+      return { 'data': pending_record[0] }, 200
+
    try:
       ObjectId(branch_id)
    except: 

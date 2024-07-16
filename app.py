@@ -51,6 +51,7 @@ from app.routes.roles.read_resources import get_resources
 from app.routes.roles.update import update_role
 from app.routes.transaction.create import create_transaction
 from app.routes.transaction.read import get_transactions
+from app.routes.transaction.read_active import get_active_transaction
 from app.routes.transaction.read_one import get_transaction
 from app.routes.transaction.update import update_transaction
 from app.routes.users.auth import login
@@ -123,6 +124,7 @@ app.register_blueprint(update_user)
 app.register_blueprint(get_resources)
 app.register_blueprint(create_transaction)
 app.register_blueprint(get_transaction)
+app.register_blueprint(get_active_transaction)
 app.register_blueprint(get_transactions)
 app.register_blueprint(update_transaction)
 
