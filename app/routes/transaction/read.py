@@ -1,8 +1,9 @@
+import pymongo
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
-import pymongo
-from app.database.config import transactions, branches, customers
+
+from app.database.config import branches, customers, doctors, transactions
 
 get_transactions = Blueprint("/transactions", __name__)
 
@@ -37,6 +38,7 @@ def _get_transactions():
          except Exception as e: 
               transaction_customer = None
          user_branch = None
+         
          try: 
             branch = branches.find_one({"_id": ObjectId(record["branch_id"])})
             if branch:
@@ -54,6 +56,45 @@ def _get_transactions():
           }
          except Exception as e: 
               user_branch = None
+
+
+         referred_by = None
+         requested_by = None
+         try: 
+               doctor = doctors.find_one({"_id": ObjectId(record["referred_by"])})
+               if doctor:
+                    referred_by = {
+                         "_id": str(doctor["_id"]),
+                         "firstName": doctor["firstName"],
+                         "middleName": doctor["middleName"],
+                         "lastName": doctor["lastName"],
+                         "age": doctor["age"],
+                         "gender": doctor["gender"],
+                         "address": doctor["address"],
+                         "isMember": doctor["isMember"],
+                         "created_by": doctor["created_by"],
+                         "created_at": doctor["created_at"]
+                    }
+         except Exception as e: 
+                    referred_by = None
+         try: 
+                    doctor = doctors.find_one({"_id": ObjectId(record["requested_by"])})
+                    if doctor:
+                         requested_by = {
+                              "_id": str(doctor["_id"]),
+                              "firstName": doctor["firstName"],
+                              "middleName": doctor["middleName"],
+                              "lastName": doctor["lastName"],
+                              "age": doctor["age"],
+                              "gender": doctor["gender"],
+                              "address": doctor["address"],
+                              "isMember": doctor["isMember"],
+                              "created_by": doctor["created_by"],
+                              "created_at": doctor["created_at"]
+                         }
+         except Exception as e: 
+                    requested_by = None
+     
          ret.append({
             "_id": str(record["_id"]),
             "transactionNo": record["transaction_no"],
@@ -61,8 +102,8 @@ def _get_transactions():
             "status": record["status"],
             "branch": user_branch,
             "customer": transaction_customer,
-            "requestedBy": record.get('requested_by'),
-            "referredBy": record.get('referred_by'),
+            "requestedBy": requested_by,
+            "referredBy": referred_by,
             "tenderType": record.get('tender_type'),
             "tenderAmount": record.get('tender_amount'),
             "change": record.get('change'),

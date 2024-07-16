@@ -2,7 +2,7 @@ from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
 
-from app.database.config import transactions, branches, customers
+from app.database.config import branches, customers, doctors, transactions
 
 get_transaction = Blueprint("/transaction", __name__)
 
@@ -20,6 +20,42 @@ def _get_transaction():
    user_branch = None
    
    transaction_customer = None
+   referred_by = None
+   requested_by = None
+   try: 
+          doctor = doctors.find_one({"_id": ObjectId(record["referred_by"])})
+          if doctor:
+               referred_by = {
+                    "_id": str(doctor["_id"]),
+                    "firstName": doctor["firstName"],
+                    "middleName": doctor["middleName"],
+                    "lastName": doctor["lastName"],
+                    "age": doctor["age"],
+                    "gender": doctor["gender"],
+                    "address": doctor["address"],
+                    "isMember": doctor["isMember"],
+                    "created_by": doctor["created_by"],
+                    "created_at": doctor["created_at"]
+               }
+   except Exception as e: 
+          referred_by = None
+   try: 
+          doctor = doctors.find_one({"_id": ObjectId(record["requested_by"])})
+          if doctor:
+               requested_by = {
+                    "_id": str(doctor["_id"]),
+                    "firstName": doctor["firstName"],
+                    "middleName": doctor["middleName"],
+                    "lastName": doctor["lastName"],
+                    "age": doctor["age"],
+                    "gender": doctor["gender"],
+                    "address": doctor["address"],
+                    "isMember": doctor["isMember"],
+                    "created_by": doctor["created_by"],
+                    "created_at": doctor["created_at"]
+               }
+   except Exception as e: 
+          requested_by = None
    try: 
           customer = customers.find_one({"_id": ObjectId(record["customer_id"])})
           if customer:
@@ -67,8 +103,8 @@ def _get_transaction():
             "branch": user_branch,
             "customer": transaction_customer,
             "services": record.get('services'),
-            "requestedBy": record.get('requested_by'),
-            "referredBy": record.get('referred_by'),
+            "requestedBy": requested_by,
+            "referredBy": referred_by,
             "tenderType": record.get('tender_type'),
             "tenderAmount": record.get('tender_amount'),
             "change": record.get('change'),
