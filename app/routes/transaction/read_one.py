@@ -21,38 +21,39 @@ def _get_transaction():
    
    transaction_customer = None
    try: 
-            customer = customers.find_one({"_id": ObjectId(record["customer_id"])})
-            if branch:
-              transaction_customer = {
-                          "_id": str(branch["_id"]),
-                          "name": branch["name"],
-                          "streetAddress": branch["street_address"],
-                          "city": branch["city"],
-                          "state": branch["state"],
-                          'tin': branch.get('tin'),
-                          "postalCode": branch["postal_code"],
-                          "contactNumber": branch["contact_number"],
-                          "emailAddress": branch["email_address"],
-                          "isActive": branch["is_active"]
-              }
+          customer = customers.find_one({"_id": ObjectId(record["customer_id"])})
+          if customer:
+               transaction_customer = {
+                    "_id": str(customer["_id"]),
+                    "firstName": customer["first_name"],
+                    "middleName": customer["middle_name"],
+                    "lastName": customer["last_name"],
+                    "age": customer["age"],
+                    "gender": customer["gender"],
+                    "address": customer["address"],
+                    "customerType": customer["customer_type"],
+                    "discount": customer["discount"],
+                    "discountType": customer["discount_type"],
+                    "isCorporate": customer["is_corporate"]
+               }
    except Exception as e: 
-              transaction_customer = None
+          transaction_customer = None
    try: 
       branch = branches.find_one({"_id": ObjectId(record["branch_id"])})
 
       if branch:
         user_branch = {
-                    "_id": str(branch["_id"]),
-                    "name": branch["name"],
-                    "streetAddress": branch["street_address"],
-                    "city": branch["city"],
-                    "state": branch["state"],
-                    'tin': branch.get('tin'),
-                    "postalCode": branch["postal_code"],
-                    "contactNumber": branch["contact_number"],
-                    "emailAddress": branch["email_address"],
-                    "isActive": branch["is_active"]
-        }
+          "_id": str(branch["_id"]),
+          "name": branch["name"],
+          "streetAddress": branch["street_address"],
+          "city": branch["city"],
+          "state": branch["state"],
+          'tin': branch.get('tin'),
+          "postalCode": branch["postal_code"],
+          "contactNumber": branch["contact_number"],
+          "emailAddress": branch["email_address"],
+          "isActive": branch["is_active"]
+     }
    except:
         user_branch = None
 
