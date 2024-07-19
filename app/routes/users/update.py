@@ -18,9 +18,9 @@ def _update_user():
       if 'roleId' in request_data:
          ObjectId(request_data['roleId'])
          update_val['role'] = request_data['roleId']
-      if 'branchId' in request_data:
-         ObjectId(request_data['branchId'])
-         update_val['branch'] = request_data['branchId']
+      if 'branchIds' in request_data:
+         ObjectId(request_data['branchIds'])
+         update_val['branches'] = request_data['branchIds']
    except:
     return {
       'message': 'data format is invalid',

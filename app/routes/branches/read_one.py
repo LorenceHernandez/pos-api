@@ -1,8 +1,10 @@
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
+from pydash import omit
 
 from app.database.config import branches
+from app.models.Branch import Branch
 
 get_branch = Blueprint("/branch", __name__)
 
@@ -16,23 +18,10 @@ def _get_branch():
             'code': 23
         }, 401
 
-   record = branches.find_one({"_id": ObjectId(request.args.get('id'))})
+   branch = branches.find_one({"_id": ObjectId(request.args.get('id'))})
 
-   if record: 
-       return {
-          'data': {
-            "_id": str(record["_id"]),
-            "name": record["name"],
-            "streetAddress": record["street_address"],
-            "city": record["city"],
-            "state": record["state"],
-            "tin":  record["tin"],
-            "postalCode": record["postal_code"],
-            "contactNumber": record["contact_number"],
-            "emailAddress": record["email_address"],
-            "isActive": record["is_active"],
-          },
-       }, 200 
+   if branch: 
+       return { 'data': { **omit(branch, '_id'), "id": str(branch["_id"]) } }, 200 
    else:
         return {
             'message': 'Branch not found',

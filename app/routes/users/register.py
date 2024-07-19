@@ -20,13 +20,14 @@ def _create_account():
    first_name = request_data['firstName']
    last_name = request_data['lastName']
    role_id = request_data['roleId']
-   branch_id = request_data['branchId']
+   branch_ids = request_data['branchIds']
    created_by = g.user_id
    create_at = datetime.now()
 
    try:
       ObjectId(role_id)
-      ObjectId(branch_id)
+      for branch_id in branch_ids:
+         ObjectId(branch_id)
    except:
       return {
          'message': 'data format is invalid',
@@ -55,7 +56,7 @@ def _create_account():
         "role": role_id,
         "created_by": created_by,
         "created_at": create_at,
-        "branch": branch_id,
+        "branches": branch_ids,
         "is_active": True
      })
      

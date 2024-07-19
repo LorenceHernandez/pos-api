@@ -8,7 +8,7 @@ JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 route_constraints = [
   { 'route': '/login', 'params': ['username', 'password'], 'content-type': 'urlencoded', 'method': 'POST' },
-  { 'route': '/user/register', 'params': ['branchId', 'username', 'password', 'firstName', 'lastName', 'roleId'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/user/register', 'params': ['branchIds', 'username', 'password', 'firstName', 'lastName', 'roleId'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/user/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/create', 'params': ['sku', 'price', 'name', 'inventoryPrerequisite', 'categoryId', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
@@ -19,7 +19,7 @@ route_constraints = [
   { 'route': '/product/category/create', 'params': ['name', 'description'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/category', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
   { 'route': '/product/category/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/branch/create', 'params': ['tin', 'name', 'streetAddress', 'city', 'state', 'postalCode', 'contactNo', 'emailAddress'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/branch/create', 'params': ['tin', 'name', 'streetAddress', 'city', 'state', 'postalCode', 'contactNumber', 'emailAddress'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/branch', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/branch/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate/create', 'params': ['name','streetAddress', 'city', 'state', 'postalCode', 'contactNo', 'emailAddress'], 'content-type': 'json', 'method': 'POST' },

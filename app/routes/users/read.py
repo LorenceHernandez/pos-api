@@ -6,8 +6,10 @@ import jwt
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
+from pydash import omit
 
 from app.database.config import branches, users, roles
+from app.models.Branch import Branch
 
 JWT_SECRET = os.getenv('JWT_SECRET')
 
@@ -20,11 +22,11 @@ def _get_users():
 
         
        ret = []
-       for record in res:
+       for user in res:
           user_branch = None
           user_role = None
           try:
-              role = roles.find_one({"_id": ObjectId(record["role"])})
+              role = roles.find_one({"_id": ObjectId(user["role"])})
               user_role = {
                 "_id": str(role["_id"]),
                 "name": role["name"],
@@ -32,33 +34,23 @@ def _get_users():
               } 
           except:
             user_role = None
-          try: 
-              branch = branches.find_one({"_id": ObjectId(record["branch"])})
-              if branch:
-                  user_branch = {
-                      "_id": str(branch["_id"]),
-                      "name": branch["name"],
-                      "streetAddress": branch["street_address"],
-                      "city": branch["city"],
-                      'tin': branch.get('tin'),
-                      "state": branch["state"],
-                      "postalCode": branch["postal_code"],
-                      "contactNumber": branch["contact_number"],
-                      "emailAddress": branch["email_address"],
-                      "isActive": branch["is_active"],
-                  }
-          except: 
-            user_branch = None
+
+
+          branch_list = []
+          for branch_id in user['branches']:
+            branch = branches.find_one({"_id": ObjectId(branch_id) })
+            branch_list.append({ **omit(branch, '_id'), "id": str(branch["_id"]) })
+            
           ret.append({
-            "_id": str(record["_id"]),
-            "username": record["username"],
+            "_id": str(user["_id"]),
+            "username": user["username"],
             "role": user_role,
-            "branch": user_branch,
-            "firstName": record["first_name"],
-            "lastName": record["last_name"],
-            "isActive": record["is_active"],
-            "createdBy": record["created_by"],
-            "createdAt": record["created_at"],
+            "branches": branch_list,
+            "firstName": user["first_name"],
+            "lastName": user["last_name"],
+            "isActive": user["is_active"],
+            "createdBy": user["created_by"],
+            "createdAt": user["created_at"],
           })
        return {
           'data': ret,

@@ -5,8 +5,10 @@ import bcrypt
 from bson import ObjectId
 import jwt
 from flask import Blueprint, request
+from pydash import omit
 
 from app.database.config import roles, users, branches
+from app.models.Branch import Branch
 
 JWT_KEY = os.getenv('JWT_SECRET_KEY')
 
@@ -35,7 +37,6 @@ def _authenticate():
     token = jwt.encode({"user_id": str(user[0]['_id'])}, JWT_KEY, algorithm="HS256")
     
     user_role = None
-    user_branch = None
     try:
         role = roles.find_one({"_id": ObjectId(user[0]["role"])})
         user_role = {
@@ -45,25 +46,12 @@ def _authenticate():
         }
     except:
         user_role = None
-
-    try: 
-            branch = branches.find_one({"_id": ObjectId(user[0]["branch"])})
-            if branch:
-                user_branch = {
-                    "_id": str(branch["_id"]),
-                    "name": branch["name"],
-                    "streetAddress": branch["street_address"],
-                    "city": branch["city"],
-                    "state": branch["state"],
-                    'tin': branch.get('tin'),
-                    "postalCode": branch["postal_code"],
-                    "contactNumber": branch["contact_number"],
-                    "emailAddress": branch["email_address"],
-                    "isActive": branch["is_active"],
-                }
-    except Exception as e:
-        print(e)
-        user_branch = None
+    
+    branch_list = []
+    for branch_id in user[0]['branches']:
+      branch = branches.find_one({"_id": ObjectId(branch_id) })
+      branch_list.append({ **omit(branch, '_id'), "id": str(branch["_id"]) })
+            
     return {
       'token': token,
       'data': {
@@ -72,7 +60,7 @@ def _authenticate():
         'first_name': user[0]['first_name'],
         'last_name': user[0]['last_name'],
         'role': user_role,
-        'branch': user_branch
+        'branches': branch_list
       }
     }, 200
    else: 

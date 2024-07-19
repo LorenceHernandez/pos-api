@@ -99,8 +99,9 @@ def _get_transactions():
      #                requested_by = None
      
          new_transaction = merge(
-             omit(Transaction.fromDict(transaction).toDict(), 'customerId', 'branchId'),
+             omit(transaction, '_id', 'customerId', 'branchId'),
              { 
+               "id": str(transaction['_id']),
                "customer": transaction_customer,
                "branch": user_branch,
              },
