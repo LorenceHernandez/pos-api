@@ -105,6 +105,8 @@ def get_pending_transaction():
           "referredBy": referred_by,
           "tenderType": record.get('tenderType'),
           "tenderAmount": record.get('tenderAmount'),
+          "paymentDue": record.get('paymentDue'),
+          "subTotal": record.get('subTotal'),
           "change": record.get('change'),
      },
 
