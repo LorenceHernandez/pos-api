@@ -132,6 +132,7 @@ class Transaction:
             "subTotal": self.sub_total,
             "invoiceNo": self.invoice_no,
             "change": self.change,
+            "createBy": self.created_by,
             "discountApplied": discount_applied
         }
     

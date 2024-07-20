@@ -109,6 +109,7 @@ def _get_transaction():
             "paymentDue": record.get('paymentDue'),
             "subTotal": record.get('subTotal'),
             "tenderAmount": record.get('tenderAmount'),
+            "createdBy": record.get('createdBy'),
             "change": record.get('change'),
           },
        }, 200 
