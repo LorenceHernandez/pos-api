@@ -6,6 +6,7 @@ from operator import itemgetter
 import bcrypt
 import jwt
 from flask import Blueprint, g, request
+from pydash import omit
 
 from app.database.config import branches
 from app.models.Branch import Branch
@@ -20,7 +21,7 @@ def _create_branch():
    branch.created_at = datetime.now()
    branch.created_by = g.user_id
    
-   doc = branches.insert_one(branch.toDict())
+   doc = branches.insert_one(omit(branch.toDict(), 'id'))
    
    if doc.inserted_id:
       return {

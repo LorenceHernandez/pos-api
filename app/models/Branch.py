@@ -12,6 +12,7 @@ class Branch:
     postal_code = None
     contact_number = None
     email_address = None
+    street_address = None
     is_active = None
     created_by = None
     created_at = None
@@ -28,6 +29,7 @@ class Branch:
         branch.postal_code = data.get('postalCode')
         branch.contact_number = data.get('contactNumber')
         branch.email_address = data.get('emailAddress')
+        branch.street_address = data.get('streetAddress')
         branch.is_active = data.get('isActive')
     
         return branch
@@ -36,11 +38,13 @@ class Branch:
         return {
             "id": self.id,
             "name": self.name,
+            "tin": self.tin,
             "city": self.city,
             "state": self.state,
             "postalCode": self.postal_code,
             "contactNumber": self.contact_number,
             "emailAddress": self.email_address,
+            "streetAddress": self.street_address,
             "isActive": self.is_active,
         }
 

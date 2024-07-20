@@ -19,7 +19,8 @@ def _update_user():
          ObjectId(request_data['roleId'])
          update_val['role'] = request_data['roleId']
       if 'branchIds' in request_data:
-         ObjectId(request_data['branchIds'])
+         for branchId in request_data['branchIds']:
+            ObjectId(branchId)
          update_val['branches'] = request_data['branchIds']
    except:
     return {
@@ -36,11 +37,7 @@ def _update_user():
    if 'isActive' in request_data:
       update_val['is_active'] = request_data['isActive']
 
-   if not update_val: 
-        return {
-            'message': 'atleast one field is required when updating a user',
-            'code': 24
-        }, 200
+   
    filter = { '_id': ObjectId(id) }
    new_val = { "$set": update_val }
 
