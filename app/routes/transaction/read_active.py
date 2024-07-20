@@ -21,7 +21,7 @@ def get_pending_transaction():
      user_branch = None
      transaction_customer = None
      try: 
-               customer = customers.find_one({"_id": ObjectId(record["customer_id"])})
+               customer = customers.find_one({"_id": ObjectId(record["customerId"])})
                if customer:
                     transaction_customer = {
                          "_id": str(customer["_id"]),
@@ -39,7 +39,7 @@ def get_pending_transaction():
      except Exception as e: 
           transaction_customer = None
      try: 
-          branch = branches.find_one({"_id": ObjectId(record["branch_id"])})
+          branch = branches.find_one({"_id": ObjectId(record["branchId"])})
 
           if branch:
                user_branch = {
@@ -59,7 +59,7 @@ def get_pending_transaction():
      referred_by = None
      requested_by = None
      try: 
-               doctor = doctors.find_one({"_id": ObjectId(record["referred_by"])})
+               doctor = doctors.find_one({"_id": ObjectId(record["referredBy"])})
                if doctor:
                     referred_by = {
                          "_id": str(doctor["_id"]),
@@ -76,7 +76,7 @@ def get_pending_transaction():
      except Exception as e: 
                     referred_by = None
      try: 
-                    doctor = doctors.find_one({"_id": ObjectId(record["requested_by"])})
+                    doctor = doctors.find_one({"_id": ObjectId(record["requestedBy"])})
                     if doctor:
                          requested_by = {
                               "_id": str(doctor["_id"]),

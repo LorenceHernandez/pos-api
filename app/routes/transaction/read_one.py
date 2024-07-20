@@ -23,7 +23,7 @@ def _get_transaction():
    referred_by = None
    requested_by = None
    try: 
-          doctor = doctors.find_one({"_id": ObjectId(record["referred_by"])})
+          doctor = doctors.find_one({"_id": ObjectId(record["referredBy"])})
           if doctor:
                referred_by = {
                     "_id": str(doctor["_id"]),
@@ -40,7 +40,7 @@ def _get_transaction():
    except Exception as e: 
           referred_by = None
    try: 
-          doctor = doctors.find_one({"_id": ObjectId(record["requested_by"])})
+          doctor = doctors.find_one({"_id": ObjectId(record["requestedBy"])})
           if doctor:
                requested_by = {
                     "_id": str(doctor["_id"]),
@@ -57,7 +57,7 @@ def _get_transaction():
    except Exception as e: 
           requested_by = None
    try: 
-          customer = customers.find_one({"_id": ObjectId(record["customer_id"])})
+          customer = customers.find_one({"_id": ObjectId(record["customerId"])})
           if customer:
                transaction_customer = {
                     "_id": str(customer["_id"]),
@@ -75,7 +75,7 @@ def _get_transaction():
    except Exception as e: 
           transaction_customer = None
    try: 
-      branch = branches.find_one({"_id": ObjectId(record["branch_id"])})
+      branch = branches.find_one({"_id": ObjectId(record["branchId"])})
 
       if branch:
         user_branch = {
@@ -97,16 +97,16 @@ def _get_transaction():
        return {
           'data': {
             "_id": str(record["_id"]),
-            "transactionNo": record["transaction_no"],
-            "transactionDate": record["transaction_date"],
+            "transactionNo": record["transactionNo"],
+            "transactionDate": record["transactionDate"],
             "status": record["status"],
             "branch": user_branch,
             "customer": transaction_customer,
             "services": record.get('services'),
             "requestedBy": requested_by,
             "referredBy": referred_by,
-            "tenderType": record.get('tender_type'),
-            "tenderAmount": record.get('tender_amount'),
+            "tenderType": record.get('tenderType'),
+            "tenderAmount": record.get('tenderAmount'),
             "change": record.get('change'),
           },
        }, 200 
