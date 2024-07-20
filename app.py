@@ -49,6 +49,7 @@ from app.routes.roles.read import get_roles
 from app.routes.roles.read_one import get_role
 from app.routes.roles.read_resources import get_resources
 from app.routes.roles.update import update_role
+from app.routes.sales.read import get_sales
 from app.routes.transaction.create import create_transaction
 from app.routes.transaction.read import get_transactions
 from app.routes.transaction.read_active import get_active_transaction
@@ -132,6 +133,8 @@ app.register_blueprint(create_discount)
 app.register_blueprint(get_discount)
 app.register_blueprint(get_discounts)
 app.register_blueprint(update_discount)
+
+app.register_blueprint(get_sales)
 
 get_resources
 if __name__ == '__main__':

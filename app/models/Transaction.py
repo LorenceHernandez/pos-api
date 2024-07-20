@@ -2,6 +2,7 @@
 
 from bson import ObjectId
 
+
 class DiscountApplied:
     type = None
     value = None
@@ -121,8 +122,9 @@ class Transaction:
             "status": self.status,
             "branchId": self.branch_id,
             "customerId": self.customer_id,
-          #   "requestedBy": requested_by,
-          #   "referredBy": referred_by,
+            "requestedBy": self.requested_by,
+            "referredBy": self.referred_by,
+            "services": self.services,
             "tenderType": self.tender_type,
             "tenderAmount": self.tender_amount,
             "paymentDue": self.payment_due,
