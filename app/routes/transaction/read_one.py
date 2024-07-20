@@ -79,16 +79,16 @@ def _get_transaction():
 
       if branch:
         user_branch = {
-          "_id": str(branch["_id"]),
-          "name": branch["name"],
-          "streetAddress": branch["street_address"],
-          "city": branch["city"],
-          "state": branch["state"],
-          'tin': branch.get('tin'),
-          "postalCode": branch["postal_code"],
-          "contactNumber": branch["contact_number"],
-          "emailAddress": branch["email_address"],
-          "isActive": branch["is_active"]
+                    "_id": str(branch["_id"]),
+                    "name": branch["name"],
+                    "streetAddress": branch["streetAddress"],
+                    "city": branch["city"],
+                    "state": branch["state"],
+                    'tin': branch.get('tin'),
+                    "postalCode": branch["postalCode"],
+                    "contactNumber": branch["contactNumber"],
+                    "emailAddress": branch["emailAddress"],
+                    "isActive": branch["isActive"]
      }
    except:
         user_branch = None

@@ -1,8 +1,8 @@
-from pydash import merge, omit
 import pymongo
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
+from pydash import merge, omit
 
 from app.database.config import branches, customers, doctors, transactions
 from app.models.Transaction import Transaction
@@ -45,19 +45,21 @@ def _get_transactions():
          try: 
             branch = branches.find_one({"_id": ObjectId(transaction["branchId"])})
             if branch:
+              print('testset')
               user_branch = {
                     "_id": str(branch["_id"]),
                     "name": branch["name"],
-                    "streetAddress": branch["street_address"],
+                    "streetAddress": branch["streetAddress"],
                     "city": branch["city"],
                     "state": branch["state"],
                     'tin': branch.get('tin'),
-                    "postalCode": branch["postal_code"],
-                    "contactNumber": branch["contact_number"],
-                    "emailAddress": branch["email_address"],
-                    "isActive": branch["is_active"]
+                    "postalCode": branch["postalCode"],
+                    "contactNumber": branch["contactNumber"],
+                    "emailAddress": branch["emailAddress"],
+                    "isActive": branch["isActive"]
           }
-         except Exception as e: 
+         except Exception as e:
+              print('testset')
               user_branch = None
 
 

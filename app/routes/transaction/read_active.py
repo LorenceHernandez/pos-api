@@ -95,16 +95,16 @@ def get_pending_transaction():
     
      return {
           "id": str(record["_id"]),
-          "transactionNo": record["transaction_no"],
-          "transactionDate": record["transaction_date"],
+          "transactionNo": record["transactionNo"],
+          "transactionDate": record["transactionDate"],
           "status": record["status"],
           "branch": user_branch,
           "customer": transaction_customer,
           "services": record.get('services'),
           "requestedBy": requested_by,
           "referredBy": referred_by,
-          "tenderType": record.get('tender_type'),
-          "tenderAmount": record.get('tender_amount'),
+          "tenderType": record.get('tenderType'),
+          "tenderAmount": record.get('tenderAmount'),
           "change": record.get('change'),
      },
 
