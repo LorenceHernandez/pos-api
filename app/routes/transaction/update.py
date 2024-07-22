@@ -103,7 +103,7 @@ def _update_transaction():
             'discount': discount,
             'referrer': doctor_full_name,
             'branch': branch,
-            'cashierId': updated_trans['createdBy']
+            'cashierId': updated_trans['createBy']
          })   
          if sale.inserted_id is None:
             return {

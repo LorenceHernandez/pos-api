@@ -108,7 +108,7 @@ def get_pending_transaction():
           "paymentDue": record.get('paymentDue'),
           "subTotal": record.get('subTotal'),
           "change": record.get('change'),
-          "createdBy": record.get('createdBy')
+          "createdBy": record.get('createBy')
      },
 
 @get_active_transaction.route('/transaction/active', methods=['GET'])

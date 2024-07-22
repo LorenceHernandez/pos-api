@@ -95,7 +95,7 @@ def _get_transaction():
         user_branch = None
    _user = None
    try: 
-     user = users.find_one({"_id": ObjectId(record.get('createdBy'))}) 
+     user = users.find_one({"_id": ObjectId(record.get('createBy'))}) 
 
      if user:
         _user = {
