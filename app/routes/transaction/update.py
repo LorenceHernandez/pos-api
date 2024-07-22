@@ -39,13 +39,13 @@ def _update_transaction():
    if res.modified_count > 0:
       updated_trans = transactions.find_one({"_id": ObjectId(id)})
       # FOR REFACTORING
-      if transaction_dict['status'] == 'completed':
+      if transaction_dict['status'].lower() == 'completed':
          categories = product_categories.find()
          customer = customers.find_one({"_id": ObjectId(updated_trans['customerId'])})
          customer_full_name = customer["first_name"] + " " + customer["middle_name"] + " " + customer["last_name"]
          services = updated_trans['services']
          orNo = updated_trans['invoiceNo']
-         amount = updated_trans['total']
+         amount = updated_trans['tenderAmount'] - updated_trans['change']
          branch = updated_trans['branchId']
          customer_id = updated_trans['customerId']
          discount = 0
@@ -69,7 +69,7 @@ def _update_transaction():
          for service in services: 
             # service_id = service['id']
             name.append(service['name'])
-            product = products.find_one({"_id": ObjectId(service['id'])})
+            product = products.find_one({"_id": ObjectId(service['_id'])})
             if product:
                for category in _categories:
                   if category['id'] == product['category_id']: 
