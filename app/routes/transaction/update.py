@@ -66,7 +66,7 @@ def _update_transaction():
              })
              
          
-         if updated_trans.get('referred_by'):
+         if updated_trans.get('referredBy'):
             doctor = doctors.find_one({"_id": ObjectId(updated_trans.get('referredBy'))})
             if doctor:
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
