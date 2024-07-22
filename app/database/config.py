@@ -27,3 +27,4 @@ roles = db.roles
 transactions = db.transactions
 discounts = db.discounts
 sales = db.sales
+bookings = db.bookings

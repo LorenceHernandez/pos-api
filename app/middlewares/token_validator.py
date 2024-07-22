@@ -8,6 +8,7 @@ JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 excluded_routes_for_validator = [
   '/login',  
+  '/booking/create'
 ]
 
 def token_validator(): 

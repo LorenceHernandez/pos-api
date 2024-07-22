@@ -9,6 +9,7 @@ from flask_cors import CORS, cross_origin
 
 load_dotenv()
 
+from app.database.config import bookings
 from app.middlewares.authorization_validator import authorization_validator
 from app.middlewares.request_validator import request_validator
 from app.middlewares.token_validator import token_validator
@@ -84,6 +85,28 @@ def hook():
 @app.route('/', methods=['GET'])
 def home():
   return 'hello world'
+@app.route('/booking/create', methods=['POST'])
+def _create_booking():
+  request_data = request.get_json()
+  doc = bookings.insert_one({
+     'firstName': request_data.get('firstName'),
+     'middleName': request_data.get('middleName'),
+     'lastName': request_data.get('lastName'),
+     'mobileNumber': request_data.get('mobileNumber'),
+     'emailAddress': request_data.get('emailAddress'),
+     'address': request_data.get('address'),
+     'referral': request_data.get('referral'),
+     'receiveType': request_data.get('receiveType'),
+     'schedule': request_data.get('schedule'),
+     'note': request_data.get('note'),
+  })
+  if doc.inserted_id:
+     return {
+        'message': 'Booking successfully created'
+     }
+  return {
+     'message': 'Unable to create booking'
+  }
 
 app.register_blueprint(login)
 app.register_blueprint(register)
