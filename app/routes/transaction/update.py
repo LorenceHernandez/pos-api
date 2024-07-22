@@ -53,7 +53,11 @@ def _update_transaction():
          if applied: 
             discount = applied['totalDiscount']
          doctor_full_name = ''
-         _categories = []
+         _categories = [{
+            'id': None,
+            'name': 'Package',
+            'price': 0
+         }]
          for category in categories:
              _categories.append({
                'id': str(category.get('_id')), 
@@ -61,43 +65,25 @@ def _update_transaction():
                'price': 0
              })
              
+         
          if updated_trans.get('referred_by'):
             doctor = doctors.find_one({"_id": ObjectId(updated_trans.get('referredBy'))})
             if doctor:
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
          name = []
          for service in services: 
-            # service_id = service['id']
             name.append(service['name'])
             product = products.find_one({"_id": ObjectId(service['_id'])})
             if product:
                for category in _categories:
                   if service.get('source') == "package":
-                     if category['name'].lower() == 'others-d package':
+                     if category['name'].lower() == 'package':
                         category['price'] += service['amount']
                      continue
                   
                   elif category['id'] == product['category_id']: 
                      category['price'] += service['amount']
 
-            # product = products.find_one({"_id": ObjectId(service_id)})
-            # if product:
-            #    for category in _categories: 
-            #       if category['id'] == product['category_id']:
-            #          category['price'] += product['amount']
-            #          break
-            # else:
-            #    package = packages.find({"_id": ObjectId(service_id)})
-            #    if package:
-            #       name.append(package['name'])
-            #       for product in package['lab_test']:
-            #          product = products.find({"_id": ObjectId(product['id'])})
-            #          for category in _categories: 
-            #             if category['id'] == product['category_id']:
-            #                category['price'] += product['price']
-            #                break
-               
-            
          sale = sales.insert_one({
             'customerName': customer_full_name,
             'customerId': customer_id,
