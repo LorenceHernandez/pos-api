@@ -14,9 +14,11 @@ def _get_sales():
       "branch": request.args.get('branchId'),
       "customerId": request.args.get('customerId')
    })
+   total = 0
    ret = []
    if res:
       for sale in res:
+        total += sale["amount"]
         ret.append({
           "customerName": sale["customerName"],
           "labExams": sale["labExams"],
@@ -29,5 +31,8 @@ def _get_sales():
 
    
    return {
-      "data": ret
+      "data": {
+         "cols": ret,
+         "total": total
+      }
    }, 200
