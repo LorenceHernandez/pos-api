@@ -2,7 +2,8 @@ from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, request
 
-from app.database.config import branches, customers, doctors, transactions
+from app.database.config import (branches, customers, doctors, transactions,
+                                 users)
 
 get_transaction = Blueprint("/transaction", __name__)
 
@@ -92,8 +93,21 @@ def _get_transaction():
      }
    except:
         user_branch = None
+   _user = None
+   try: 
+     user = users.find_one({"_id": ObjectId(record.get('createdBy'))}) 
 
-   if record: 
+     if user:
+        _user = {
+            "_id": str(user["_id"]),
+            "username": user["username"],
+            "firstName": user["first_name"],
+            "lastName": user["last_name"],
+          }
+   except:
+        _user = None
+   if record:
+          
        return {
           'data': {
             "_id": str(record["_id"]),
@@ -109,7 +123,10 @@ def _get_transaction():
             "paymentDue": record.get('paymentDue'),
             "subTotal": record.get('subTotal'),
             "tenderAmount": record.get('tenderAmount'),
-            "createdBy": record.get('createdBy'),
+            "total": record.get('total'),
+            "invoiceNo": record.get('invoiceNo'),
+            "discountApplied": record.get('discountApplied'),
+            "createdBy": _user,
             "change": record.get('change'),
           },
        }, 200 
