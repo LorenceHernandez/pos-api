@@ -12,7 +12,7 @@ def _get_sales():
   
    res = sales.find({
       "branch": request.args.get('branchId'),
-      "customerId": request.args.get('customerId')
+      "cashierId": request.args.get('cashierId')
    })
    total = 0
    ret = []

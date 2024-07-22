@@ -10,7 +10,7 @@ from pydash import omit
 
 from app.database.config import (customers, doctors, packages,
                                  product_categories, products, sales,
-                                 transactions)
+                                 transactions, users)
 from app.models.Transaction import Transaction
 from app.utils.filter_values import filterValues
 
@@ -103,6 +103,7 @@ def _update_transaction():
             'discount': discount,
             'referrer': doctor_full_name,
             'branch': branch,
+            'cashierId': updated_trans['createdBy']
          })   
          if sale.inserted_id is None:
             return {
