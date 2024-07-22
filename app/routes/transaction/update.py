@@ -72,9 +72,15 @@ def _update_transaction():
             product = products.find_one({"_id": ObjectId(service['_id'])})
             if product:
                for category in _categories:
-                  if category['id'] == product['category_id']: 
-                     
+                  print(service.get('source'))
+                  if service.get('source') == "package":
+                     if category['name'].lower() == 'others-d package':
+                        category['price'] += service['amount']
+                        continue
+                  
+                  elif category['id'] == product['category_id']: 
                      category['price'] += service['amount']
+
             # product = products.find_one({"_id": ObjectId(service_id)})
             # if product:
             #    for category in _categories: 
