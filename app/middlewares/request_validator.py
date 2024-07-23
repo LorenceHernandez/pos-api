@@ -42,6 +42,8 @@ route_constraints = [
   { 'route': '/discount/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/discount', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/sales', 'params': ['cashierId', 'branchId'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/balance/create', 'params': [], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/balance', 'params': [], 'content-type': 'json', 'method': 'GET' },
 ]
 
 
