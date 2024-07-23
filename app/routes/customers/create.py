@@ -23,16 +23,14 @@ def _create_customer():
    address = request_data['address']
    customer_type = request_data['customerType']
    contact_number = request_data['contactNumber']
+   birthDate = request_data['birthDate']
    # discount = 0
    # discount_type = None
    tin_number = None
-   is_corporate = False 
 
    created_by = g.user_id
    created_at = datetime.now()
    
-   if 'isCorporate' in request_data:
-      is_corporate = request_data['isCorporate']
    # if 'discount' in request_data:
    #    discount = request_data['discount']
    # if 'discountType' in request_data:
@@ -60,9 +58,9 @@ def _create_customer():
       # "discount_type": discount_type,
       "tin_number": tin_number,
       "contact_number": contact_number,
-      "is_corporate": is_corporate,
       "created_by": created_by,
-      "created_at": created_at
+      "created_at": created_at,
+      "birthDate": birthDate
    })
    
    if doc.inserted_id:

@@ -25,7 +25,7 @@ route_constraints = [
   { 'route': '/corporate/create', 'params': ['name','streetAddress', 'city', 'state', 'postalCode', 'contactNo', 'emailAddress'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
-  { 'route': '/customer/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', 'address', 'customerType', 'contactNumber'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/customer/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', 'address', 'customerType', 'contactNumber', 'birthDate'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/customer/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/customer', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/package/create', 'params': ['name', 'description', 'labTest', 'packageType'], 'content-type': 'json', 'method': 'POST' },

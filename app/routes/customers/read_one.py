@@ -19,16 +19,6 @@ def _get_customer():
    record = customers.find_one({"_id": ObjectId(request.args.get('id'))})
 
    if record: 
-       corporate = None
-       try: 
-           corp_record = corporates.find_one({"_id": ObjectId(record["corporate_id"])})
-           if corp_record: 
-               corporate = {
-                   "id": str(corp_record['_id']),
-                   "name": corp_record['name']
-                }
-       except: 
-            corporate = None
        return {
           'data': {
             "_id": str(record["_id"]),
@@ -41,10 +31,7 @@ def _get_customer():
             "contactNumber": record.get('contact_number'),
             "address": record["address"],
             "customerType": record["customer_type"],
-            "discount": record["discount"],
-            "discountType": record["discount_type"],
-            "corporate": corporate,
-            "isCorporate": record["is_corporate"]
+            "birthDate": record["birthDate"],
           },
        }, 200 
    else:

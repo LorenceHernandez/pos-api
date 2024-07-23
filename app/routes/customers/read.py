@@ -34,10 +34,7 @@ def _get_customers():
             "tinNumber": record.get('tin_number'),
             "contactNumber": record.get('contact_number'),
             "customerType": record["customer_type"],
-            "discount": record["discount"],
-            "discountType": record["discount_type"],
-            "corporate": corporate,
-            "isCorporate": record["is_corporate"]
+            "birthDate": record["birthDate"],
           })
    return {
        'data': ret,
