@@ -23,9 +23,8 @@ def _create_customer():
    address = request_data['address']
    customer_type = request_data['customerType']
    contact_number = request_data['contactNumber']
-   discount = 0
-   discount_type = None
-   corporate_id = None
+   # discount = 0
+   # discount_type = None
    tin_number = None
    is_corporate = False 
 
@@ -34,25 +33,20 @@ def _create_customer():
    
    if 'isCorporate' in request_data:
       is_corporate = request_data['isCorporate']
-   if 'discount' in request_data:
-      discount = request_data['discount']
-   if 'discountType' in request_data:
-      discount_type = request_data['discountType']
-   if 'corporateId' in request_data:
-      corporate_id = request_data['corporateId']
+   # if 'discount' in request_data:
+   #    discount = request_data['discount']
+   # if 'discountType' in request_data:
+   #    discount_type = request_data['discountType']
    if 'tinNumber' in request_data:
       tin_number = request_data['tinNumber']
 
-   try: 
-       float(discount)
-       if 'corporateId' in request_data:
-          ObjectId(corporate_id)
-
-   except:
-        return {
-            'message': 'data format is invalid',
-            'code': 23
-        }, 401
+   # try: 
+   #     float(discount)
+   # except:
+   #      return {
+   #          'message': 'data format is invalid',
+   #          'code': 23
+   #      }, 401
 
    doc = customers.insert_one({
       "first_name": f_name,
@@ -62,9 +56,8 @@ def _create_customer():
       "gender": gender,
       "address": address,
       "customer_type": customer_type,
-      "discount": float(discount),
-      "discount_type": discount_type,
-      "corporate_id": corporate_id,
+      # "discount": float(discount),
+      # "discount_type": discount_type,
       "tin_number": tin_number,
       "contact_number": contact_number,
       "is_corporate": is_corporate,
