@@ -37,7 +37,7 @@ class Transaction:
     _tender_amount = None
     _change = None
     _branch_id = None
-
+    reason = None
     transaction_no = None
     status = None
     transaction_date = None
@@ -90,6 +90,7 @@ class Transaction:
 
         transaction.transaction_no = data.get('transactionNo')
         transaction.transaction_date = data.get('transactionDate')
+        transaction.reason = data.get('reason')
         transaction.status = data.get('status')
         transaction.id = data.get('_id')
         transaction.branch_id = data.get('branchId')
@@ -129,6 +130,7 @@ class Transaction:
             "tenderAmount": self.tender_amount,
             "paymentDue": self.payment_due,
             "total": self.total,
+            "reason": self.reason,
             "subTotal": self.sub_total,
             "invoiceNo": self.invoice_no,
             "change": self.change,

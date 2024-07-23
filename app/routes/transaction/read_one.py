@@ -128,6 +128,7 @@ def _get_transaction():
             "discountApplied": record.get('discountApplied'),
             "createdBy": _user,
             "change": record.get('change'),
+            "reason": record.get('reason'),
           },
        }, 200 
    else:

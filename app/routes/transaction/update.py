@@ -65,7 +65,6 @@ def _update_transaction():
                'price': 0
              })
              
-         
          if updated_trans.get('referredBy'):
             doctor = doctors.find_one({"_id": ObjectId(updated_trans.get('referredBy'))})
             if doctor:
@@ -94,7 +93,8 @@ def _update_transaction():
             'discount': discount,
             'referrer': doctor_full_name,
             'branch': branch,
-            'cashierId': updated_trans['createBy']
+            'cashierId': updated_trans['createBy'],
+            'transactionId': str(updated_trans['_id'])
          })   
          if sale.inserted_id is None:
             return {
