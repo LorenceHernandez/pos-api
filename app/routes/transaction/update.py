@@ -41,13 +41,10 @@ def _update_transaction():
       # FOR REFACTORING
       if transaction_dict['status'].lower() == 'completed':
          categories = product_categories.find()
-         customer = customers.find_one({"_id": ObjectId(updated_trans['customerId'])})
-         customer_full_name = customer["first_name"] + " " + customer["middle_name"] + " " + customer["last_name"]
          services = updated_trans['services']
          orNo = updated_trans['invoiceNo']
          amount = updated_trans['tenderAmount'] - updated_trans['change']
          branch = updated_trans['branchId']
-         customer_id = updated_trans['customerId']
          discount = 0
          applied = updated_trans.get('discountApplied')
          if applied: 
@@ -84,8 +81,7 @@ def _update_transaction():
                      category['price'] += service['amount']
 
          sale = sales.insert_one({
-            'customerName': customer_full_name,
-            'customerId': customer_id,
+            'customerData': updated_trans['customerData'],
             'labExams': ', '.join(name),
             'orNo': orNo,
             'amount': amount,

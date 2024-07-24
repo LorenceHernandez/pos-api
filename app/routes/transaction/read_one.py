@@ -129,6 +129,7 @@ def _get_transaction():
             "createdBy": _user,
             "change": record.get('change'),
             "reason": record.get('reason'),
+            "customerData": record.get('customerData')
           },
        }, 200 
    else:

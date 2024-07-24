@@ -51,6 +51,7 @@ class Transaction:
     sub_total = None
     invoice_no = None
     discount_applied = None
+    customer_data = None
     
     # def __init__(self, 
     #         transaction_no = None, 
@@ -107,7 +108,7 @@ class Transaction:
         transaction.sub_total = data.get('subTotal')
         transaction.invoice_no = data.get('invoiceNo')
         transaction.discount_applied = DiscountApplied.fromDict(data.get('discountApplied'))
-        
+        transaction.customer_data = data.get('customerData')
         return transaction
     
     def toDict(self): 
@@ -135,6 +136,7 @@ class Transaction:
             "invoiceNo": self.invoice_no,
             "change": self.change,
             "createBy": self.created_by,
+            "corporateData": self.customer_data,
             "discountApplied": discount_applied
         }
     
