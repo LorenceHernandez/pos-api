@@ -1,6 +1,6 @@
 
 import os
-from datetime import datetime
+from datetime import date, datetime
 
 import bcrypt
 import jwt
@@ -90,7 +90,9 @@ def _update_transaction():
             'referrer': doctor_full_name,
             'branch': branch,
             'cashierId': updated_trans['createBy'],
-            'transactionId': str(updated_trans['_id'])
+            'transactionId': str(updated_trans['_id']),
+            'date': str(date.today()),
+            'created_at': datetime.now()
          })   
          if sale.inserted_id is None:
             return {

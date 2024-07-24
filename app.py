@@ -61,8 +61,9 @@ from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
 from app.routes.users.register import register
 from app.routes.users.update import update_user
-from app.routes.balances.create import create_balance
-from app.routes.balances.read_latest import get_latest_balance
+from app.routes.cashier_reports.time_in import time_in_cashier_report
+from app.routes.cashier_reports.time_out import time_out_cashier_report
+from app.routes.cashier_reports.read_today import get_latest_cashier_report
 
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
@@ -161,8 +162,9 @@ app.register_blueprint(update_discount)
 
 app.register_blueprint(get_sales)
 
-app.register_blueprint(create_balance)
-app.register_blueprint(get_latest_balance)
+app.register_blueprint(time_in_cashier_report)
+app.register_blueprint(time_out_cashier_report)
+app.register_blueprint(get_latest_cashier_report)
 
 get_resources
 if __name__ == '__main__':

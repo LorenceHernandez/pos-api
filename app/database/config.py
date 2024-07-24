@@ -28,4 +28,4 @@ transactions = db.transactions
 discounts = db.discounts
 sales = db.sales
 bookings = db.bookings
-balances = db.balances
+cashier_reports = db.cashier_reports
