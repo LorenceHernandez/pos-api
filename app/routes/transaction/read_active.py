@@ -4,7 +4,7 @@ from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, g, request
 
-from app.database.config import branches, customers, doctors, transactions
+from app.database.config import branches, doctors, transactions, users
 
 get_active_transaction = Blueprint("/transaction/active", __name__)
 
@@ -17,6 +17,21 @@ def get_pending_transaction():
      if record is None:
         return None
    
+
+     create_by_user = None
+     try: 
+          user = users.find_one({"_id": ObjectId(record["createBy"])})
+
+          if branch:
+               create_by_user = {
+                    "_id": str(user["_id"]),
+                    "username": user["username"],
+                    "firstName": user["first_name"],
+                    "lastName": user["last_name"],
+                    "isActive": user["is_active"],
+               }
+     except:
+          create_by_user = None
 
      user_branch = None
      try: 
@@ -84,7 +99,7 @@ def get_pending_transaction():
           "requestedBy": requested_by,
           "referredBy": referred_by,
           "reason": record.get('reason'),
-          "createdBy": record.get('createBy'),
+          "createdBy": create_by_user,
           "customerData": record.get('customerData')
      },
 

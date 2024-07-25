@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from flask import Blueprint, request
 from pydash import merge, omit
 
-from app.database.config import branches, customers, doctors, transactions
+from app.database.config import branches, doctors, transactions, users
 from app.models.Transaction import Transaction
 
 get_transactions = Blueprint("/transactions", __name__)
@@ -18,6 +18,22 @@ def _get_transactions():
    for transaction in data:
          user_branch = None
          
+         create_by_user = None
+         print(transaction["createBy"])
+         try: 
+               user = users.find_one({"_id": ObjectId(transaction["createBy"])})
+
+               if user:
+                    create_by_user = {
+                         "_id": str(user["_id"]),
+                         "username": user["username"],
+                         "firstName": user["first_name"],
+                         "lastName": user["last_name"],
+                         "isActive": user["is_active"],
+                    }
+         except:
+               print('testset')
+               create_by_user = None
          try: 
             branch = branches.find_one({"_id": ObjectId(transaction["branchId"])})
             if branch:
@@ -34,7 +50,6 @@ def _get_transactions():
                     "isActive": branch["isActive"]
           }
          except Exception as e:
-              print('testset')
               user_branch = None
 
          referred_by = None
@@ -75,12 +90,13 @@ def _get_transactions():
                               requested_by = None
      
          new_transaction = merge(
-             omit(transaction, '_id', 'customerId', 'branchId', 'requestedBy', 'referredBy'),
+             omit(transaction, '_id', 'customerId', 'branchId', 'requestedBy', 'referredBy', 'createBy'),
              { 
                "id": str(transaction['_id']),
                "branch": user_branch,
                "requestedBy": requested_by,
                "referredBy": referred_by,
+               "createdBy": create_by_user
              },
           )
          transaction_list.append(new_transaction)
