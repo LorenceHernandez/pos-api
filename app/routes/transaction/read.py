@@ -16,30 +16,6 @@ def _get_transactions():
 
    transaction_list = []
    for transaction in data:
-         transaction_customer = None
-         try: 
-            customer_id = transaction.get('customerId')
-
-            if customer_id:
-               customer = customers.find_one({"_id": ObjectId(customer_id)})
-
-               if customer:
-                    transaction_customer = {
-                         "_id": str(customer.get('_id')),
-                         "firstName": customer.get("first_name"),
-                         "middleName": customer.get("middle_name"),
-                         "lastName": customer.get("last_name"),
-                         "age": customer.get("age"),
-                         "gender": customer.get("gender"),
-                         "address": customer.get("address"),
-                         "customerType": customer.get("customer_type"),
-                         "discount": customer.get("discount"),
-                         "discountType": customer.get("discount_type"),
-                         "isCorporate": customer.get("is_corporate")
-                    }
-         except Exception as e: 
-              print(e)
-              transaction_customer = None
          user_branch = None
          
          try: 
@@ -102,7 +78,6 @@ def _get_transactions():
              omit(transaction, '_id', 'customerId', 'branchId', 'requestedBy', 'referredBy'),
              { 
                "id": str(transaction['_id']),
-               "customer": transaction_customer,
                "branch": user_branch,
                "requestedBy": requested_by,
                "referredBy": referred_by,

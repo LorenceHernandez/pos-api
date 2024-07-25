@@ -35,7 +35,7 @@ def _update_transaction():
    new_val = { "$set": filterValues(omit(transaction_dict, 'id')) }
 
    res = transactions.update_one(filter, new_val)
-   print(res)
+   
    if res.modified_count > 0:
       updated_trans = transactions.find_one({"_id": ObjectId(id)})
       # FOR REFACTORING

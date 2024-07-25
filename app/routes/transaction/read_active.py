@@ -19,25 +19,6 @@ def get_pending_transaction():
    
 
      user_branch = None
-     transaction_customer = None
-     try: 
-               customer = customers.find_one({"_id": ObjectId(record["customerId"])})
-               if customer:
-                    transaction_customer = {
-                         "_id": str(customer["_id"]),
-                         "firstName": customer["first_name"],
-                         "middleName": customer["middle_name"],
-                         "lastName": customer["last_name"],
-                         "age": customer["age"],
-                         "gender": customer["gender"],
-                         "address": customer["address"],
-                         "customerType": customer["customer_type"],
-                         "discount": customer["discount"],
-                         "discountType": customer["discount_type"],
-                         "isCorporate": customer["is_corporate"]
-                    }
-     except Exception as e: 
-          transaction_customer = None
      try: 
           branch = branches.find_one({"_id": ObjectId(record["branchId"])})
 
@@ -99,15 +80,9 @@ def get_pending_transaction():
           "transactionDate": record["transactionDate"],
           "status": record["status"],
           "branch": user_branch,
-          "customer": transaction_customer,
           "services": record.get('services'),
           "requestedBy": requested_by,
           "referredBy": referred_by,
-          "tenderType": record.get('tenderType'),
-          "tenderAmount": record.get('tenderAmount'),
-          "paymentDue": record.get('paymentDue'),
-          "subTotal": record.get('subTotal'),
-          "change": record.get('change'),
           "reason": record.get('reason'),
           "createdBy": record.get('createBy'),
           "customerData": record.get('customerData')

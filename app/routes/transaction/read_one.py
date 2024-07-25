@@ -58,24 +58,6 @@ def _get_transaction():
    except Exception as e: 
           requested_by = None
    try: 
-          customer = customers.find_one({"_id": ObjectId(record["customerId"])})
-          if customer:
-               transaction_customer = {
-                    "_id": str(customer["_id"]),
-                    "firstName": customer["first_name"],
-                    "middleName": customer["middle_name"],
-                    "lastName": customer["last_name"],
-                    "age": customer["age"],
-                    "gender": customer["gender"],
-                    "address": customer["address"],
-                    "customerType": customer["customer_type"],
-                    "discount": customer["discount"],
-                    "discountType": customer["discount_type"],
-                    "isCorporate": customer["is_corporate"]
-               }
-   except Exception as e: 
-          transaction_customer = None
-   try: 
       branch = branches.find_one({"_id": ObjectId(record["branchId"])})
 
       if branch:
@@ -115,19 +97,12 @@ def _get_transaction():
             "transactionDate": record["transactionDate"],
             "status": record["status"],
             "branch": user_branch,
-            "customer": transaction_customer,
             "services": record.get('services'),
             "requestedBy": requested_by,
             "referredBy": referred_by,
-            "tenderType": record.get('tenderType'),
-            "paymentDue": record.get('paymentDue'),
-            "subTotal": record.get('subTotal'),
-            "tenderAmount": record.get('tenderAmount'),
-            "total": record.get('total'),
             "invoiceNo": record.get('invoiceNo'),
             "discountApplied": record.get('discountApplied'),
             "createdBy": _user,
-            "change": record.get('change'),
             "reason": record.get('reason'),
             "customerData": record.get('customerData')
           },
