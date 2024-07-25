@@ -34,8 +34,8 @@ class DiscountApplied:
 class Transaction: 
     _id = None
     _customer_id = None
-    _tender_amount = None
-    _change = None
+    # _tender_amount = None
+    # _change = None
     _branch_id = None
     reason = None
     transaction_no = None
@@ -45,14 +45,14 @@ class Transaction:
     services = None
     requested_by = None
     referred_by = None
-    tender_type = None
-    payment_due = None
-    total = None
-    sub_total = None
+    # tender_type = None
+    # payment_due = None
+    # total = None
+    # sub_total = None
     invoice_no = None
     discount_applied = None
     customer_data = None
-    
+    payment_details = None
     # def __init__(self, 
     #         transaction_no = None, 
     #         status = None, 
@@ -100,15 +100,16 @@ class Transaction:
         transaction.services = data.get('services')
         transaction.requested_by = data.get('requestedBy')
         transaction.referred_by = data.get('referredBy')
-        transaction.tender_type = data.get('tendetType')
-        transaction.tender_amount = data.get('tenderAmount')
-        transaction.change = data.get('change')
-        transaction.payment_due = data.get('paymentDue')
-        transaction.total = data.get('total')
-        transaction.sub_total = data.get('subTotal')
+        # transaction.tender_type = data.get('tendetType')
+        # transaction.tender_amount = data.get('tenderAmount')
+        # transaction.change = data.get('change')
+        # transaction.payment_due = data.get('paymentDue')
+        # transaction.total = data.get('total')
+        # transaction.sub_total = data.get('subTotal')
         transaction.invoice_no = data.get('invoiceNo')
         transaction.discount_applied = DiscountApplied.fromDict(data.get('discountApplied'))
         transaction.customer_data = data.get('customerData')
+        transaction.payment_details = data.get('paymentDetails')
         return transaction
     
     def toDict(self): 
@@ -127,17 +128,18 @@ class Transaction:
             "requestedBy": self.requested_by,
             "referredBy": self.referred_by,
             "services": self.services,
-            "tenderType": self.tender_type,
-            "tenderAmount": self.tender_amount,
-            "paymentDue": self.payment_due,
-            "total": self.total,
+            # "tenderType": self.tender_type,
+            # "tenderAmount": self.tender_amount,
+            # "paymentDue": self.payment_due,
+            # "total": self.total,
+            # "subTotal": self.sub_total,
+            # "change": self.change,
             "reason": self.reason,
-            "subTotal": self.sub_total,
             "invoiceNo": self.invoice_no,
-            "change": self.change,
             "createBy": self.created_by,
             "corporateData": self.customer_data,
-            "discountApplied": discount_applied
+            "discountApplied": discount_applied,
+            "paymentDetails": self.payment_details
         }
     
     @property

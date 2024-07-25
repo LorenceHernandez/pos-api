@@ -43,7 +43,7 @@ def _update_transaction():
          categories = product_categories.find()
          services = updated_trans.get('services')
          orNo = updated_trans.get('invoiceNo')
-         amount = updated_trans.get('tenderAmount') - updated_trans.get('change')
+         amount = updated_trans.get('paymentDetails').get('paymentDue')
          branch = updated_trans.get('branchId')
          discount = 0
          applied = updated_trans.get('discountApplied')
