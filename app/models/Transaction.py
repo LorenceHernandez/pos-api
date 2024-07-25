@@ -137,7 +137,7 @@ class Transaction:
             "reason": self.reason,
             "invoiceNo": self.invoice_no,
             "createBy": self.created_by,
-            "corporateData": self.customer_data,
+            "customerData": self.customer_data,
             "discountApplied": discount_applied,
             "paymentDetails": self.payment_details
         }

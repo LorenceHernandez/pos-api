@@ -20,13 +20,13 @@ def _get_sales():
       for sale in res:
         total += sale["amount"]
         ret.append({
-          "customerName": sale["customerName"],
-          "labExams": sale["labExams"],
-          "orNo": sale["orNo"],
-          "amount": sale["amount"],
-          "categories": sale["categories"],
-          "discount": sale["discount"],
-          "referrer": sale["referrer"]
+          "customerData": sale.get("customerData"),
+          "labExams": sale.get("labExams"),
+          "orNo": sale.get("orNo"),
+          "amount": sale.get("amount"),
+          "categories": sale.get("categories"),
+          "discount": sale.get("discount"),
+          "referrer": sale.get("referrer")
         })
 
    
