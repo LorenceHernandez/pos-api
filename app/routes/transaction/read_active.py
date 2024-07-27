@@ -100,7 +100,8 @@ def get_pending_transaction():
           "referredBy": referred_by,
           "reason": record.get('reason'),
           "createdBy": create_by_user,
-          "customerData": record.get('customerData')
+          "customerData": record.get('customerData'),
+          "paymentDetails": record.get('paymentDetails')
      },
 
 @get_active_transaction.route('/transaction/active', methods=['GET'])

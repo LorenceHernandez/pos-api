@@ -104,7 +104,8 @@ def _get_transaction():
             "discountApplied": record.get('discountApplied'),
             "createdBy": _user,
             "reason": record.get('reason'),
-            "customerData": record.get('customerData')
+            "customerData": record.get('customerData'),
+            "paymentDetails": record.get('paymentDetails')
           },
        }, 200 
    else:
