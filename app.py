@@ -17,6 +17,9 @@ from app.routes.branches.create import create_branch
 from app.routes.branches.read import get_branches
 from app.routes.branches.read_one import get_branch
 from app.routes.branches.update import update_branch
+from app.routes.cashier_reports.read_today import get_latest_cashier_report
+from app.routes.cashier_reports.time_in import time_in_cashier_report
+from app.routes.cashier_reports.time_out import time_out_cashier_report
 from app.routes.corporates.create import create_company
 from app.routes.corporates.read import get_companies
 from app.routes.corporates.read_one import get_company
@@ -50,7 +53,14 @@ from app.routes.roles.read import get_roles
 from app.routes.roles.read_one import get_role
 from app.routes.roles.read_resources import get_resources
 from app.routes.roles.update import update_role
-from app.routes.sales.read import get_sales
+from app.routes.sales.read_betalife_reports import get_betalife_reports
+from app.routes.sales.read_monthly_report_mancom import get_mancom
+from app.routes.sales.read_municipality_reports import get_municipality_reports
+from app.routes.sales.read_no_of_patients_per_services import \
+    get_products_reports
+from app.routes.sales.read_packages_reports import get_packages_reports
+from app.routes.sales.read_sales_reports import get_sales
+from app.routes.sales.read_summary_income import get_summary_income
 from app.routes.transaction.create import create_transaction
 from app.routes.transaction.read import get_transactions
 from app.routes.transaction.read_active import get_active_transaction
@@ -61,9 +71,6 @@ from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
 from app.routes.users.register import register
 from app.routes.users.update import update_user
-from app.routes.cashier_reports.time_in import time_in_cashier_report
-from app.routes.cashier_reports.time_out import time_out_cashier_report
-from app.routes.cashier_reports.read_today import get_latest_cashier_report
 
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
@@ -110,6 +117,42 @@ def _create_booking():
   return {
      'message': 'Unable to create booking'
   }
+@app.route('/appointments', methods=['GET'])
+def _get_appointments():
+  request_data = request.get_json()
+  
+  #restructure when theres database. 7-10am available only as per requirements
+  return {
+   "data": [{
+     "day": "*",
+     "timeslot": [
+        {
+         "shift": "AM",
+         "time": "7",
+         "endShift": "AM",
+         "endTime": "8"
+        },
+        {
+         "shift": "AM",
+         "time": "8",
+         "endShift": "AM",
+         "endTime": "9"
+        },
+        {
+         "shift": "AM",
+         "time": "9",
+         "endShift": "AM",
+         "endTime": "10"
+        },
+        {
+         "shift": "AM",
+         "time": "10",
+         "endShift": "AM",
+         "endTime": "11"
+        },
+     ]
+     
+  }]}
 
 app.register_blueprint(login)
 app.register_blueprint(register)
@@ -161,11 +204,15 @@ app.register_blueprint(get_discounts)
 app.register_blueprint(update_discount)
 
 app.register_blueprint(get_sales)
+app.register_blueprint(get_packages_reports)
 
 app.register_blueprint(time_in_cashier_report)
 app.register_blueprint(time_out_cashier_report)
+app.register_blueprint(get_mancom)
 app.register_blueprint(get_latest_cashier_report)
-
-get_resources
+app.register_blueprint(get_products_reports)
+app.register_blueprint(get_municipality_reports)
+app.register_blueprint(get_summary_income)
+app.register_blueprint(get_betalife_reports)
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)
