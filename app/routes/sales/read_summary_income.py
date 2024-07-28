@@ -5,10 +5,10 @@ from flask import Blueprint, request
 
 from app.database.config import sales
 
-get_sales = Blueprint("/sales", __name__)
+get_summary_income = Blueprint("/reports/summary-income", __name__)
 
-@get_sales.route('/sales', methods=['GET'])
-def _get_sales():
+@get_summary_income.route('/reports/summary-income', methods=['GET'])
+def _get_summary_income():
   
    res = sales.find({
       "branch": request.args.get('branchId'),
