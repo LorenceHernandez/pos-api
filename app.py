@@ -109,6 +109,7 @@ def _create_booking():
      'receiveType': request_data.get('receiveType'),
      'schedule': request_data.get('schedule'),
      'note': request_data.get('note'),
+     'branchId': request_data.get('branchId'),
   })
   if doc.inserted_id:
      return {
