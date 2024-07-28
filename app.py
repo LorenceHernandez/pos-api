@@ -120,7 +120,6 @@ def _create_booking():
   }
 @app.route('/appointments', methods=['GET'])
 def _get_appointments():
-  request_data = request.get_json()
   
   #restructure when theres database. 7-10am available only as per requirements
   return {
@@ -186,7 +185,7 @@ def _get_appointments():
   }
   
   
-  ]}
+  ]}, 200
 
 app.register_blueprint(login)
 app.register_blueprint(register)
