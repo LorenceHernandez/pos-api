@@ -125,7 +125,7 @@ def _get_appointments():
   #restructure when theres database. 7-10am available only as per requirements
   return {
    "data": [{
-     "day": "*",
+     "day": "2024/07/29",
      "timeslot": [
         {
          "shift": "AM",
@@ -153,7 +153,40 @@ def _get_appointments():
         },
      ]
      
-  }]}
+  },
+  {
+     "day": "2024/07/30",
+     "timeslot": [
+        {
+         "shift": "AM",
+         "time": "7",
+         "endShift": "AM",
+         "endTime": "8"
+        },
+        {
+         "shift": "AM",
+         "time": "8",
+         "endShift": "AM",
+         "endTime": "9"
+        },
+        {
+         "shift": "AM",
+         "time": "9",
+         "endShift": "AM",
+         "endTime": "10"
+        },
+        {
+         "shift": "AM",
+         "time": "10",
+         "endShift": "AM",
+         "endTime": "11"
+        },
+     ]
+     
+  }
+  
+  
+  ]}
 
 app.register_blueprint(login)
 app.register_blueprint(register)
