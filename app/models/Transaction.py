@@ -34,8 +34,6 @@ class DiscountApplied:
 class Transaction: 
     _id = None
     _customer_id = None
-    # _tender_amount = None
-    # _change = None
     _branch_id = None
     reason = None
     transaction_no = None
@@ -45,42 +43,10 @@ class Transaction:
     services = None
     requested_by = None
     referred_by = None
-    # tender_type = None
-    # payment_due = None
-    # total = None
-    # sub_total = None
     invoice_no = None
     discount_applied = None
     customer_data = None
     payment_details = None
-    # def __init__(self, 
-    #         transaction_no = None, 
-    #         status = None, 
-    #         transaction_date = None,
-    #         id = None,
-    #         branch_id = None, 
-    #         created_by = None, 
-    #         customer_id = None, 
-    #         services = None, 
-    #         requested_by = None,
-    #         referred_by = None,
-    #         tender_type = None,
-    #         tender_amount = None,
-    #         change = None,
-    #     ):
-    #     self.id = id
-    #     self.customer_id = customer_id
-    #     self.transaction_no = transaction_no
-    #     self.status = status
-    #     self.transaction_date = transaction_date
-    #     self.branch_id = branch_id
-    #     self.created_by = created_by
-    #     self.services = services
-    #     self.requested_by = requested_by
-    #     self.referred_by = referred_by
-    #     self.tender_type = tender_type
-    #     self.tender_amount = tender_amount
-    #     self.change = change
 
     @staticmethod
     def fromDict(data: dict):
@@ -100,12 +66,6 @@ class Transaction:
         transaction.services = data.get('services')
         transaction.requested_by = data.get('requestedBy')
         transaction.referred_by = data.get('referredBy')
-        # transaction.tender_type = data.get('tendetType')
-        # transaction.tender_amount = data.get('tenderAmount')
-        # transaction.change = data.get('change')
-        # transaction.payment_due = data.get('paymentDue')
-        # transaction.total = data.get('total')
-        # transaction.sub_total = data.get('subTotal')
         transaction.invoice_no = data.get('invoiceNo')
         transaction.discount_applied = DiscountApplied.fromDict(data.get('discountApplied'))
         transaction.customer_data = data.get('customerData')
@@ -113,7 +73,6 @@ class Transaction:
         return transaction
     
     def toDict(self): 
-
         discount_applied = None
         if(self.discount_applied is not None):
             discount_applied = self.discount_applied.toDict()
@@ -128,12 +87,6 @@ class Transaction:
             "requestedBy": self.requested_by,
             "referredBy": self.referred_by,
             "services": self.services,
-            # "tenderType": self.tender_type,
-            # "tenderAmount": self.tender_amount,
-            # "paymentDue": self.payment_due,
-            # "total": self.total,
-            # "subTotal": self.sub_total,
-            # "change": self.change,
             "reason": self.reason,
             "invoiceNo": self.invoice_no,
             "createBy": self.created_by,

@@ -74,7 +74,8 @@ def _update_transaction():
                for category in _categories:
                   if service.get('source') == "package":
                      if category['name'].lower() == 'package':
-                        category['price'] += service['amount']
+                        for item in service['items']:
+                           category['price'] += item['amount']
                      continue
                   
                   elif category['id'] == product['category_id']: 

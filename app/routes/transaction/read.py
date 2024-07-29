@@ -19,7 +19,6 @@ def _get_transactions():
          user_branch = None
          
          create_by_user = None
-         print(transaction["createBy"])
          try: 
                user = users.find_one({"_id": ObjectId(transaction["createBy"])})
 
