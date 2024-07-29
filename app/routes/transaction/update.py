@@ -68,17 +68,18 @@ def _update_transaction():
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
          name = []
          for service in services: 
-            name.append(service['name'])
             product = products.find_one({"_id": ObjectId(service['_id'])})
             if product:
                for category in _categories:
                   if service.get('source') == "package":
                      if category['name'].lower() == 'package':
                         for item in service['items']:
+                           name.append(service['name'])
                            category['price'] += item['amount']
                      continue
                   
                   elif category['id'] == product['category_id']: 
+                     name.append(service['name'])
                      category['price'] += service['amount']
 
          sale = sales.insert_one({
