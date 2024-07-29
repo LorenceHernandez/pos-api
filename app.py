@@ -9,6 +9,7 @@ from flask_cors import CORS, cross_origin
 
 load_dotenv()
 
+
 from app.database.config import bookings
 from app.middlewares.authorization_validator import authorization_validator
 from app.middlewares.request_validator import request_validator
@@ -248,4 +249,5 @@ app.register_blueprint(get_municipality_reports)
 app.register_blueprint(get_summary_income)
 app.register_blueprint(get_betalife_reports)
 if __name__ == '__main__':
-   app.run(HOST, PORT, debug=True)
+   app.run(HOST, PORT, ssl_context='adhoc', debug=True)
+   

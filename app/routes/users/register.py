@@ -8,7 +8,6 @@ from bson.objectid import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import users
-from app.utils.utils import roles
 
 register = Blueprint("/user/register", __name__)
 

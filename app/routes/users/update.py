@@ -3,7 +3,6 @@ from bson.objectid import ObjectId
 from flask import Blueprint, request
 
 from app.database.config import users
-from app.utils.utils import roles
 
 update_user = Blueprint("/user/edit", __name__)
 
