@@ -249,5 +249,5 @@ app.register_blueprint(get_municipality_reports)
 app.register_blueprint(get_summary_income)
 app.register_blueprint(get_betalife_reports)
 if __name__ == '__main__':
-   app.run(HOST, PORT, ssl_context='adhoc', debug=True)
+   app.run(HOST, PORT, debug=True)
    
