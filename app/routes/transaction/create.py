@@ -29,7 +29,7 @@ def _create_transaction():
       transaction.transaction_no = str(uuid.uuid4())
       transaction.status = 'active'
       transaction.transaction_date = datetime.now()
-      transaction.created_by = g.user_id
+      transaction.create_by = g.user_id
       transaction.branch_id = request_data['branchId']
       
    except: 

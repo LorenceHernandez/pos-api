@@ -60,6 +60,7 @@ from app.routes.sales.read_municipality_reports import get_municipality_reports
 from app.routes.sales.read_no_of_patients_per_services import \
     get_products_reports
 from app.routes.sales.read_packages_reports import get_packages_reports
+from app.routes.sales.read_reports import get_reports
 from app.routes.sales.read_sales_reports import get_sales
 from app.routes.sales.read_summary_income import get_summary_income
 from app.routes.transaction.create import create_transaction
@@ -248,6 +249,8 @@ app.register_blueprint(get_products_reports)
 app.register_blueprint(get_municipality_reports)
 app.register_blueprint(get_summary_income)
 app.register_blueprint(get_betalife_reports)
+app.register_blueprint(get_reports)
+
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)
    

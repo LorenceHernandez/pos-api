@@ -35,16 +35,14 @@ route_constraints = [
   { 'route': '/roles/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/role', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/transaction/create', 'params': ['branchId'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/transaction/active', 'params': [], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/transaction/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/transaction', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/discount/create', 'params': ['name', 'description', 'value', 'type'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/discount/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/discount', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/sales', 'params': ['cashierId', 'branchId'], 'content-type': 'json', 'method': 'GET' },
-  { 'route': '/cashier-report/time-in', 'params': [], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/cashier-report/time-out', 'params': ['id', 'endingCashCount'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/cashier-report', 'params': [], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/reports', 'params': ['min', 'max', 'type', 'branchIds'], 'content-type': 'json', 'method': 'GET' }
 ]
 
 

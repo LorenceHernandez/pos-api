@@ -39,7 +39,7 @@ class Transaction:
     transaction_no = None
     status = None
     transaction_date = None
-    created_by = None
+    create_by = None
     services = None
     requested_by = None
     referred_by = None
@@ -61,7 +61,7 @@ class Transaction:
         transaction.status = data.get('status')
         transaction.id = data.get('_id')
         transaction.branch_id = data.get('branchId')
-        transaction.created_by = data.get('createdBy')
+        transaction.create_by = data.get('createBy')
         transaction.customer_id = data.get('customerId')
         transaction.services = data.get('services')
         transaction.requested_by = data.get('requestedBy')
@@ -89,7 +89,7 @@ class Transaction:
             "services": self.services,
             "reason": self.reason,
             "invoiceNo": self.invoice_no,
-            "createBy": self.created_by,
+            "createBy": self.create_by,
             "customerData": self.customer_data,
             "discountApplied": discount_applied,
             "paymentDetails": self.payment_details
