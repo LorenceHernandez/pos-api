@@ -13,6 +13,7 @@ def comparativeData(args):
    c2024 = 0
 
    res = transactions.find({
+      "status": "Completed",
       "branchId": {"$in": branchIds},
       "transactionDate": {"$gte": args.get('min'), "$lte": args.get('max')}
    })

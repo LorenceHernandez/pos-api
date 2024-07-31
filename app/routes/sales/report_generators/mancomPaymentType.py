@@ -11,6 +11,7 @@ def getMancomPaymentType(args):
    objectIds = []
 
    res = transactions.find({
+      "status": "Completed",
       "branchId": {"$in": branchIds},
       "transactionDate": {"$gte": args.get('min'), "$lte": args.get('max')}
    })
@@ -30,7 +31,8 @@ def getMancomPaymentType(args):
             'id': str(category['_id']),
             'name': category['name'],
             'Cash': 0,
-            'AR': 0
+            'AR': 0,
+            'Count': 0
          })
          
    if res_branch:
@@ -56,9 +58,11 @@ def getMancomPaymentType(args):
                              if category['id'] == item['category']['id']:
                                 if transaction['paymentDetails']['tenderType'].lower() in ['cash', 'debit']:
                                     category['Cash'] += item['amount']
+                                    category['Count'] += 1
                                     branch['totalCash'] += item['amount']
                                 else:
                                     category['AR'] += item['amount']
+                                    category['Count'] += 1
                                     branch['totalAr'] += item['amount']
            else: 
               for branch in _branches:
@@ -67,9 +71,11 @@ def getMancomPaymentType(args):
                       if category['id'] == service['category']['id']:
                         if transaction['paymentDetails']['tenderType'].lower() in ['cash', 'debit']:
                             category['Cash'] += service['amount']
+                            category['Count'] += 1
                             branch['totalCash'] += item['amount']
                         else:
                             category['AR'] += service['amount']
+                            category['Count'] += 1
                             branch['totalAr'] += item['amount']
    return _branches
 
