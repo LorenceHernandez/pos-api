@@ -5,15 +5,16 @@ from flask import Blueprint, g, request
 from pydash import omit
 
 from app.database.config import cashier_reports
+from app.models.CashCount import CashCount
 from app.models.CashierReport import CashierReport
 from app.utils.filter_values import filterValues
 
 
 from app.database.config import sales
 
-time_out_cashier_report = Blueprint("/cashier-report/time-out", __name__)
+time_out_cashier_report = Blueprint("/cashier-reports/time-out", __name__)
 
-@time_out_cashier_report.route('/cashier-report/time-out', methods=['POST'])
+@time_out_cashier_report.route('/cashier-reports/time-out', methods=['POST'])
 def _update_cashier_report():
    request_data = request.get_json()
    id = request_data['id']
@@ -22,7 +23,7 @@ def _update_cashier_report():
 
    report = CashierReport.fromDict(data)
    report.time_out = str(datetime.now().time())
-   report.ending_cash_count = request_data['endingCashCount']
+   report.ending_cash_on_hand = CashCount.fromDict(request_data['endingCashOnHand'])
    report.cash_sales = _compute_cash_sale(report)
 
   
@@ -43,7 +44,7 @@ def _update_cashier_report():
       return {
          'message': 'Unable to update report.',
          'code': 30,
-      }, 200
+      }, 500
 
 
 def _compute_cash_sale(report: CashierReport):

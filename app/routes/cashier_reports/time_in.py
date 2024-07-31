@@ -6,9 +6,9 @@ from pydash import omit
 from app.database.config import cashier_reports
 from app.models.CashierReport import CashierReport
 
-time_in_cashier_report = Blueprint("/cashier-report/time-in", __name__)
+time_in_cashier_report = Blueprint("/cashier-reports/time-in", __name__)
 
-@time_in_cashier_report.route('/cashier-report/time-in', methods=['POST'])
+@time_in_cashier_report.route('/cashier-reports/time-in', methods=['POST'])
 def _create_cashier_report():
    request_data = request.get_json()
 
@@ -45,6 +45,6 @@ def _create_cashier_report():
       return {
          'message': 'Unable to add report.',
          'code': 30,
-      }, 200
+      }, 500
 
 

@@ -31,8 +31,3 @@ def authorization_validator():
      'code': 9
   }, 401
  
-
-
-      
-
-  

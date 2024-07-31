@@ -107,7 +107,7 @@ class Transaction:
             
     @property
     def tender_amount(self): 
-        if(self._change is not None):
+        if(self._tender_amount is not None):
             return self._tender_amount
 
     @tender_amount.setter

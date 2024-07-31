@@ -29,3 +29,5 @@ discounts = db.discounts
 sales = db.sales
 bookings = db.bookings
 cashier_reports = db.cashier_reports
+sales_deposits = db.sales_deposits  
+branch_reports = db.branch_reports  

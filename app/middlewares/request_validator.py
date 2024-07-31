@@ -41,8 +41,18 @@ route_constraints = [
   { 'route': '/discount/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/discount', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/sales', 'params': ['cashierId', 'branchId'], 'content-type': 'json', 'method': 'GET' },
-  { 'route': '/cashier-report/time-out', 'params': ['id', 'endingCashCount'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/reports', 'params': ['min', 'max', 'type', 'branchIds'], 'content-type': 'json', 'method': 'GET' }
+  { 'route': '/reports', 'params': ['min', 'max', 'type', 'branchIds'], 'content-type': 'json', 'method': 'GET' },
+
+  { 'route': '/cashier-reports/time-in', 'params': [], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/cashier-reports/time-out', 'params': ['id', 'endingCashOnHand'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/cashier-reports', 'params': [], 'content-type': 'json', 'method': 'GET' },
+
+  { 'route': '/sales-deposits/create', 'params': ['branchId', 'amount', 'bankName', 'bankCode', 'referenceNumber'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/sales-deposits', 'params': [], 'content-type': 'json', 'method': 'GET' },
+
+  { 'route': '/branch-reports/generated', 'params': [], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/branch-reports/create', 'params': ['branchId', 'endingCashBalance'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/branch-reports', 'params': [], 'content-type': 'json', 'method': 'GET' },
 ]
 
 

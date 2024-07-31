@@ -5,42 +5,52 @@ from pydash import omit
 
 from app.database.config import cashier_reports
 
-get_latest_cashier_report = Blueprint("/cashier-report", __name__)
+get_cashier_report = Blueprint("/cashier-reports", __name__)
 
-@get_latest_cashier_report.route('/cashier-report', methods=['GET'])
+@get_cashier_report.route('/cashier-reports', methods=['GET'])
 def _get_cashier_report():
    
-   previous_report = None
+     prev_report = None
 
-   try:
-     previous_report = cashier_reports.find({ 
-        'cashierId': g.user_id, 
-        'date': { '$ne': str(date.today()) }
-     }).sort({ '_id': -1 }).limit(1)[0]
-   except:
-     pass
+     try:
+          reports = cashier_reports.find({ 
+               'cashierId': g.user_id, 
+               'date': { '$ne': str(date.today()) }
+          }).sort({ '_id': -1 }).limit(1)
 
-   report = cashier_reports.find_one({ 
-        'cashierId': g.user_id, 
-        'date': str(date.today()) 
-   })
-   if report is None:
-        return {
-            'message': 'No report is available',
-            'data': None,
-            'previous': {
-               **omit(previous_report, '_id'), 
-                    "id": str(previous_report["_id"]) 
-               }
-        }, 200
- 
+          reports = list(reports)
 
-   return { 
-          'data': { 
-               **omit(report, '_id'), 
-               "id": str(report["_id"]) 
-          },
+          if(len(reports) > 0):
+               prev_report = reports[0]
           
-     }, 200 
+     except Exception as e:
+          return {
+               'message': 'Unable to get previous report',
+               'error': repr(e),
+          }, 206
+
+     report = cashier_reports.find_one({ 
+          'cashierId': g.user_id, 
+          'date': str(date.today()) 
+     })
+     
+     if report is None:
+          return {
+               'message': 'No report is available for today',
+               'data': None,
+               'previous': {
+                    **omit(prev_report, '_id'), 
+                         "id": str(prev_report["_id"]) 
+                    }
+          }, 206
+     
+
+     return { 
+               'data': { 
+                    **omit(report, '_id'), 
+                    "id": str(report["_id"]) 
+               },
+               
+          }, 200 
 
 
