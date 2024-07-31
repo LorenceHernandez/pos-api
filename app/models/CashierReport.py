@@ -3,13 +3,14 @@ from bson import ObjectId
 
 from app.models.CashCount import CashCount
 
+
 class CashierReport:
     _id = None
     _cashier_id = None
     _branch_id = None
 
-    beginning_cash_on_hand: CashCount | None = None
-    ending_cash_on_hand: CashCount | None = None
+    beginning_cash_on_hand: None = None
+    ending_cash_on_hand: None = None
     time_in = None
     time_out = None
     cash_sales = None
