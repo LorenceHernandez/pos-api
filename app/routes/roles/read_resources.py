@@ -29,6 +29,8 @@ apis = ['/resource',
          '/transaction/create',
          '/transaction',
          '/transactions',
+         '/sales-deposits',
+         '/cashier-reports'
          ]
 
 permission = ['update', 'read', 'create', 'delete']

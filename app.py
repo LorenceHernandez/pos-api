@@ -18,9 +18,6 @@ from app.routes.branches.create import create_branch
 from app.routes.branches.read import get_branches
 from app.routes.branches.read_one import get_branch
 from app.routes.branches.update import update_branch
-from app.routes.cashier_reports.read_today import get_latest_cashier_report
-from app.routes.cashier_reports.time_in import time_in_cashier_report
-from app.routes.cashier_reports.time_out import time_out_cashier_report
 from app.routes.corporates.create import create_company
 from app.routes.corporates.read import get_companies
 from app.routes.corporates.read_one import get_company
@@ -73,6 +70,19 @@ from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
 from app.routes.users.register import register
 from app.routes.users.update import update_user
+
+from app.routes.cashier_reports.time_in import time_in_cashier_report
+from app.routes.cashier_reports.time_out import time_out_cashier_report
+from app.routes.cashier_reports.read_today import get_cashier_report
+
+from app.routes.sales_deposit.create import create_sales_deposit
+from app.routes.sales_deposit.read import get_sales_deposits
+
+from app.routes.branch_reports.read_generated import get_generated_branch_reports
+from app.routes.branch_reports.read import get_branch_reports
+from app.routes.branch_reports.create import create_branch_reports
+
+
 
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
@@ -243,13 +253,22 @@ app.register_blueprint(get_packages_reports)
 
 app.register_blueprint(time_in_cashier_report)
 app.register_blueprint(time_out_cashier_report)
+
+app.register_blueprint(create_sales_deposit)
+app.register_blueprint(get_sales_deposits)
+app.register_blueprint(get_cashier_report)
+
+app.register_blueprint(get_generated_branch_reports)
+app.register_blueprint(create_branch_reports)
+app.register_blueprint(get_branch_reports)
+
 app.register_blueprint(get_mancom)
-app.register_blueprint(get_latest_cashier_report)
 app.register_blueprint(get_products_reports)
 app.register_blueprint(get_municipality_reports)
 app.register_blueprint(get_summary_income)
 app.register_blueprint(get_betalife_reports)
 app.register_blueprint(get_reports)
+
 
 if __name__ == '__main__':
    app.run(HOST, PORT, debug=True)
