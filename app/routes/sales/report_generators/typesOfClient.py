@@ -1,3 +1,4 @@
+import moment
 from bson.objectid import ObjectId
 
 from app.database.config import (branches, customers, product_categories,
@@ -10,12 +11,21 @@ def typesOfClient(args):
    _branches = []
    objectIds = []
    types = []
-   
+   min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
+   max = moment.date(args.get('max'), '%m/%d/%Y').add(hours=24).format('ddd, DD MMM YYYY 00:00:00')
+  
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
-      "transactionDate": {"$gte": args.get('min'), "$lte": args.get('max')}
+      # "transactionDate": {"$gte": str(min), "$lte": str(max)}
    })
+   #filter -> to be refactored using aggregation.
+   res_copy = []
+   if res:
+      for transaction in res:
+         if (str(moment.date(transaction['transactionDate'])) >= str(min)) and (str(moment.date(transaction['transactionDate'])) <= str(max)):
+                res_copy.append(transaction)
+   
 
    for branchId in branchIds:
       objectIds.append(ObjectId(branchId))
@@ -40,9 +50,8 @@ def typesOfClient(args):
             'name': branch['name'],
             'types': types,
          })
-   
-   if res:
-      for transaction in res:
+   if res_copy:
+      for transaction in res_copy:
         total += 1
         for branch in _branches:
            if branch['id'] == transaction['branchId']:
