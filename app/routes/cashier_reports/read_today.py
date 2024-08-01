@@ -5,9 +5,9 @@ from pydash import omit
 
 from app.database.config import cashier_reports
 
-get_cashier_report = Blueprint("/cashier-reports", __name__)
+get_cashier_report_today = Blueprint("/cashier-reports/today", __name__)
 
-@get_cashier_report.route('/cashier-reports', methods=['GET'])
+@get_cashier_report_today.route('/cashier-reports/today', methods=['GET'])
 def _get_cashier_report():
    
      prev_report = None

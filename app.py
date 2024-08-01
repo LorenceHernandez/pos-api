@@ -84,6 +84,20 @@ from app.routes.users.read_one import get_user
 from app.routes.users.register import register
 from app.routes.users.update import update_user
 
+from app.routes.cashier_reports.time_in import time_in_cashier_report
+from app.routes.cashier_reports.time_out import time_out_cashier_report
+from app.routes.cashier_reports.read_today import get_cashier_report_today
+from app.routes.cashier_reports.read import get_cashier_reports
+
+from app.routes.sales_deposit.create import create_sales_deposit
+from app.routes.sales_deposit.read import get_sales_deposits
+
+from app.routes.branch_reports.read_generated import get_generated_branch_reports
+from app.routes.branch_reports.read import get_branch_reports
+from app.routes.branch_reports.create import create_branch_reports
+
+
+
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
@@ -306,10 +320,11 @@ app.register_blueprint(get_packages_reports)
 
 app.register_blueprint(time_in_cashier_report)
 app.register_blueprint(time_out_cashier_report)
+app.register_blueprint(get_cashier_report_today)
+app.register_blueprint(get_cashier_reports)
 
 app.register_blueprint(create_sales_deposit)
 app.register_blueprint(get_sales_deposits)
-app.register_blueprint(get_cashier_report)
 
 app.register_blueprint(get_generated_branch_reports)
 app.register_blueprint(create_branch_reports)

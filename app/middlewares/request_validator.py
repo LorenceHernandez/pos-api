@@ -45,6 +45,7 @@ route_constraints = [
 
   { 'route': '/cashier-reports/time-in', 'params': [], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/cashier-reports/time-out', 'params': ['id', 'endingCashOnHand'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/cashier-reports/today', 'params': [], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/cashier-reports', 'params': [], 'content-type': 'json', 'method': 'GET' },
 
   { 'route': '/sales-deposits/create', 'params': ['branchId', 'amount', 'bankName', 'bankCode', 'referenceNumber'], 'content-type': 'json', 'method': 'POST' },
