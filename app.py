@@ -10,6 +10,10 @@ from flask_cors import CORS, cross_origin
 load_dotenv()
 
 
+from datetime import datetime
+
+from bson import ObjectId
+
 from app.database.config import bookings
 from app.middlewares.authorization_validator import authorization_validator
 from app.middlewares.request_validator import request_validator
@@ -100,9 +104,61 @@ def hook():
    
    
 
+
 @app.route('/', methods=['GET'])
 def home():
   return 'hello world'
+@app.route('/booking', methods=['GET'])
+def _get_booking():
+   booking = bookings.find_one({"_id": ObjectId(request.args.get('id'))})
+
+   if booking:
+         return {
+            'data': {
+               'id': str(booking.get('_id')),
+               'firstName': booking.get('firstName'),
+               'middleName': booking.get('middleName'),
+               'lastName': booking.get('lastName'),
+               'mobileNumber': booking.get('mobileNumber'),
+               'emailAddress': booking.get('emailAddress'),
+               'address': booking.get('address'),
+               'referral': booking.get('referral'),
+               'receiveType': booking.get('receiveType'),
+               'schedule': booking.get('schedule'),
+               'note': booking.get('note'),
+               'branchId': booking.get('branchId'),
+               'create_at': booking.get('create_at')
+            }
+         }
+   return {
+      "message": "Booking not found.",
+   }
+
+@app.route('/bookings', methods=['GET'])
+def _get_bookings():
+   res = bookings.find()
+   ret = []
+   if res:
+      for booking in res:
+         ret.append({
+            'id': str(booking.get('_id')),
+            'firstName': booking.get('firstName'),
+            'middleName': booking.get('middleName'),
+            'lastName': booking.get('lastName'),
+            'mobileNumber': booking.get('mobileNumber'),
+            'emailAddress': booking.get('emailAddress'),
+            'address': booking.get('address'),
+            'referral': booking.get('referral'),
+            'receiveType': booking.get('receiveType'),
+            'schedule': booking.get('schedule'),
+            'note': booking.get('note'),
+            'branchId': booking.get('branchId'),
+            'create_at': booking.get('create_at')
+         })
+   return {
+      "data": ret,
+   }
+
 @app.route('/booking/create', methods=['POST'])
 def _create_booking():
   request_data = request.get_json()
@@ -118,6 +174,7 @@ def _create_booking():
      'schedule': request_data.get('schedule'),
      'note': request_data.get('note'),
      'branchId': request_data.get('branchId'),
+     'create_at': datetime.now()
   })
   if doc.inserted_id:
      return {
