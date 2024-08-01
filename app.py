@@ -14,10 +14,17 @@ from app.database.config import bookings
 from app.middlewares.authorization_validator import authorization_validator
 from app.middlewares.request_validator import request_validator
 from app.middlewares.token_validator import token_validator
+from app.routes.branch_reports.create import create_branch_reports
+from app.routes.branch_reports.read import get_branch_reports
+from app.routes.branch_reports.read_generated import \
+    get_generated_branch_reports
 from app.routes.branches.create import create_branch
 from app.routes.branches.read import get_branches
 from app.routes.branches.read_one import get_branch
 from app.routes.branches.update import update_branch
+from app.routes.cashier_reports.read_today import get_cashier_report
+from app.routes.cashier_reports.time_in import time_in_cashier_report
+from app.routes.cashier_reports.time_out import time_out_cashier_report
 from app.routes.corporates.create import create_company
 from app.routes.corporates.read import get_companies
 from app.routes.corporates.read_one import get_company
@@ -60,6 +67,8 @@ from app.routes.sales.read_packages_reports import get_packages_reports
 from app.routes.sales.read_reports import get_reports
 from app.routes.sales.read_sales_reports import get_sales
 from app.routes.sales.read_summary_income import get_summary_income
+from app.routes.sales_deposit.create import create_sales_deposit
+from app.routes.sales_deposit.read import get_sales_deposits
 from app.routes.transaction.create import create_transaction
 from app.routes.transaction.read import get_transactions
 from app.routes.transaction.read_active import get_active_transaction
@@ -70,19 +79,6 @@ from app.routes.users.read import get_users
 from app.routes.users.read_one import get_user
 from app.routes.users.register import register
 from app.routes.users.update import update_user
-
-from app.routes.cashier_reports.time_in import time_in_cashier_report
-from app.routes.cashier_reports.time_out import time_out_cashier_report
-from app.routes.cashier_reports.read_today import get_cashier_report
-
-from app.routes.sales_deposit.create import create_sales_deposit
-from app.routes.sales_deposit.read import get_sales_deposits
-
-from app.routes.branch_reports.read_generated import get_generated_branch_reports
-from app.routes.branch_reports.read import get_branch_reports
-from app.routes.branch_reports.create import create_branch_reports
-
-
 
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
@@ -136,7 +132,7 @@ def _get_appointments():
   #restructure when theres database. 7-10am available only as per requirements
   return {
    "data": [{
-     "day": "2024/07/29",
+     "day": "2024/08/01",
      "timeslot": [
         {
          "shift": "AM",
@@ -166,7 +162,7 @@ def _get_appointments():
      
   },
   {
-     "day": "2024/07/30",
+     "day": "2024/08/02",
      "timeslot": [
         {
          "shift": "AM",
