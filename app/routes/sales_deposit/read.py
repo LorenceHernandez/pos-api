@@ -1,23 +1,22 @@
 from flask import Blueprint, g, request
-from pydash import merge, omit
+from pydash import merge, omit, pick
 
 from app.database.config import sales_deposits
-from app.models.SalesDeposit import SalesDeposit
-from app.utils.filter_values import filterValues
+from app.utils.compare_date import compareDateYearMonth, compareDateRange, compareDateToday
 from app.utils.utils import ToStringId
+from app.filters.date_filter import DateFilter
+
 
 get_sales_deposits = Blueprint("/sales-deposits", __name__)
 
 @get_sales_deposits.route('/sales-deposits', methods=['GET'])
 def _get_sales_deposits():
-     request_data = request.args
+
 
      try:
-          query = {}
-          
-          if(request_data is not None): 
-               query = SalesDeposit.fromDict(request_data)
-               query = filterValues(query.toDict())
+          query = request.args.to_dict()
+          filters = pick(query, ['dateFilter', 'customDate', 'startDate', 'endDate'])
+          query = omit(query, ['dateFilter', 'customDate', 'startDate', 'endDate'])
 
           deposits = sales_deposits.aggregate([
               { '$match': query },
@@ -61,8 +60,23 @@ def _get_sales_deposits():
                }
           ])
 
+          dateFilter = DateFilter.TODAY
+          if(filters.get('dateFilter') is not None):
+               dateFilter = int(filters.get('dateFilter'))
+
           deposit_list = []
           for deposit in deposits:
+               date = deposit['dateDeposited']
+
+               if(dateFilter != DateFilter.ALL):
+
+                    if(dateFilter == DateFilter.CUSTOM_DATE and not compareDateYearMonth(date, filters.get('customDate'))):
+                         continue
+                    if(dateFilter == DateFilter.CUSTOM_FILTER and not compareDateRange(date, filters.get('startDate'),  filters.get('endDate'))):
+                         continue
+                    if(dateFilter < 9 and not compareDateToday(dateFilter, date)):
+                         continue
+               
                deposit = ToStringId(deposit)
                deposit['branch'] = ToStringId(deposit['branch'])
                deposit['cashier'] = ToStringId(deposit['cashier'])
@@ -74,3 +88,4 @@ def _get_sales_deposits():
             'message': 'Unable to get sales deposits.',
             'error': repr(e),
          }, 500
+

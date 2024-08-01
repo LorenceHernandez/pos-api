@@ -9,9 +9,9 @@ get_branch_reports = Blueprint("/branch-reports", __name__)
 def _get_branch_reports():
 
      try:
-          query = request.args
+          query = request.args.to_dict()
           data = branch_reports.aggregate([
-              { '$match': query.to_dict() },
+              { '$match': query },
               {
                     "$addFields": {
                          "cashierId": {"$toObjectId": "$cashierId"},
