@@ -40,7 +40,8 @@ def _get_product():
           "category": category,
           "inventory_prerequisite": record["inventory_prerequisite"],
           "created_by": record["created_by"],
-          "created_at": record["created_at"]
+          "created_at": record["created_at"],
+          "no_price": record.get('noPrice')
           },
        }, 200 
    else:

@@ -35,9 +35,10 @@ def _update_product():
       update_val['description'] = request_data['description']
    if 'category' in request_data:
       update_val['category_id'] = request_data['categoryId']
+   if 'noPrice' in request_data:
+      update_val['no_price'] = request_data['noPrice']
    if 'inventoryPrerequisite' in request_data:
-      inventoryPrerequisite = request_data['inventoryPrerequisite']
-      update_val['inventory_prerequisite'] = inventoryPrerequisite
+      update_val['inventory_prerequisite'] = request_data['inventoryPrerequisite']
    if 'sku' in request_data:
       if len(request_data['sku']) == 0:
          return {

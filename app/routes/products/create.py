@@ -21,6 +21,9 @@ def _create_product():
    inventory_prerequisite = request_data['inventoryPrerequisite']
    sku = request_data['sku']
    created_by = g.user_id
+   no_price = False 
+   if request_data.get('noPrice'):
+       no_price = request_data.get('noPrice')
    create_at = datetime.now()
 
    if len(sku) == 0:
@@ -54,6 +57,7 @@ def _create_product():
       "sku": sku,
       "created_by": created_by,
       "created_at": create_at,
+      "no_price": no_price,
    })
    
    if doc.inserted_id:
