@@ -26,6 +26,10 @@ from app.routes.branches.create import create_branch
 from app.routes.branches.read import get_branches
 from app.routes.branches.read_one import get_branch
 from app.routes.branches.update import update_branch
+from app.routes.cashier_reports.read import get_cashier_reports
+from app.routes.cashier_reports.read_today import get_cashier_report_today
+from app.routes.cashier_reports.time_in import time_in_cashier_report
+from app.routes.cashier_reports.time_out import time_out_cashier_report
 from app.routes.corporates.create import create_company
 from app.routes.corporates.read import get_companies
 from app.routes.corporates.read_one import get_company
@@ -81,20 +85,6 @@ from app.routes.users.read_one import get_user
 from app.routes.users.register import register
 from app.routes.users.update import update_user
 
-from app.routes.cashier_reports.time_in import time_in_cashier_report
-from app.routes.cashier_reports.time_out import time_out_cashier_report
-from app.routes.cashier_reports.read_today import get_cashier_report_today
-from app.routes.cashier_reports.read import get_cashier_reports
-
-from app.routes.sales_deposit.create import create_sales_deposit
-from app.routes.sales_deposit.read import get_sales_deposits
-
-from app.routes.branch_reports.read_generated import get_generated_branch_reports
-from app.routes.branch_reports.read import get_branch_reports
-from app.routes.branch_reports.create import create_branch_reports
-
-
-
 PORT = os.getenv('PORT')
 HOST = os.getenv('HOST')
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
@@ -119,6 +109,38 @@ def hook():
 @app.route('/', methods=['GET'])
 def home():
   return 'hello world'
+
+
+@app.route('/booking/confirm', methods=['POST'])
+def _confirm_booking():
+   request_data = request.get_json()
+   id = request_data['id']
+   update_val = {}
+   try: 
+      ObjectId(id)
+   except:
+    return {
+      'message': 'data format is invalid',
+      'code': 23
+    }, 401
+   
+   update_val['isConfirmed'] = True
+   
+   filter = { '_id': ObjectId(id) }
+   new_val = { "$set": update_val }
+
+   res = bookings.update_one(filter, new_val)
+   if res.modified_count > 0:
+      return {
+         'message': 'Booking confirmed',
+      }, 200 
+   else:
+      return {
+         'message': 'Unable to confirm booking',
+         'code': 200
+      }
+
+
 @app.route('/booking', methods=['GET'])
 def _get_booking():
    booking = bookings.find_one({"_id": ObjectId(request.args.get('id'))})
@@ -138,7 +160,8 @@ def _get_booking():
                'schedule': booking.get('schedule'),
                'note': booking.get('note'),
                'branchId': booking.get('branchId'),
-               'create_at': booking.get('create_at')
+               'create_at': booking.get('create_at'),
+               'is_confirmed': booking.get('isConfirmed')
             }
          }
    return {
@@ -164,7 +187,8 @@ def _get_bookings():
             'schedule': booking.get('schedule'),
             'note': booking.get('note'),
             'branchId': booking.get('branchId'),
-            'create_at': booking.get('create_at')
+            'create_at': booking.get('create_at'),
+            'is_confirmed': booking.get('isConfirmed')
          })
    return {
       "data": ret,
@@ -185,6 +209,7 @@ def _create_booking():
      'schedule': request_data.get('schedule'),
      'note': request_data.get('note'),
      'branchId': request_data.get('branchId'),
+     'isConfirmed': False,
      'create_at': datetime.now()
   })
   if doc.inserted_id:

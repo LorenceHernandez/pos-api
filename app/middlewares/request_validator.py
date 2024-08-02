@@ -54,6 +54,8 @@ route_constraints = [
   { 'route': '/branch-reports/generated', 'params': [], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/branch-reports/create', 'params': ['branchId', 'endingCashBalance'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/branch-reports', 'params': [], 'content-type': 'json', 'method': 'GET' },
+
+  { 'route': '/booking/confirm', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
 ]
 
 

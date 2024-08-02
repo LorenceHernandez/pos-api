@@ -12,7 +12,8 @@ excluded_routes_for_validator = [
   '/bookings',
   '/booking',
   '/appointments',
-  '/branches'
+  '/branches',
+  '/booking/confirm'
 ]
 
 def token_validator(): 
