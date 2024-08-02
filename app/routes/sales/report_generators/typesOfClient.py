@@ -1,3 +1,5 @@
+import copy
+
 import moment
 from bson.objectid import ObjectId
 
@@ -19,6 +21,9 @@ def typesOfClient(args):
       "branchId": {"$in": branchIds},
       # "transactionDate": {"$gte": str(min), "$lte": str(max)}
    })
+   print(    {  "status": "Completed",
+      "branchId": {"$in": branchIds}})
+
    #filter -> to be refactored using aggregation.
    res_copy = []
    if res:
@@ -43,12 +48,13 @@ def typesOfClient(args):
       for customer_type in customer_types:
          types.append({"name": customer_type, "count": 0, "amount": 0})
       types.append({"name": 'NO. OF CLIENTS', "count": 0, "amount": 0})
+
    if res_branch:
       for branch in res_branch:
          _branches.append({
             'id': str(branch['_id']),
             'name': branch['name'],
-            'types': types,
+            'types': copy.deepcopy(types)
          })
    if res_copy:
       for transaction in res_copy:
@@ -57,6 +63,7 @@ def typesOfClient(args):
            if branch['id'] == transaction['branchId']:
               for type in branch['types']:
                  if type['name'] == transaction['customerData']['customerType'] or type['name'] == transaction['customerData']['type']:
+                    print(type['name'])
                     type['count'] += 1
                     type['amount'] += transaction['paymentDetails']['paymentDue']
                     index = len(branch['types']) - 1
