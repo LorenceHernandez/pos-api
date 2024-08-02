@@ -1,23 +1,61 @@
+import copy
+
+import moment
 from bson.objectid import ObjectId
 
 from app.database.config import branches, product_categories, transactions
 
 
 def comparativeData(args):
-   
-   branchIds = args.getlist('branchIds')
+    year1 = generateYearReport(args.getlist('branchIds'), args.get('min'))
+    year2 = generateYearReport(args.getlist('branchIds'), args.get('max'))
+    categories = []
+    res_categories = product_categories.find()
+    if res_categories:
+      for category in res_categories:
+         categories.append({
+            'id': str(category['_id']),
+            'name': category['name'],
+            '% INCREASE/DECREASE': 0,
+         })
+  
+      categories.append({
+            'id': None,
+            'name': 'NO. OF CLIENTS',
+            '% INCREASE/DECREASE': 0,
+      })
+   #(currnt year rev - last year rev) / last year rev * 100
+    for i, x in enumerate(year1):
+       if x['revenue'] <= 0:
+           categories[i]['% INCREASE/DECREASE'] = 100
+           continue
+       percent = abs(x['revenue'] - year2[i]['revenue']) / x['revenue'] * 100
+       categories[i]['% INCREASE/DECREASE'] = percent
 
+    return {
+      'diff': categories,
+      args.get('min'): year1,
+      args.get('max'): year2,
+    }
+
+def generateYearReport(branchIds, year):
+   
    categories = []
    objectIds = []
    total = 0
-   c2024 = 0
+   min = moment.date(year).format('YYYY')
+   max = moment.date(year).add(year=1).format('YYYY')
 
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
-      "transactionDate": {"$gte": args.get('min'), "$lte": args.get('max')}
    })
-
+   res_copy = []
+   if res:
+      for transaction in res:
+         transaction_date = str(moment.date(transaction['transactionDate']).format('YYYY'))
+         if (transaction_date >= str(min)) and transaction_date < str(max):
+                res_copy.append(transaction)
 
    for branchId in branchIds:
       objectIds.append(ObjectId(branchId))
@@ -28,32 +66,30 @@ def comparativeData(args):
          categories.append({
             'id': str(category['_id']),
             'name': category['name'],
-            '2024': 0,
-            'total': 0,
+            'count': 0,
+            'revenue': 0,
          })
-   
-   if res:
-      c2024 = len(list(res))
-      for transaction in res:
+   if res_copy:
+      for transaction in res_copy:
         for service in transaction['services']:
            if service['source'] == 'package':
                 for item in service['items']:
                           for category in categories:
                              if category['id'] == item['category']['id']:
-                                category['2024'] += 1
-                                category['total'] += item['amount']
+                                category['count'] += 1
+                                category['revenue'] += item['amount']
                                 total += item['amount']
            else: 
                    for category in categories:
                       if category['id'] == service['category']['id']:
-                          category['2024'] += 1
-                          category['total'] += item['amount']
+                          category['count'] += 1
+                          category['revenue'] += item['amount']
                           total += item['amount']
       
-      categories.append({
+   categories.append({
          'id': None,
          'name': 'NO. OF CLIENTS',
-         '2024': c2024,
-         'total': total,
-      })
+         'count': len(res_copy),
+         'revenue': total,
+   })
    return categories
