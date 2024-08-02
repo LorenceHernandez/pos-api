@@ -22,42 +22,88 @@ def _get_cashier_reports():
               { '$match': query },
               {
                     "$addFields": {
-                         "cashierId": {"$toObjectId": "$cashierId"},
-                         "branchId": {"$toObjectId": "$branchId"}
+                         "cashierObjId": {"$toObjectId": "$cashierId"},
+                         "branchObjId": {"$toObjectId": "$branchId"}
                     }
                },
               { 
                     '$lookup': {
                          'from': 'users',
-                         'localField': 'cashierId',
+                         'localField': 'cashierObjId',
                          'foreignField': '_id',
                          'as': 'cashier'
                     }, 
                },
+               { "$unwind": "$cashier" },
                { 
                     '$lookup': {
                         'from': 'branches',
-                        'localField': 'branchId',
+                        'localField': 'branchObjId',
                         'foreignField': '_id',
                         'as': 'branch'
                     }, 
                },
+               { "$unwind": "$branch" },
+               {
+                    "$lookup": {
+                         "from": "sales",
+                         "let": {
+                              "branchId": "$branchId",
+                              "cashierId": "$cashierId",
+                              "date": "$date"
+                         },
+                         "pipeline": [
+                              {
+                                   "$match": {
+                                        "$expr": {
+                                             "$and": [
+                                                  { "$eq": ["$branch", "$$branchId"] },
+                                                  { "$eq": ["$cashierId", "$$cashierId"] },
+                                                  { "$eq": ["$date", "$$date"] }
+                                             ]
+                                        }
+                                   }
+                              },
+                              {
+                                   "$group": {
+                                        "_id": "$cashierId",
+                                        "total": { "$sum": "$amount" }
+                                   }
+                              },
+                         ],
+                         "as": "sales"
+                    }
+               },
                {
                     "$addFields": {
-                         "branch": { "$arrayElemAt": ["$branch", 0] },
-                         "cashier": { "$arrayElemAt": ["$cashier", 0] }
+                         "cashSales": { 
+                              "$cond": [
+                                   { "$gt": [ { "$size": "$sales" }, 0 ] },
+                                   { "$arrayElemAt": ["$sales", 0] },
+                                   None
+                              ]
+                         },
+                         # "cashDifference": { "$subtract": ["$cashSales.total", "$endingCashOnHand.total"] },
+                         "cashier.name": {
+                              "$concat": [
+                                   "$cashier.first_name",
+                                   " ",
+                                   "$cashier.last_name"
+                              ]
+                         }
                     }
                },
                {
                    '$project': {
-                       'cashierId': 0,
-                       'branchId': 0,
-                       'cashier': {
-                           'password': 0,
-                           'branches': 0
-                       }
+                         'cashierObjId': 0,
+                         'branchObjId': 0,
+                         'sales': 0,
+                         'cashier': {
+                              'password': 0,
+                              'branches': 0
+                         }
                    }
-               }
+               },
           ])
 
           dateFilter = DateFilter.TODAY
@@ -80,6 +126,19 @@ def _get_cashier_reports():
                report = ToStringId(report)
                report['branch'] = ToStringId(report['branch'])
                report['cashier'] = ToStringId(report['cashier'])
+               report['cashGain'] = None
+               report['cashLoss'] = None
+
+               cashSales = report['cashSales']['total'] if report['cashSales'] is not None else 0
+               cashOnHand = report['endingCashOnHand']['total'] if report['endingCashOnHand'] is not None else 0
+               
+               difference = cashSales - cashOnHand
+               report['cashGain'] = difference if difference > 0 else 0
+               report['cashLoss'] = difference * -1 if difference < 0 else 0
+
+               if(report['cashSales'] is not None):
+                    report['cashSales'] = report['cashSales']['total']
+
                report_list.append(report)
 
           return { 'data': report_list, }, 200

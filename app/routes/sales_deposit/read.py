@@ -50,6 +50,17 @@ def _get_sales_deposits():
                     }
                },
                {
+                    "$addFields": {
+                         "cashier.name": {
+                              "$concat": [
+                                   "$cashier.first_name",
+                                   " ",
+                                   "$cashier.last_name"
+                              ]
+                         }
+                    }
+               },
+               {
                    '$project': {
                        'cashierId': 0,
                        'branchId': 0,

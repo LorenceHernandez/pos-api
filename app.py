@@ -26,9 +26,6 @@ from app.routes.branches.create import create_branch
 from app.routes.branches.read import get_branches
 from app.routes.branches.read_one import get_branch
 from app.routes.branches.update import update_branch
-from app.routes.cashier_reports.read_today import get_cashier_report
-from app.routes.cashier_reports.time_in import time_in_cashier_report
-from app.routes.cashier_reports.time_out import time_out_cashier_report
 from app.routes.corporates.create import create_company
 from app.routes.corporates.read import get_companies
 from app.routes.corporates.read_one import get_company

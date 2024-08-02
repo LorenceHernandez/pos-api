@@ -8,7 +8,7 @@ from app.database.config import cashier_reports
 get_cashier_report_today = Blueprint("/cashier-reports/today", __name__)
 
 @get_cashier_report_today.route('/cashier-reports/today', methods=['GET'])
-def _get_cashier_report():
+def _get_cashier_report_today():
    
      prev_report = None
 
@@ -34,14 +34,17 @@ def _get_cashier_report():
           'date': str(date.today()) 
      })
      
+     if prev_report is not None:
+          prev_report = {
+          **omit(prev_report, '_id'), 
+               "id": str(prev_report["_id"]) 
+          }
+
      if report is None:
           return {
                'message': 'No report is available for today',
                'data': None,
-               'previous': {
-                    **omit(prev_report, '_id'), 
-                         "id": str(prev_report["_id"]) 
-                    }
+               'previous': prev_report
           }, 206
      
 

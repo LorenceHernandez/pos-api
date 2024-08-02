@@ -24,9 +24,6 @@ def _update_cashier_report():
    report = CashierReport.fromDict(data)
    report.time_out = str(datetime.now().time())
    report.ending_cash_on_hand = CashCount.fromDict(request_data['endingCashOnHand'])
-   report.cash_sales = _compute_cash_sale(report)
-
-  
    
    filter = { '_id': ObjectId(id) }
    new_val = { "$set": filterValues(omit(report.toDict(), 'id')) }
@@ -45,18 +42,3 @@ def _update_cashier_report():
          'message': 'Unable to update report.',
          'code': 30,
       }, 500
-
-
-def _compute_cash_sale(report: CashierReport):
-   cash_sale = 0.0
-
-   sale_list = sales.find({ 
-      "branch": report.branch_id, 
-      'cashierId': report.cashier_id, 
-      'date': report.date
-   })
-
-   for sale in sale_list:
-      cash_sale += float(sale['amount'])
-   
-   return cash_sale
