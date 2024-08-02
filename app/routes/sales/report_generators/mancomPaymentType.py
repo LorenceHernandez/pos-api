@@ -56,7 +56,7 @@ def getMancomPaymentType(args):
                        if transaction['branchId'] == branch['id']:
                           for category in branch['categories']:
                              if category['id'] == item['category']['id']:
-                                if transaction['paymentDetails']['tenderType'].lower() in ['cash', 'debit']:
+                                if item['name'].lower() == 'account receivable':
                                     category['Cash'] += item['amount']
                                     category['Count'] += 1
                                     branch['totalCash'] += item['amount']
