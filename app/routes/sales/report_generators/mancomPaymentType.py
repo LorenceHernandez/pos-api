@@ -1,3 +1,4 @@
+import moment
 from bson.objectid import ObjectId
 
 from app.database.config import branches, product_categories, transactions
@@ -9,13 +10,19 @@ def getMancomPaymentType(args):
    categories = []
    _branches = []
    objectIds = []
-
+   min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
+   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00')
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
-      "transactionDate": {"$gte": args.get('min'), "$lte": args.get('max')}
    })
+   res_copy = []
+   if res:
+      for transaction in res:
 
+         if (str(moment.date(transaction['transactionDate'])) >= str(min)) and (str(moment.date(transaction['transactionDate'])) <= str(max)):
+                res_copy.append(transaction)
+   
    for branchId in branchIds:
       objectIds.append(ObjectId(branchId))
    
@@ -44,11 +51,8 @@ def getMancomPaymentType(args):
             'totalCash': 0,
             'totalAr': 0
          })
-   
-   print(_branches)
-#    return "test"
-   if res:
-      for transaction in res:
+   if res_copy:
+      for transaction in res_copy:
         for service in transaction['services']:
            if service['source'] == 'package':
                 for item in service['items']:
@@ -57,26 +61,26 @@ def getMancomPaymentType(args):
                           for category in branch['categories']:
                              if category['id'] == item['category']['id']:
                                 if item['name'].lower() == 'account receivable':
-                                    category['Cash'] += item['amount']
-                                    category['Count'] += 1
-                                    branch['totalCash'] += item['amount']
-                                else:
                                     category['AR'] += item['amount']
                                     category['Count'] += 1
                                     branch['totalAr'] += item['amount']
+                                else:
+                                    category['Cash'] += item['amount']
+                                    category['Count'] += 1
+                                    branch['totalCash'] += item['amount']
            else: 
               for branch in _branches:
                 if transaction['branchId'] == branch['id']:
                    for category in branch['categories']:
                       if category['id'] == service['category']['id']:
                         if service['name'].lower() == 'account receivable':
-                            category['Cash'] += service['amount']
-                            category['Count'] += 1
-                            branch['totalCash'] += item['amount']
-                        else:
                             category['AR'] += service['amount']
                             category['Count'] += 1
                             branch['totalAr'] += item['amount']
+                        else:
+                            category['Cash'] += service['amount']
+                            category['Count'] += 1
+                            branch['totalCash'] += item['amount']
    return _branches
 
 
