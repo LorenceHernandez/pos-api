@@ -14,20 +14,19 @@ def typesOfClient(args):
    objectIds = []
    types = []
    min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
-   max = moment.date(args.get('max'), '%m/%d/%Y').add(hours=24).format('ddd, DD MMM YYYY 00:00:00')
-  
+   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00')
+
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
       # "transactionDate": {"$gte": str(min), "$lte": str(max)}
    })
-   print(    {  "status": "Completed",
-      "branchId": {"$in": branchIds}})
 
    #filter -> to be refactored using aggregation.
    res_copy = []
    if res:
       for transaction in res:
+         
          if (str(moment.date(transaction['transactionDate'])) >= str(min)) and (str(moment.date(transaction['transactionDate'])) <= str(max)):
                 res_copy.append(transaction)
    
