@@ -63,6 +63,7 @@ def _get_sales_deposits():
                    '$project': {
                        'cashierId': 0,
                        'branchId': 0,
+                       'cashierName': 0,
                        'cashier': {
                            'password': 0,
                            'branches': 0
