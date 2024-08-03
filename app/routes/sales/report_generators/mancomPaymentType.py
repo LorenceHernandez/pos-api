@@ -33,6 +33,7 @@ def getMancomPaymentType(args):
    })
 
    
+   
    res_categories = product_categories.find()
    if res_categories:
       for category in res_categories:
@@ -53,6 +54,7 @@ def getMancomPaymentType(args):
             'totalCash': 0,
             'totalAr': 0
          })
+
    if res_copy:
       for transaction in res_copy:
         for service in transaction['services']:
@@ -78,11 +80,11 @@ def getMancomPaymentType(args):
                         if service['name'].lower() == 'account receivable':
                             category['AR'] += service['amount']
                             category['Count'] += 1
-                            branch['totalAr'] += item['amount']
+                            branch['totalAr'] += service['amount']
                         else:
                             category['Cash'] += service['amount']
                             category['Count'] += 1
-                            branch['totalCash'] += item['amount']
+                            branch['totalCash'] += service['amount']
    return _branches
 
 
