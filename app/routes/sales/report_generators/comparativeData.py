@@ -86,8 +86,8 @@ def generateYearReport(branchIds, year):
                    for category in categories:
                       if category['id'] == service['category']['id']:
                           category['count'] += 1
-                          category['revenue'] += item['amount']
-                          total += item['amount']
+                          category['revenue'] += service['amount']
+                          total += service['amount']
       
    categories.append({
          'id': None,
