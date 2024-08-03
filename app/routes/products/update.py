@@ -33,7 +33,7 @@ def _update_product():
       update_val['name'] = request_data['name']
    if 'description' in request_data:
       update_val['description'] = request_data['description']
-   if 'category' in request_data:
+   if 'categoryId' in request_data:
       update_val['category_id'] = request_data['categoryId']
    if 'noPrice' in request_data:
       update_val['no_price'] = request_data['noPrice']
