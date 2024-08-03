@@ -27,6 +27,9 @@ def comparativeData(args):
    #(currnt year rev - last year rev) / last year rev * 100
     for i, x in enumerate(year1):
        if x['revenue'] <= 0:
+           if year2[i]['revenue'] <= 0:
+               categories[i]['% INCREASE/DECREASE'] = 0
+               continue
            categories[i]['% INCREASE/DECREASE'] = 100
            continue
        percent = abs(x['revenue'] - year2[i]['revenue']) / x['revenue'] * 100
@@ -43,8 +46,8 @@ def generateYearReport(branchIds, year):
    categories = []
    objectIds = []
    total = 0
-   min = moment.date(year).format('YYYY')
-   max = moment.date(year).add(year=1).format('YYYY')
+   min = moment.date(year).format('YYYY/MM')
+   max = moment.date(year).add(month=1).format('YYYY/MM')
 
    res = transactions.find({
       "status": "Completed",
@@ -53,7 +56,7 @@ def generateYearReport(branchIds, year):
    res_copy = []
    if res:
       for transaction in res:
-         transaction_date = str(moment.date(transaction['transactionDate']).format('YYYY'))
+         transaction_date = str(moment.date(transaction['transactionDate']).format('YYYY/MM'))
          if (transaction_date >= str(min)) and transaction_date < str(max):
                 res_copy.append(transaction)
 
