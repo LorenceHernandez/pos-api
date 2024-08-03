@@ -22,7 +22,7 @@ route_constraints = [
   { 'route': '/branch/create', 'params': ['tin', 'name', 'streetAddress', 'city', 'state', 'postalCode', 'contactNumber', 'emailAddress'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/branch', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/branch/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/corporate/create', 'params': ['name','streetAddress', 'city', 'state', 'postalCode', 'contactNo', 'emailAddress'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/corporate/create', 'params': ['name','streetAddress', 'city', 'state', 'postalCode', 'contactNo', 'emailAddress', 'tinId'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/corporate', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/customer/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', 'address', 'customerType', 'contactNumber', 'birthDate'], 'content-type': 'json', 'method': 'POST' },

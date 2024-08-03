@@ -15,7 +15,7 @@ create_company = Blueprint("/corporate/create", __name__)
 def _create_company():
    request_data = request.get_json()
    name, street_address, city, state, postal_code, contact, email = request_data['name'], request_data['streetAddress'], request_data['city'], request_data['state'], request_data['postalCode'], request_data['contactNo'], request_data['emailAddress']
-   tin_id = request_data['tin_id']
+   tin_id = request_data['tinId']
    created_by = g.user_id
    created_at = datetime.now()
    
