@@ -47,22 +47,40 @@ def generatePackagesReports(args):
         'packages': copy.deepcopy(_packages),
         "total": 0
       }
- 
+   
+   _branches = []
 
+   for branchId in branchIds:
+      objectIds.append(ObjectId(branchId))
+   
+   res_branch = branches.find({
+      "_id": {"$in": objectIds}
+   })
+   
+   if res_branch:
+      for branch in res_branch:
+         _branches.append({
+            'id': str(branch['_id']),
+            'name': branch['name'],
+            'table': copy.deepcopy(table),
+            'total': 0
+         })
    if res_copy:
       for transaction in res_copy:
         key = str(moment.date(transaction['transactionDate']).format("MMMM YYYY"))
-        for service in transaction['services']:
-            if service['source'] == 'package':
-                for col in table[key]['packages']:
-                    if col['id'] == service['_id']:
-                        total = 0
-                        for item in service['items']:
-                            total += item['amount']
-                        col['count'] += 1
-                        col['amount'] += total
-                        table[key]["total"] += total
-                        break
-   return table
+        for branch in _branches:
+          if branch['id'] == transaction['branchId']:
+            for service in transaction['services']:
+                if service['source'] == 'package':
+                    for col in branch['table'][key]['packages']:
+                        if col['id'] == service['_id']:
+                            total = 0
+                            for item in service['items']:
+                                total += item['amount']
+                            col['count'] += 1
+                            col['amount'] += total
+                            branch["total"] += total
+                            break
+   return _branches
 
 
