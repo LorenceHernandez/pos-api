@@ -29,6 +29,8 @@ def _update_company():
       update_val['name'] = request_data['name']
    if 'streetAddress' in request_data:
       update_val['street_address'] = request_data['streetAddress']
+   if 'tinId' in request_data:
+      update_val['tin_id'] = request_data['tinId']
    if 'city' in request_data:
       update_val['city'] = request_data['city']
    if 'state' in request_data:
