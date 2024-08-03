@@ -18,7 +18,7 @@ def _get_branch_reports():
 
 
           data = branch_reports.aggregate([
-              { '$match': query.to_dict() },
+              { '$match': query },
               {
                     "$addFields": {
                          "cashierId": {"$toObjectId": "$cashierId"},
@@ -67,7 +67,8 @@ def _get_branch_reports():
                            'branches': 0
                        }
                    }
-               }
+               },
+               { "$sort": { "_id": -1 }}
           ])
           reports = list(data)
 

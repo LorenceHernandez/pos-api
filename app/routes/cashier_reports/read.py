@@ -22,14 +22,14 @@ def _get_cashier_reports():
               { '$match': query },
               {
                     "$addFields": {
-                         "cashierObjId": {"$toObjectId": "$cashierId"},
-                         "branchObjId": {"$toObjectId": "$branchId"}
+                         "cashierId": {"$toObjectId": "$cashierId"},
+                         "branchId": {"$toObjectId": "$branchId"}
                     }
                },
               { 
                     '$lookup': {
                          'from': 'users',
-                         'localField': 'cashierObjId',
+                         'localField': 'cashierId',
                          'foreignField': '_id',
                          'as': 'cashier'
                     }, 
@@ -38,7 +38,7 @@ def _get_cashier_reports():
                { 
                     '$lookup': {
                         'from': 'branches',
-                        'localField': 'branchObjId',
+                        'localField': 'branchId',
                         'foreignField': '_id',
                         'as': 'branch'
                     }, 
@@ -83,7 +83,6 @@ def _get_cashier_reports():
                                    None
                               ]
                          },
-                         # "cashDifference": { "$subtract": ["$cashSales.total", "$endingCashOnHand.total"] },
                          "cashier.name": {
                               "$concat": [
                                    "$cashier.first_name",
@@ -95,8 +94,8 @@ def _get_cashier_reports():
                },
                {
                    '$project': {
-                         'cashierObjId': 0,
-                         'branchObjId': 0,
+                         'cashierId': 0,
+                         'branchId': 0,
                          'sales': 0,
                          'cashier': {
                               'password': 0,
@@ -104,6 +103,7 @@ def _get_cashier_reports():
                          }
                    }
                },
+               { "$sort": { "_id": -1 }}
           ])
 
           dateFilter = DateFilter.TODAY
