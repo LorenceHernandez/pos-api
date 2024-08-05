@@ -43,18 +43,18 @@ def _update_transaction():
          categories = product_categories.find()
          services = updated_trans.get('services')
          orNo = updated_trans.get('invoiceNo')
-         amount = updated_trans.get('paymentDetails').get('paymentDue')
+         amount = updated_trans.get('paymentDetails').get('subTotal')
          branch = updated_trans.get('branchId')
          discount = 0
          applied = updated_trans.get('discountApplied')
-         if applied: 
+         if applied:    
             discount = applied['totalDiscount']
          doctor_full_name = ''
          _categories = [{
             'id': None,
             'name': 'Package',
             'price': 0
-         }]
+         }] 
          for category in categories:
              _categories.append({
                'id': str(category.get('_id')), 
@@ -67,20 +67,25 @@ def _update_transaction():
             if doctor:
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
          name = []
+
+         
          for service in services: 
-            product = products.find_one({"_id": ObjectId(service['_id'])})
-            if product:
-               for category in _categories:
-                  if service.get('source') == "package":
+            if service['source'] == "package": 
+               for item in service['items']:
+                  name.append(item['name'])
+            else:
+               name.append(service['name'])
+         
+         for service in services:
+            if service['source'] == "package":  
+                  for category in _categories:  
                      if category['name'].lower() == 'package':
                         for item in service['items']:
-                           name.append(service['name'])
-                           category['price'] += item['amount']
-                     continue
-                  
-                  elif category['id'] == product['category_id']: 
-                     name.append(service['name'])
-                     category['price'] += service['amount']
+                           category['price'] +=  item['amount']
+            else:
+                  for category in _categories:
+                     if category['id'] == service['category']['id']:
+                        category['price'] += service['amount']
 
          sale = sales.insert_one({
             'customerData': updated_trans.get('customerData'),
