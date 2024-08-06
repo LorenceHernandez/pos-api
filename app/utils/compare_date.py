@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 from app.filters.date_filter import DateFilter
 
 
-def compareDateToday(dateFilter, date):
+def compare_date_today(dateFilter, date):
      date = datetime.fromisoformat(date)
      today = datetime.now()
 
@@ -27,7 +27,7 @@ def compareDateToday(dateFilter, date):
                return date.year == (today - relativedelta(years=1)).year
      return False
 
-def compareDateYearMonth(dateA, dateB):
+def compare_date_year_month(dateA, dateB):
      if dateB is None:
           return False
      
@@ -36,7 +36,7 @@ def compareDateYearMonth(dateA, dateB):
 
      return dateA.year == dateB.year and dateA.month == dateB.month
 
-def compareDateRange(date, startDate, endDate):
+def compare_date_range(date, startDate, endDate):
      if startDate is None or endDate is None:
           return False
      

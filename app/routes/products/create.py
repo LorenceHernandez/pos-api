@@ -8,6 +8,7 @@ from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import products
+from app.database.store import insert_one
 
 create_product = Blueprint("/product/create", __name__)
 
@@ -48,7 +49,7 @@ def _create_product():
          'code': 17
       }, 200
    
-   doc = products.insert_one({
+   doc = insert_one('products', {
       "name": name,
       "description": desc,
       "category_id": category_id,

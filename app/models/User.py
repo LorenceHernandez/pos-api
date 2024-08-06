@@ -3,6 +3,7 @@ from datetime import datetime
 from bson import ObjectId
 
 from app.database.config import users
+from app.database.store import insert_one
 
 
 class User:
@@ -18,7 +19,7 @@ class User:
         
    def save(self):
         created_at = datetime.now()
-        return users.insert_one({
+        return insert_one('users', {
             "username": self.username,
             "password": self.password,
             "first_name": self.first_name,

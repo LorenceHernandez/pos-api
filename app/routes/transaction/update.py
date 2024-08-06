@@ -11,6 +11,7 @@ from pydash import omit
 from app.database.config import (customers, doctors, packages,
                                  product_categories, products, sales,
                                  transactions, users)
+from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.utils.filter_values import filterValues
 
@@ -87,7 +88,7 @@ def _update_transaction():
                      if category['id'] == service['category']['id']:
                         category['price'] += service['amount']
 
-         sale = sales.insert_one({
+         sale = insert_one('sales', {
             'customerData': updated_trans.get('customerData'),
             'labExams': ', '.join(name),
             'orNo': orNo,

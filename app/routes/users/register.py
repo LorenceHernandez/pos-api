@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import users
+from app.database.store import insert_one
 
 register = Blueprint("/user/register", __name__)
 
@@ -47,7 +48,7 @@ def _create_account():
      salt = bcrypt.gensalt()
      hashed = bcrypt.hashpw(pwd_bytes, salt)
      string_password = hashed.decode('utf8')
-     doc = users.insert_one({
+     doc = insert_one('users', {
         "username": username,
         "password": string_password + " " + salt.decode('utf8'),
         "first_name": first_name,

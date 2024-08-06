@@ -4,6 +4,7 @@ from flask import Blueprint, g, request
 from pydash import omit
 
 from app.database.config import sales_deposits
+from app.database.store import insert_one
 from app.models.SalesDeposit import SalesDeposit
 
 create_sales_deposit = Blueprint("/sales-deposits/create", __name__)
@@ -25,7 +26,7 @@ def _create_sales_deposit():
       deposit.date_deposited = today
       deposit.cashier_id = g.user_id
       
-      doc = sales_deposits.insert_one(omit(deposit.toDict(), 'id'))
+      doc = insert_one('sales_deposits', omit(deposit.toDict(), 'id'))
       
       if not doc.inserted_id:
          raise Exception('Document failed to create')

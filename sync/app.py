@@ -5,7 +5,7 @@ import schedule
 import time
 from datetime import datetime
 
-from app.config import LOCAL_HOST, REMOTE_HOST
+from app.config import BACKUP_HOST, LOCAL_HOST, REMOTE_HOST
 
 def sync_data(source_uri, source_db_name, dest_uri, dest_db_name, drop_dest_collection=False, drop_source_collection=False):
   try:
@@ -49,7 +49,7 @@ while True:
 
   print('\n=========================================================================')
   print(f'[{datetime.now()}] Upstream-Sync data from local to remote...')
-  sync_data(LOCAL_HOST, "pos-cache", REMOTE_HOST, "pos", False, True)
+  sync_data(BACKUP_HOST, "pos-cache", REMOTE_HOST, "pos", False, True)
   
   print(f'[{datetime.now()}] Upstream-Sync was sucessfully done...')
 

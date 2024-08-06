@@ -4,6 +4,7 @@ from flask import Blueprint, g, request
 from pydash import omit
 
 from app.database.config import cashier_reports
+from app.database.store import insert_one
 from app.models.CashierReport import CashierReport
 
 time_in_cashier_report = Blueprint("/cashier-reports/time-in", __name__)
@@ -32,7 +33,7 @@ def _create_cashier_report():
    report.date = str(date.today())
    report.cashier_id = g.user_id
    
-   doc = cashier_reports.insert_one(omit(report.toDict(), 'id'))
+   doc = insert_one('cashier_reports', omit(report.toDict(), 'id'))
    
    if doc.inserted_id:
       report.id = doc.inserted_id

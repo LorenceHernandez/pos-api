@@ -8,6 +8,7 @@ import jwt
 from flask import Blueprint, g, request
 
 from app.database.config import product_categories
+from app.database.store import insert_one
 
 create_product_category = Blueprint("/product/category/create", __name__)
 
@@ -18,7 +19,7 @@ def _create_product_category():
    created_by = g.user_id
    created_at = datetime.now()
    
-   doc = product_categories.insert_one({
+   doc = insert_one('product_categories', {
       "name": name,
       "description": desc,
       "isActive": True,

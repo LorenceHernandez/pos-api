@@ -1,7 +1,6 @@
 import copy
 
 import moment
-import pandas as pd
 from bson.objectid import ObjectId
 
 from app.database.config import (branches, packages, product_categories,

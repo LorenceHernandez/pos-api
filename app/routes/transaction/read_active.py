@@ -1,3 +1,4 @@
+from datetime import date
 import sys
 
 from bson.json_util import dumps, loads
@@ -11,7 +12,8 @@ get_active_transaction = Blueprint("/transaction/active", __name__)
 def get_pending_transaction():
      record = transactions.find_one({
           "status": "active",
-          "created_by": g.user_id
+          "created_by": g.user_id,
+          # "date": str(date.today())
      })
 
      if record is None:

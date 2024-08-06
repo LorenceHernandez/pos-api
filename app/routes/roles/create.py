@@ -8,6 +8,7 @@ import jwt
 from flask import Blueprint, g, request
 
 from app.database.config import roles
+from app.database.store import insert_one
 
 create_role = Blueprint("/role/create", __name__)
 
@@ -20,7 +21,7 @@ def _create_role():
    created_by = g.user_id
    created_at = datetime.now()
    
-   doc = roles.insert_one({
+   doc = insert_one('roles', {
       "name": name,
       "authorizations": authorizations,
       "created_by": created_by,

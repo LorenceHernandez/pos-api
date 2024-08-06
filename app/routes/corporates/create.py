@@ -8,6 +8,7 @@ import jwt
 from flask import Blueprint, g, request
 
 from app.database.config import corporates
+from app.database.store import insert_one
 
 create_company = Blueprint("/corporate/create", __name__)
 
@@ -19,7 +20,7 @@ def _create_company():
    created_by = g.user_id
    created_at = datetime.now()
    
-   doc = corporates.insert_one({
+   doc = insert_one('corporate', {
       "name": name,
       "street_address": street_address,
       "city": city,

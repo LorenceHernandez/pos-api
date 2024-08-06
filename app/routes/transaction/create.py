@@ -1,7 +1,7 @@
 
 import os
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from operator import itemgetter
 
 import bcrypt
@@ -10,6 +10,7 @@ from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import transactions
+from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.routes.transaction.read_active import get_pending_transaction
 from app.utils.filter_values import filterValues
@@ -22,13 +23,17 @@ def _create_transaction():
 
    pending_record = get_pending_transaction()
    if pending_record:
-      return { 'data': pending_record[0] }, 200
+      return { 
+         'data': pending_record[0], 
+         'message': 'Returned active transaction' 
+      }, 200
 
    try:
       transaction = Transaction()
       transaction.transaction_no = str(uuid.uuid4())
       transaction.status = 'active'
-      transaction.transaction_date = datetime.now()
+      transaction.transaction_date = datetime.now().isoformat()
+      transaction.date = str(date.today())
       transaction.create_by = g.user_id
       transaction.branch_id = request_data['branchId']
       
@@ -40,7 +45,7 @@ def _create_transaction():
 
    
 
-   doc = transactions.insert_one(filterValues(transaction.toDict()))
+   doc = insert_one('transactions', filterValues(transaction.toDict()))
 
    if doc.inserted_id:
       transaction.id = doc.inserted_id

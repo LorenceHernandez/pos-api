@@ -39,6 +39,7 @@ class Transaction:
     transaction_no = None
     status = None
     transaction_date = None
+    date = None
     create_by = None
     services = None
     requested_by = None
@@ -57,6 +58,7 @@ class Transaction:
 
         transaction.transaction_no = data.get('transactionNo')
         transaction.transaction_date = data.get('transactionDate')
+        transaction.date = data.get('date')
         transaction.reason = data.get('reason')
         transaction.status = data.get('status')
         transaction.id = data.get('_id')
@@ -81,6 +83,7 @@ class Transaction:
             "id": self.id,
             "transactionNo": self.transaction_no,
             "transactionDate": self.transaction_date,
+            "date": self.date,
             "status": self.status,
             "branchId": self.branch_id,
             "customerId": self.customer_id,

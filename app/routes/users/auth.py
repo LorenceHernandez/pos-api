@@ -7,10 +7,10 @@ import jwt
 from flask import Blueprint, request
 from pydash import omit
 
+from app.config import JWT_SECRET_KEY
 from app.database.config import roles, users, branches
 from app.models.Branch import Branch
 
-JWT_KEY = os.getenv('JWT_SECRET_KEY')
 
 login = Blueprint("login", __name__)
 
@@ -34,7 +34,7 @@ def _authenticate():
    string_password = hashed.decode('utf8')
 
    if string_password == splitpw[0]: 
-    token = jwt.encode({"user_id": str(user[0]['_id'])}, JWT_KEY, algorithm="HS256")
+    token = jwt.encode({"user_id": str(user[0]['_id'])}, JWT_SECRET_KEY, algorithm="HS256")
     
     user_role = None
     try:

@@ -4,6 +4,7 @@ from flask import Blueprint, g, request
 from pydash import merge, omit
 
 from app.database.config import branch_reports
+from app.database.store import insert_one
 from app.models.BranchReports import BranchReport
 from app.routes.branch_reports.read_generated import generate_branch_report
 
@@ -30,7 +31,7 @@ def _create_branch_reports():
       report.date = today
       report.cashier_id = g.user_id
       
-      doc = branch_reports.insert_one(omit(report.toDict(), 'id'))
+      doc = insert_one('branch_reports', omit(report.toDict(), 'id'))
       
       if not doc.inserted_id:
          raise Exception('Document failed to create')

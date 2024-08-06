@@ -8,6 +8,7 @@ import jwt
 from flask import Blueprint, g, request
 
 from app.database.config import packages
+from app.database.store import insert_one
 
 create_package = Blueprint("/package/create", __name__)
 
@@ -19,7 +20,8 @@ def _create_package():
    created_by = g.user_id
    created_at = datetime.now()
 
-   doc = packages.insert_one({
+
+   doc = insert_one('packages', {
       "name": name,
       "description": desc,
       "discount": discount,

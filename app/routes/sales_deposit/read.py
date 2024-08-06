@@ -2,7 +2,7 @@ from flask import Blueprint, g, request
 from pydash import merge, omit, pick
 
 from app.database.config import sales_deposits
-from app.utils.compare_date import compareDateYearMonth, compareDateRange, compareDateToday
+from app.utils.compare_date import compare_date_year_month, compare_date_range, compare_date_today
 from app.utils.utils import ToStringId
 from app.filters.date_filter import DateFilter
 
@@ -82,11 +82,11 @@ def _get_sales_deposits():
 
                if(dateFilter != DateFilter.ALL):
 
-                    if(dateFilter == DateFilter.CUSTOM_DATE and not compareDateYearMonth(date, filters.get('customDate'))):
+                    if(dateFilter == DateFilter.CUSTOM_DATE and not compare_date_year_month(date, filters.get('customDate'))):
                          continue
-                    if(dateFilter == DateFilter.CUSTOM_FILTER and not compareDateRange(date, filters.get('startDate'),  filters.get('endDate'))):
+                    if(dateFilter == DateFilter.CUSTOM_FILTER and not compare_date_range(date, filters.get('startDate'),  filters.get('endDate'))):
                          continue
-                    if(dateFilter < 9 and not compareDateToday(dateFilter, date)):
+                    if(dateFilter < 9 and not compare_date_today(dateFilter, date)):
                          continue
                
                deposit = ToStringId(deposit)

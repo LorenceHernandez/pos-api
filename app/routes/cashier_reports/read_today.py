@@ -29,6 +29,7 @@ def _get_cashier_report_today():
                'error': repr(e),
           }, 206
 
+     print(str(date.today()))
      report = cashier_reports.find_one({ 
           'cashierId': g.user_id, 
           'date': str(date.today()) 

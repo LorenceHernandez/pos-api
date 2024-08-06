@@ -9,6 +9,7 @@ from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import customers
+from app.database.store import insert_one
 
 create_customer = Blueprint("/customer/create", __name__)
 
@@ -46,7 +47,7 @@ def _create_customer():
    #          'code': 23
    #      }, 401
 
-   doc = customers.insert_one({
+   doc = insert_one('customers', {
       "first_name": f_name,
       "middle_name": m_name,
       "last_name": l_name,

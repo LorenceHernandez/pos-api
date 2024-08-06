@@ -9,6 +9,7 @@ from bson import ObjectId
 from flask import Blueprint, g, request
 
 from app.database.config import discounts
+from app.database.store import insert_one
 
 create_discount = Blueprint("/discount/create", __name__)
 
@@ -27,7 +28,7 @@ def _create_discount():
          'message': 'data format is invalid',
          'code': 23
    }, 200
-   doc = discounts.insert_one({
+   doc = insert_one('discounts', {
       "name": name,
       "description": description,
       "value": float(value),
