@@ -1,0 +1,20 @@
+version: '4.19'
+
+services:
+  app:
+    build: ./app
+    ports:
+      - "5000:5000" 
+
+  proxy_server:
+    build: ./proxy_server
+    ports:
+      - "80:80" 
+
+  # sync_app:
+  #   build: ./changes_detection_app
+
+  # db:
+  #   build: ./db
+  #   ports:
+  #     - "5432:5432" 
