@@ -41,7 +41,8 @@ def _get_product():
           "inventory_prerequisite": record["inventory_prerequisite"],
           "created_by": record["created_by"],
           "created_at": record["created_at"],
-          "no_price": record.get('no_price')
+          "no_price": record.get('no_price'),
+          "transaction_count": record.get('transaction_count')
           },
        }, 200 
    else:

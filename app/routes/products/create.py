@@ -23,6 +23,7 @@ def _create_product():
    inventory_prerequisite = request_data['inventoryPrerequisite']
    sku = request_data['sku']
    created_by = g.user_id
+   transaction_count = 0
    no_price = False 
    if request_data.get('noPrice'):
        no_price = request_data.get('noPrice')
@@ -60,6 +61,7 @@ def _create_product():
       "created_by": created_by,
       "created_at": create_at,
       "no_price": no_price,
+      "transaction_count": transaction_count
    })
    
    if doc.inserted_id:

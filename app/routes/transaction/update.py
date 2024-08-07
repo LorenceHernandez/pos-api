@@ -70,14 +70,19 @@ def _update_transaction():
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
          name = []
 
-         
          for service in services: 
             if service['source'] == "package": 
                for item in service['items']:
                   name.append(item['name'])
+                  product_filter = { '_id': ObjectId(item['_id'])  }
+                  product_new_val = { "$inc": { 'transaction_count': 1 } }
+                  res = products.update_one(product_filter, product_new_val)
             else:
                name.append(service['name'])
-         
+               product_filter = { '_id': ObjectId(item['_id'])  }
+               product_new_val = { "$inc": { 'transaction_count': 1 } }
+               res = products.update_one(product_filter, product_new_val)
+
          for service in services:
             if service['source'] == "package":  
                   for category in _categories:  

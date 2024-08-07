@@ -9,7 +9,8 @@ get_products = Blueprint("/products", __name__)
 @get_products.route('/products', methods=['GET'])
 def _get_products():
        #todo add more handling
-       res = products.find()
+      #  res = products.find()
+       res = products.find().sort("transaction_count", -1)
 
        ret = []
        for record in res:
@@ -35,7 +36,8 @@ def _get_products():
             "inventory_prerequisite": record["inventory_prerequisite"],
             "created_by": record["created_by"],
             "created_at": record["created_at"],
-            "no_price": record.get('no_price')
+            "no_price": record.get('no_price'),
+            "transaction_count": record.get('transaction_count')
           })
        return {
           'data': ret,
