@@ -1,10 +1,15 @@
+import os
 import pymongo
 import datetime
-import time
 from datetime import datetime
 
-from .config import REMOTE_HOST, LOCAL_HOST, BACKUP_HOST
+from dotenv import load_dotenv
 
+load_dotenv()
+
+BACKUP_HOST = os.getenv('BACKUP_HOST')
+LOCAL_HOST = os.getenv('LOCAL_HOST')
+REMOTE_HOST = os.getenv('REMOTE_HOST')
 
 def sync_data(source_uri, source_db_name, dest_uri, dest_db_name, drop_dest_collection=False, drop_source_collection=False):
   try:
@@ -37,8 +42,8 @@ def sync_data(source_uri, source_db_name, dest_uri, dest_db_name, drop_dest_coll
         source_collection.drop()
   except Exception as e:
     print('Error: ', repr(e))
-
-while True:
+  
+def downstream_remote_to_internal():
   print('\n=========================================================================')
   print(f'[{datetime.now()}] Downstream-Sync data from remote to backup...')
   sync_data(REMOTE_HOST, "pos", LOCAL_HOST, "internal-pos", True)
@@ -46,10 +51,9 @@ while True:
   print(f'[{datetime.now()}] Downstream-Sync was sucessfully done...')
 
 
+def upstream_backup_to_remote():
   print('\n=========================================================================')
   print(f'[{datetime.now()}] Upstream-Sync data from local to remote...')
   sync_data(BACKUP_HOST, "pos-cache", REMOTE_HOST, "pos", False, True)
-  
-  print(f'[{datetime.now()}] Upstream-Sync was sucessfully done...')
 
-  time.sleep(60)
+  print(f'[{datetime.now()}] Upstream-Sync was sucessfully done...')

@@ -1,14 +1,28 @@
+import multiprocessing
+import os
+import time
 from flask import Flask, request, Response
 from flask_cors import CORS
 import requests
 import socket
 from escpos import *
+import schedule
+
+from sync.sync import downstream_remote_to_internal, upstream_backup_to_remote
 
 app = Flask(__name__)
 
+from dotenv import load_dotenv
+
+load_dotenv('../.env')
 # Replace with your local and cloud server URLs
-LOCAL_SERVER_URL = "http://127.0.0.1:5000"
-CLOUD_SERVER_URL = "http://3.90.33.200:5000"
+LOCAL_SERVER_URL = os.getenv('LOCAL_URL')
+CLOUD_SERVER_URL = os.getenv('CLOUD_URL')
+
+
+schedule.every(2).minutes.do(downstream_remote_to_internal)
+schedule.every(30).seconds.do(upstream_backup_to_remote)
+
 
 def is_internet_connected():
     try:
@@ -70,7 +84,16 @@ def print_text():
     p.text('Hello from Python!\n')
     p.cut()
     return 'Print job sent'
-    
+
+
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', debug=True, port=8080)
+    p = multiprocessing.Process(target=run_schedule)
+    p.start()
+
+    app.run(host="0.0.0.0", debug=True, port=8080)
+

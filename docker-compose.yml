@@ -6,29 +6,21 @@ services:
     image: chrisn0tdev/pos-app
     ports:
       - "5000:5000" 
-    networks:
-      - pos-network
+    # networks:
+    #   - pos-network
     env_file: .env
     restart: unless-stopped
   proxy:
     build: ./proxy
     image: chrisn0tdev/pos-proxy
     ports:
-      - "90:90" 
+      - "8080:8080" 
     depends_on:
       - mongo
-    networks:
-      - pos-network
+    # networks:
+    #   - pos-network
     restart: unless-stopped
-
-  sync:
-    build: ./sync
-    image: chrisn0tdev/pos-sync
-    ports:
-      - "91:91" 
-    networks:
-      - pos-network
-    restart: always
+    env_file: .env
 
 
   mongo:
@@ -38,12 +30,12 @@ services:
       - "27017:27017" 
     volumes:
       - mongo-data:/data/db
-    networks:
-      - pos-network
+    # networks:
+    #   - pos-network
 
-networks:
-  pos-network:
-    driver: bridge
+# networks:
+#   pos-network:
+#     driver: bridge
 volumes:
   mongo-data:
     driver: local
