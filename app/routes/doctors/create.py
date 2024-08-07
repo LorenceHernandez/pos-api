@@ -8,6 +8,7 @@ import jwt
 from flask import Blueprint, g, request
 
 from app.database.config import doctors
+from app.utils.utils import getLocalTime
 
 create_doctor = Blueprint("/doctor/create", __name__)
 
@@ -27,7 +28,7 @@ def _create_doctor():
         }, 200
 
    created_by = g.user_id
-   create_at = datetime.now()
+   create_at = getLocalTime()
 
    
    doc = doctors.insert_one({

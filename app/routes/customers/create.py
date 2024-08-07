@@ -10,6 +10,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import customers
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_customer = Blueprint("/customer/create", __name__)
 
@@ -30,7 +31,7 @@ def _create_customer():
    tin_number = None
 
    created_by = g.user_id
-   created_at = datetime.now()
+   created_at = getLocalTime()
    
    # if 'discount' in request_data:
    #    discount = request_data['discount']

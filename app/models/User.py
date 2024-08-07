@@ -4,6 +4,7 @@ from bson import ObjectId
 
 from app.database.config import users
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 
 class User:
@@ -18,7 +19,7 @@ class User:
         self.created_by = created_by
         
    def save(self):
-        created_at = datetime.now()
+        created_at = getLocalTime()
         return insert_one('users', {
             "username": self.username,
             "password": self.password,
@@ -33,7 +34,7 @@ class User:
         })
    
    def update(self, id, obj = {}):
-        obj['updated_at'] = datetime.now()
+        obj['updated_at'] = getLocalTime()
         filter = { '_id': ObjectId(id) }
         new_val = { "$set": obj }
         return users.update_one(filter, new_val)

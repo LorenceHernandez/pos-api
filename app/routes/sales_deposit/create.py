@@ -1,11 +1,13 @@
 
 from datetime import date, datetime
+
 from flask import Blueprint, g, request
 from pydash import omit
 
 from app.database.config import sales_deposits
 from app.database.store import insert_one
 from app.models.SalesDeposit import SalesDeposit
+from app.utils.utils import getLocalTime
 
 create_sales_deposit = Blueprint("/sales-deposits/create", __name__)
 
@@ -22,7 +24,7 @@ def _create_sales_deposit():
          raise Exception('Only one sales deposit is allowed per day in any branch.')
 
       deposit = SalesDeposit.fromDict(request_data)
-      deposit.created_at = datetime.now()
+      deposit.created_at = getLocalTime()
       deposit.date_deposited = today
       deposit.cashier_id = g.user_id
       

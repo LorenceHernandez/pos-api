@@ -9,6 +9,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import corporates
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_company = Blueprint("/corporate/create", __name__)
 
@@ -18,7 +19,7 @@ def _create_company():
    name, street_address, city, state, postal_code, contact, email = request_data['name'], request_data['streetAddress'], request_data['city'], request_data['state'], request_data['postalCode'], request_data['contactNo'], request_data['emailAddress']
    tin_id = request_data['tinId']
    created_by = g.user_id
-   created_at = datetime.now()
+   created_at = getLocalTime()
    
    doc = insert_one('corporate', {
       "name": name,

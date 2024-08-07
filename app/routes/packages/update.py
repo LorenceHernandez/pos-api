@@ -8,6 +8,7 @@ from bson import ObjectId
 from flask import Blueprint, request
 
 from app.database.config import packages
+from app.utils.utils import getLocalTime
 
 update_package = Blueprint("/package/edit", __name__)
 
@@ -46,7 +47,7 @@ def _update_package():
             'message': 'atleast one field is required when updating a user',
             'code': 25
         }, 200
-   update_val['updated_at'] = datetime.now()
+   update_val['updated_at'] = getLocalTime()
    filter = { '_id': ObjectId(id) }
    new_val = { "$set": update_val }
    #array_filt = {"arrayFilters": [{'[0].id': '1'}]}

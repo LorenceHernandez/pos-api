@@ -11,6 +11,7 @@ from pydash import omit
 from app.database.config import branches
 from app.database.store import insert_one
 from app.models.Branch import Branch
+from app.utils.utils import getLocalTime
 
 create_branch = Blueprint("/branch/create", __name__)
 
@@ -19,7 +20,7 @@ def _create_branch():
    request_data = request.get_json()
   
    branch = Branch.fromDict(request_data)
-   branch.created_at = datetime.now()
+   branch.created_at = getLocalTime()
    branch.created_by = g.user_id
    
    doc = insert_one('branches', omit(branch.toDict(), 'id'))

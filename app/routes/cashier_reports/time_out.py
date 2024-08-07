@@ -1,16 +1,15 @@
 
 from datetime import date, datetime
+
 from bson import ObjectId
 from flask import Blueprint, g, request
 from pydash import omit
 
-from app.database.config import cashier_reports
+from app.database.config import cashier_reports, sales
 from app.models.CashCount import CashCount
 from app.models.CashierReport import CashierReport
 from app.utils.filter_values import filterValues
-
-
-from app.database.config import sales
+from app.utils.utils import getLocalTime
 
 time_out_cashier_report = Blueprint("/cashier-reports/time-out", __name__)
 
@@ -22,7 +21,7 @@ def _update_cashier_report():
    data = cashier_reports.find_one({ '_id': ObjectId(id) })
 
    report = CashierReport.fromDict(data)
-   report.time_out = str(datetime.now().time())
+   report.time_out = str(getLocalTime().time())
    report.ending_cash_on_hand = CashCount.fromDict(request_data['endingCashOnHand'])
    
    filter = { '_id': ObjectId(id) }

@@ -10,6 +10,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import discounts
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_discount = Blueprint("/discount/create", __name__)
 
@@ -19,7 +20,7 @@ def _create_discount():
    name, description, value, type = request_data['name'], request_data['description'], request_data['value'], request_data['type']
 
    created_by = g.user_id
-   created_at = datetime.now()
+   created_at = getLocalTime()
    
    try:
         float(value)

@@ -9,6 +9,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import packages
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_package = Blueprint("/package/create", __name__)
 
@@ -18,7 +19,7 @@ def _create_package():
    name, desc, package_type, lab_test = request_data['name'], request_data['description'], request_data['packageType'], request_data['labTest']
    discount = request_data['discount']
    created_by = g.user_id
-   created_at = datetime.now()
+   created_at = getLocalTime()
 
 
    doc = insert_one('packages', {

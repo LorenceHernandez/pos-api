@@ -9,6 +9,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import users
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 register = Blueprint("/user/register", __name__)
 
@@ -22,7 +23,7 @@ def _create_account():
    role_id = request_data['roleId']
    branch_ids = request_data['branchIds']
    created_by = g.user_id
-   create_at = datetime.now()
+   create_at = getLocalTime()
 
    try:
       ObjectId(role_id)

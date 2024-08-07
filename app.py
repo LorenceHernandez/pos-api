@@ -2,12 +2,12 @@
 import json
 import os
 
-
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
 from app.blueprints.cashier_report import cashier_report
+from app.utils.utils import getLocalTime
 
 load_dotenv()
 
@@ -212,7 +212,7 @@ def _create_booking():
      'note': request_data.get('note'),
      'branchId': request_data.get('branchId'),
      'isConfirmed': False,
-     'create_at': datetime.now()
+     'create_at': getLocalTime()
   })
   if doc.inserted_id:
      return {

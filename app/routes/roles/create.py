@@ -9,6 +9,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import roles
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_role = Blueprint("/role/create", __name__)
 
@@ -19,7 +20,7 @@ def _create_role():
    name, authorizations = request_data['name'], request_data['authorizations']
    
    created_by = g.user_id
-   created_at = datetime.now()
+   created_at = getLocalTime()
    
    doc = insert_one('roles', {
       "name": name,

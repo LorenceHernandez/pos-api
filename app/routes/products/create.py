@@ -9,6 +9,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import products
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_product = Blueprint("/product/create", __name__)
 
@@ -25,7 +26,7 @@ def _create_product():
    no_price = False 
    if request_data.get('noPrice'):
        no_price = request_data.get('noPrice')
-   create_at = datetime.now()
+   create_at = getLocalTime()
 
    if len(sku) == 0:
        return {

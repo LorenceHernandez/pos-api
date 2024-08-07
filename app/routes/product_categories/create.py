@@ -9,6 +9,7 @@ from flask import Blueprint, g, request
 
 from app.database.config import product_categories
 from app.database.store import insert_one
+from app.utils.utils import getLocalTime
 
 create_product_category = Blueprint("/product/category/create", __name__)
 
@@ -17,7 +18,7 @@ def _create_product_category():
    request_data = request.get_json()
    name, desc = request_data['name'], request_data['description']
    created_by = g.user_id
-   created_at = datetime.now()
+   created_at = getLocalTime()
    
    doc = insert_one('product_categories', {
       "name": name,

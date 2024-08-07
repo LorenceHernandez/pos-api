@@ -14,6 +14,7 @@ from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.routes.transaction.read_active import get_pending_transaction
 from app.utils.filter_values import filterValues
+from app.utils.utils import getLocalTime
 
 create_transaction = Blueprint("/transaction/create", __name__)
 
@@ -32,8 +33,8 @@ def _create_transaction():
       transaction = Transaction()
       transaction.transaction_no = str(uuid.uuid4())
       transaction.status = 'active'
-      transaction.transaction_date = datetime.now().isoformat()
-      transaction.date = str(date.today())
+      transaction.transaction_date = getLocalTime().isoformat()
+      transaction.date = getLocalTime()
       transaction.create_by = g.user_id
       transaction.branch_id = request_data['branchId']
       

@@ -1,11 +1,13 @@
 
 from datetime import date, datetime
+
 from flask import Blueprint, g, request
 from pydash import omit
 
 from app.database.config import cashier_reports
 from app.database.store import insert_one
 from app.models.CashierReport import CashierReport
+from app.utils.utils import getLocalTime
 
 time_in_cashier_report = Blueprint("/cashier-reports/time-in", __name__)
 
@@ -29,7 +31,7 @@ def _create_cashier_report():
       pass
    
    report = CashierReport.fromDict(request_data)
-   report.time_in = str(datetime.now().time())
+   report.time_in = str(getLocalTime().time())
    report.date = str(date.today())
    report.cashier_id = g.user_id
    
