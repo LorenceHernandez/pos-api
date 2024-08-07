@@ -1,20 +1,47 @@
-version: '4.19'
+version: '4'
 
 services:
-  app:
-    build: ./app
+  server:
+    build: ./
+    image: chrisn0tdev/pos-app
     ports:
       - "5000:5000" 
+    networks:
+      - pos-network
 
-  proxy_server:
-    build: ./proxy_server
+  proxy:
+    build: ./proxy
+    image: chrisn0tdev/pos-proxy
     ports:
-      - "80:80" 
+      - "90:90" 
+    depends_on:
+      - mongo
+    networks:
+      - pos-network
 
-  # sync_app:
-  #   build: ./changes_detection_app
 
-  # db:
-  #   build: ./db
-  #   ports:
-  #     - "5432:5432" 
+  sync:
+    build: ./sync
+    image: chrisn0tdev/pos-sync
+    ports:
+      - "91:91" 
+    networks:
+      - pos-network
+
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017" 
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - pos-network
+
+networks:
+  pos-network:
+    driver: bridge
+volumes:
+  mongo-data:
+    driver: local

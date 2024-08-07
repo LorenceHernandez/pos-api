@@ -3,7 +3,6 @@ import json
 import os
 
 
-import jwt
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
@@ -109,24 +108,6 @@ def hook():
    if request_validator_result is not None:
       return request_validator_result
    
-from escpos import *
-import usb.core
-import usb.util
-
-@app.route('/print')
-def print_text():
-
-   dev = usb.core.find(idVendor=0x04b8, idProduct=0x0202)  # Replace with your device's VID and PID
-   p = printer.Usb(0x04b8,0x0202)
-   p.initialize()
-   # p = escpos.printer(Usb(0x04b8, 0x0202))  # For USB connection
-    # p = escpos.Network("192.168.1.100")  # For network connection
-
-   p.set(align='center')
-   p.text('Hello from Python!\n')
-   p.cut()
-   return 'Print job sent'
-
 @app.route('/', methods=['GET'])
 def home():
   return 'hello world'

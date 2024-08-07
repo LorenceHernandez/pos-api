@@ -1,11 +1,10 @@
 import pymongo
-import subprocess
 import datetime
-import schedule
 import time
 from datetime import datetime
 
-from app.config import BACKUP_HOST, LOCAL_HOST, REMOTE_HOST
+from .config import REMOTE_HOST, LOCAL_HOST, BACKUP_HOST
+
 
 def sync_data(source_uri, source_db_name, dest_uri, dest_db_name, drop_dest_collection=False, drop_source_collection=False):
   try:
