@@ -12,6 +12,7 @@ from app.new_models.CashCount import CashCount
 from app.new_models.CashierReport import TimeInCashierReport, TimeOutCashierReport
 from app.repositories.cashier_report import CashierReportRepository
 from app.utils.filter_values import filterValues
+from app.utils.utils import getTimeZone
 
 api = '/v2/cashier-reports'
 cashier_report = Blueprint('cashier-reports', __name__)
@@ -67,7 +68,7 @@ def time_in_report(user_id):
         return jsonify({ 'data': report, 'message': 'Report today returned' })
     
     report = TimeInCashierReport(**request_data)
-    report.timeIn = datetime.now().isoformat()
+    report.timeIn = datetime.now(getTimeZone()).isoformat()
     report.cashierId = user_id
     report.date = date_today
 
@@ -85,7 +86,7 @@ def time_out_report(user_id):
     id = request_data['_id']
 
     report = TimeOutCashierReport(**request_data)
-    report.timeOut = datetime.now().isoformat()
+    report.timeOut = datetime.now(getTimeZone()).isoformat()
     report.endingCashOnHand = CashCount(**request_data['endingCashOnHand'])
 
     query = { '_id': ObjectId(id) }

@@ -2,11 +2,12 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from app.filters.date_filter import DateFilter
+from app.utils.utils import getTimeZone
 
 
 def compare_date_today(dateFilter, date):
      date = datetime.fromisoformat(date)
-     today = datetime.now()
+     today = datetime.now(getTimeZone())
 
      match dateFilter:
           case DateFilter.TODAY:
