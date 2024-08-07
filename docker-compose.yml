@@ -8,7 +8,8 @@ services:
       - "5000:5000" 
     networks:
       - pos-network
-
+    env_file: .env
+    restart: unless-stopped
   proxy:
     build: ./proxy
     image: chrisn0tdev/pos-proxy
@@ -18,7 +19,7 @@ services:
       - mongo
     networks:
       - pos-network
-
+    restart: unless-stopped
 
   sync:
     build: ./sync
@@ -27,6 +28,7 @@ services:
       - "91:91" 
     networks:
       - pos-network
+    restart: always
 
 
   mongo:

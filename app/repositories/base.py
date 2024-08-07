@@ -1,13 +1,14 @@
 
 import abc
+
+from dotenv import load_dotenv
 from app.config import IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION
 from app.database.database import remote_database, backup_database, internal_prod_database
 
-current_database = None
+load_dotenv()
+current_database = remote_database
 current_backup_database = None
 
-if IS_DEVELOPMENT:
-    current_database = remote_database
 if IS_INTERNAL_PRODUCTION:
     current_database = internal_prod_database
     current_backup_database = backup_database
