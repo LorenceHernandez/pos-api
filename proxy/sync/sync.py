@@ -1,31 +1,19 @@
 import os
+import os
 import pymongo
-import datetime
-from datetime import datetime
+import time
+import schedule
 
-from dotenv import load_dotenv
+REMOTE_DATABASE_URL = os.getenv('REMOTE_DATABASE_URL') 
+LOCAL_DATABASE_URL = os.getenv('LOCAL_DATABASE_URL')  
 
-load_dotenv()
+print('REMOTE_DATABASE_URL: ', REMOTE_DATABASE_URL)
+print('LOCAL_DATABASE_URL: ', LOCAL_DATABASE_URL)
 
-BACKUP_HOST = os.getenv('BACKUP_HOST')
-LOCAL_HOST = os.getenv('LOCAL_HOST')
-REMOTE_HOST = os.getenv('REMOTE_HOST')
-
-def sync_data(source_uri, source_db_name, dest_uri, dest_db_name, drop_dest_collection=False, drop_source_collection=False):
+def sync_data(source_client: pymongo.MongoClient, source_db_name, dest_client: pymongo.MongoClient, dest_db_name, drop_dest_collection=False, drop_source_collection=False):
   try:
-    source_client = pymongo.MongoClient(source_uri)
-    dest_client = pymongo.MongoClient(dest_uri)
-
     source_db = source_client[source_db_name]
     dest_db = dest_client[dest_db_name]
-
-    if(source_db_name not in source_client.list_database_names()):
-      print(f'- Error: source db "{source_db_name}" does not exist.')
-      return
-    
-    if(dest_db_name not in dest_client.list_database_names()):
-      print(f'- Error: destination db "{dest_db_name}" does not exist.')
-      return
 
     for collection_name in source_db.list_collection_names():
       print(f'- Collection: {collection_name}')
@@ -37,23 +25,40 @@ def sync_data(source_uri, source_db_name, dest_uri, dest_db_name, drop_dest_coll
 
       for doc in source_collection.find():
         dest_collection.insert_one(doc)
-      
+
       if(drop_source_collection):
         source_collection.drop()
   except Exception as e:
     print('Error: ', repr(e))
-  
-def downstream_remote_to_internal():
+
+
+
+def downstream_sync_data():
+  source_client = pymongo.MongoClient(REMOTE_DATABASE_URL)
+  dest_client = pymongo.MongoClient(LOCAL_DATABASE_URL)
+
   print('\n=========================================================================')
-  print(f'[{datetime.now()}] Downstream-Sync data from remote to backup...')
-  sync_data(REMOTE_HOST, "pos", LOCAL_HOST, "internal-pos", True)
+  print(f'Downstream-Sync data from remote to backup...')
+  sync_data(source_client, "pos", dest_client, "internal-pos", True)
 
-  print(f'[{datetime.now()}] Downstream-Sync was sucessfully done...')
+  print(f'Downstream-Sync was sucessfully done...')
 
+def upstream_sync_data():
+  source_client = pymongo.MongoClient(LOCAL_DATABASE_URL)
+  dest_client = pymongo.MongoClient(REMOTE_DATABASE_URL)
 
 def upstream_backup_to_remote():
   print('\n=========================================================================')
-  print(f'[{datetime.now()}] Upstream-Sync data from local to remote...')
-  sync_data(BACKUP_HOST, "pos-cache", REMOTE_HOST, "pos", False, True)
+  print(f'Upstream-Sync data from local to remote...')
+  sync_data(source_client, "pos-cache", dest_client, "pos", False, True)
+  
+  print(f'Upstream-Sync was sucessfully done...')
 
-  print(f'[{datetime.now()}] Upstream-Sync was sucessfully done...')
+print('Auto-Sync starting...')
+schedule.every(3).minutes.do(downstream_sync_data)
+schedule.every(20).seconds.do(upstream_sync_data)
+
+downstream_sync_data()
+while True:
+  schedule.run_pending()
+  time.sleep(1)

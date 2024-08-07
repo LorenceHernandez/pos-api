@@ -3,7 +3,7 @@
 from functools import wraps
 import os
 from flask import jsonify, make_response, request
-import jwt
+from jwt.api_jwt import decode
 
 from app.config import JWT_SECRET_KEY
 
@@ -21,7 +21,7 @@ def authorized(f):
             return make_response(jsonify({'message': 'Unauthorized'}), 401)
 
         try:
-            data = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+            data = decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
             user_id = data['user_id']
         except Exception as e:
             return make_response(jsonify({'message': 'Invalid Token'}), 401)

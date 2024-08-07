@@ -9,5 +9,5 @@ RUN pip install -r requirements.txt --verbose
 
 COPY . .
 
-EXPOSE 8080
-CMD ["python", "-u", "app.py", "runserver", "0.0.0.0:8080"]
+EXPOSE 9090
+CMD ["python", "-u", "app.py"]

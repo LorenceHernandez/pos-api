@@ -1,7 +1,7 @@
 
 import abc
 import pymongo
-from app.config import BACKUP_DATABASE, BACKUP_HOST, BACKUP_PORT, LOCAL_DATABASE, LOCAL_HOST, LOCAL_PORT, REMOTE_DATABASE, REMOTE_HOST, REMOTE_PORT
+from app.config import BACKUP_DATABASE, LOCAL_DATABASE, LOCAL_DATABASE_URL, REMOTE_DATABASE, REMOTE_DATABASE_URL
 
 class Database(abc.ABC):
     def __init__(self, config):
@@ -18,10 +18,10 @@ class Database(abc.ABC):
 
 class MongoDB(Database):
     def connect(self):
-        self._connection = pymongo.MongoClient(self.config['host'], self.config['port'])
+        self._connection = pymongo.MongoClient(self.config['uri'])
         db = self._connection[self.config['database']]
 
-        print('CONNECTED_DB: ', self._connection)
+        print('CONNECTED_DB: ', self.config['database'], self._connection)
         return db
 
     def close(self):
@@ -29,25 +29,21 @@ class MongoDB(Database):
 
 
 dev_database = MongoDB({ 
-    "host": LOCAL_HOST, 
-    "port": LOCAL_PORT,
+    "uri": LOCAL_DATABASE_URL, 
     "database": REMOTE_DATABASE, 
 })
 
 remote_database = MongoDB({ 
-    "host": REMOTE_HOST, 
-    "port": REMOTE_PORT,
+    "uri": REMOTE_DATABASE_URL, 
     "database": REMOTE_DATABASE, 
 })
 
 backup_database = MongoDB({ 
-    "host": BACKUP_HOST, 
-    "port": BACKUP_PORT,
+    "uri": LOCAL_DATABASE_URL, 
     "database": BACKUP_DATABASE, 
 })
 
 internal_prod_database = MongoDB({ 
-    "host": LOCAL_HOST, 
-    "port": LOCAL_PORT,
+    "uri": LOCAL_DATABASE_URL, 
     "database": LOCAL_DATABASE, 
 })

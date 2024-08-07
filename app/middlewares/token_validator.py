@@ -1,8 +1,8 @@
 
 import os
 
-import jwt
 from flask import Blueprint, g, request
+from jwt.api_jwt import decode
 
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
@@ -27,7 +27,8 @@ def token_validator():
           auth = bearer.split(' ')
           if len(auth) > 1:
             token = auth[1]
-            decoded_token = jwt.decode(token, "eec96ad2524e71caacb54e9061178f512867998d8980fccdea34274629e0762b", algorithms=["HS256"])
+            
+            decoded_token = decode(token, JWT_SECRET, algorithms=["HS256"])
             
             if decoded_token['user_id'] is None:
                 return {

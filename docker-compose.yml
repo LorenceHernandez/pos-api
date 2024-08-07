@@ -9,7 +9,12 @@ services:
     # networks:
     #   - pos-network
     env_file: .env
-    restart: unless-stopped
+    environment:
+      LOCAL_DATABASE_URL: mongodb://mongo:27017
+    restart: always
+    depends_on:
+      - mongo
+
   proxy:
     build: ./proxy
     image: chrisn0tdev/pos-proxy
@@ -17,17 +22,32 @@ services:
       - "8080:8080" 
     depends_on:
       - mongo
+      - server
     # networks:
     #   - pos-network
-    restart: unless-stopped
+    restart: always
     env_file: .env
+    environment:
+      LOCAL_DATABASE_URL: mongodb://mongo:27017
+      LOCAL_SERVER_URL: http://server:5000
 
+  sync:
+    build: ./sync
+    image: chrisn0tdev/pos-sync
+    depends_on:
+      - mongo
+    # networks:
+    #   - pos-network
+    restart: always
+    env_file: .env
+    environment:
+      LOCAL_DATABASE_URL: mongodb://mongo:27017
 
   mongo:
     image: mongo
     restart: always
     ports:
-      - "27017:27017" 
+      - "27018:27017" 
     volumes:
       - mongo-data:/data/db
     # networks:

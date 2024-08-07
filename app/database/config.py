@@ -2,32 +2,35 @@ import os
 
 from pymongo import MongoClient
 
+from app.config import IS_INTERNAL_PRODUCTION, IS_PRODUCTION
+from .database import remote_database, internal_prod_database
+
 MONGO_PORT = os.getenv('MONGO_PORT')
 MONGO_HOST_PY = os.getenv('MONGO_HOST_PY')
 MONGO_USER = os.getenv('MONGO_USER')
 MONGO_PASS = os.getenv('MONGO_PASS')
 LOCAL = os.getenv('LOCAL')
 
-if LOCAL: 
- client = client = MongoClient(MONGO_HOST_PY, int(MONGO_PORT)) 
-else:  
-  host = 'mongodb://' + MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST_PY + ':' + MONGO_PORT + '/?authSource=pos'
-  client = MongoClient(host)    
+database = remote_database
+if IS_INTERNAL_PRODUCTION:
+  database = internal_prod_database
+if IS_PRODUCTION:
+  database = remote_database
 
-db = client.pos
-users = db.users
-products = db.products
-doctors = db.doctors
-product_categories = db.product_categories
-branches = db.branches
-corporates = db.corporates
-customers = db.customers
-packages = db.packages
-roles = db.roles
-transactions = db.transactions
-discounts = db.discounts
-sales = db.sales
-bookings = db.bookings
-cashier_reports = db.cashier_reports
-sales_deposits = db.sales_deposits  
-branch_reports = db.branch_reports  
+database = database.connect()
+users = database.users
+products = database.products
+doctors = database.doctors
+product_categories = database.product_categories
+branches = database.branches
+corporates = database.corporates
+customers = database.customers
+packages = database.packages
+roles = database.roles
+transactions = database.transactions
+discounts = database.discounts
+sales = database.sales
+bookings = database.bookings
+cashier_reports = database.cashier_reports
+sales_deposits = database.sales_deposits  
+branch_reports = database.branch_reports  
