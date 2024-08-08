@@ -9,7 +9,7 @@ from flask_cors import CORS, cross_origin
 from app.blueprints.cashier_report import cashier_report
 from app.utils.utils import getLocalTime
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 from datetime import datetime
@@ -93,9 +93,9 @@ JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 app = Flask(__name__)
 
-app.register_blueprint(cashier_report)
 
 cors = CORS(app, origins=["*", "*"])
+app.register_blueprint(cashier_report)
 @app.before_request
 def hook():
    
