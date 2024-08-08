@@ -38,8 +38,8 @@ def _create_product():
             'code': 23
         }, 200
    
-   if len(sku) > 0:
-   
+   if sku is not None and len(sku) > 0:
+         
       doc = list(products.find({"sku": sku}))
 
       if len(doc) > 0:
