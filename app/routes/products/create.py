@@ -29,11 +29,6 @@ def _create_product():
        no_price = request_data.get('noPrice')
    create_at = getLocalTime()
 
-   if len(sku) == 0:
-       return {
-           'message': 'SKU is required',
-           'code': 45
-       }, 200
    try:
         float(price)
         ObjectId(category_id)
@@ -42,14 +37,17 @@ def _create_product():
             'message': 'data format is invalid',
             'code': 23
         }, 200
+   
+   if len(sku) > 0:
+   
+      doc = list(products.find({"sku": sku}))
 
-   doc = list(products.find({"sku": sku}))
-
-   if len(doc) > 0:
-      return {
-         'message': 'Duplicate SKU is not allowed',
-         'code': 17
-      }, 200
+      if len(doc) > 0:
+         return {
+            'message': 'Duplicate SKU is not allowed',
+            'code': 17
+         }, 200
+    
    
    doc = insert_one('products', {
       "name": name,
