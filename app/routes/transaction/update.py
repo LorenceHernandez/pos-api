@@ -78,8 +78,8 @@ def _update_transaction():
                   product_new_val = { "$inc": { 'transaction_count': 1 } }
                   res = products.update_one(product_filter, product_new_val)
             else:
-               name.append(service['name'])
-               product_filter = { '_id': ObjectId(item['_id'])  }
+               name.append(service['name'])  
+               product_filter = { '_id': ObjectId(service['_id'])  }
                product_new_val = { "$inc": { 'transaction_count': 1 } }
                res = products.update_one(product_filter, product_new_val)
 
