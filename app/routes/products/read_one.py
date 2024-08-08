@@ -33,10 +33,10 @@ def _get_product():
         return {
           'data': {
           "_id": str(record["_id"]),
-          "sku": record["sku"],
+          "sku": record.get("sku"),
           "name": record["name"],
           "price": record["price"],
-          "description": record["description"],
+          "description": record.get("description"),
           "category": category,
           "inventory_prerequisite": record["inventory_prerequisite"],
           "created_by": record["created_by"],

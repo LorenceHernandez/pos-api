@@ -17,11 +17,11 @@ create_product = Blueprint("/product/create", __name__)
 def _create_product():
    request_data = request.get_json()
    name = request_data['name']
-   desc = request_data['description']
+   desc = request_data.get('description')
    price = request_data['price']
    category_id = request_data['categoryId']
    inventory_prerequisite = request_data['inventoryPrerequisite']
-   sku = request_data['sku']
+   sku = request_data.get('sku')
    created_by = g.user_id
    transaction_count = 0
    no_price = False 

@@ -10,7 +10,7 @@ route_constraints = [
   { 'route': '/login', 'params': ['username', 'password'], 'content-type': 'urlencoded', 'method': 'POST' },
   { 'route': '/user/register', 'params': ['branchIds', 'username', 'password', 'firstName', 'lastName', 'roleId'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/user/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/product/create', 'params': ['sku', 'price', 'name', 'inventoryPrerequisite', 'categoryId', 'description'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/product/create', 'params': ['price', 'name', 'inventoryPrerequisite', 'categoryId'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/product', 'params': ['id'], 'content-type': 'urlencoded', 'method': 'GET' },
   { 'route': '/doctor/create', 'params': ['firstName', 'lastName', 'middleName', 'age', 'gender', "address", "isMember"], 'content-type': 'json', 'method': 'POST' },

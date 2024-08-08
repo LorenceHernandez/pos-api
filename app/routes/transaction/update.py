@@ -25,7 +25,8 @@ def _update_transaction():
 
    try:
       transaction = Transaction.fromDict(request_data)
-   except:
+   except Exception as e:
+      print (e)
       return {
          'message': 'data format is invalid',
          'code': 23
