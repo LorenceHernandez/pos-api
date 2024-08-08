@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 
@@ -24,6 +24,7 @@ IS_DEVELOPMENT = ENVIRONMENT == 'development'
 IS_INTERNAL_PRODUCTION = ENVIRONMENT == 'internal-production'
 IS_PRODUCTION = ENVIRONMENT == 'production'
 
-if LOCAL_DATABASE_URL is None:
-    raise Exception('LOCAL_DATABASE_URL is None')
-print('CURRENT_ENVIRONMENT: ', ENVIRONMENT)
+if IS_PRODUCTION is not True:
+    if LOCAL_DATABASE_URL is None:
+        raise Exception('LOCAL_DATABASE_URL is None')
+    print('CURRENT_ENVIRONMENT: ', ENVIRONMENT)
