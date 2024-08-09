@@ -22,7 +22,7 @@ repository = CashierReportRepository()
 @authorized
 def get_reports(user_id):
     date_today = str(date.today())
-    date_filter = request.args.get('dateFilter', DateFilter.TODAY)
+    date_filter = request.args.get('dateFilter', DateFilter.ALL)
     custom_date = request.args.get('customDate')
     start_date = request.args.get('startDate')
     end_date = request.args.get('endDate')

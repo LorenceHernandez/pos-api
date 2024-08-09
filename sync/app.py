@@ -24,7 +24,9 @@ def sync_data(source_client: pymongo.MongoClient, source_db_name, dest_client: p
         dest_collection.drop()
 
       for doc in source_collection.find():
-        dest_collection.insert_one(doc)
+        filter = { '_id': doc['_id'] }
+        value = { "$set": doc }
+        dest_collection.update_one(filter, value, upsert=True)
 
       if(drop_source_collection):
         source_collection.drop()
@@ -47,7 +49,6 @@ def upstream_sync_data():
   source_client = pymongo.MongoClient(LOCAL_DATABASE_URL)
   dest_client = pymongo.MongoClient(REMOTE_DATABASE_URL)
 
-def upstream_backup_to_remote():
   print('\n=========================================================================')
   print(f'Upstream-Sync data from local to remote...')
   sync_data(source_client, "pos-cache", dest_client, "pos", False, True)
