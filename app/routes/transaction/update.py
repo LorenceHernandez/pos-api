@@ -46,6 +46,7 @@ def _update_transaction():
          categories = product_categories.find()
          services = updated_trans.get('services')
          orNo = updated_trans.get('invoiceNo')
+         invoiceNumber = updated_trans.get('invoiceNumber')
          amount = updated_trans.get('paymentDetails').get('paymentDue')
          branch = updated_trans.get('branchId')
          discount = 0
@@ -99,6 +100,7 @@ def _update_transaction():
             'customerData': updated_trans.get('customerData'),
             'labExams': ', '.join(name),
             'orNo': orNo,
+            'invoiceNumber': invoiceNumber,
             'amount': amount,
             'categories': _categories,
             'discount': discount,

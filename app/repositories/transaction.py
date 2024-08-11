@@ -86,18 +86,18 @@ class TransactionRepository(BackupRepository):
             ]))
 
             transactions = []
-            for transaction in data:
-                if transaction.get('referredBy') is None or transaction.get('referredBy').get('_id') is None:
-                    transaction['referredBy'] = None
+            for item in data:
+                if item.get('referredBy') is None or item.get('referredBy').get('_id') is None:
+                    item['referredBy'] = None
                 
-                if transaction.get('requestedBy') is None or transaction.get('requestedBy').get('_id') is None:
-                    transaction['requestedBy'] = None
+                if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
+                    item['requestedBy'] = None
 
-                transaction['invoiceNumberStr'] = generate_invoice_str(
-                    transaction['branch']['code'], 
-                    transaction['invoiceNumber']
+                item['invoiceNumberStr'] = generate_invoice_str(
+                    item['branch']['code'], 
+                    item['invoiceNumber']
                 )
-                transactions.append(transaction)
+                transactions.append(item)
             return transactions
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")

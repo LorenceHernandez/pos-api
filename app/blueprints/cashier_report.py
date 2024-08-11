@@ -32,7 +32,6 @@ def get_reports(user_id):
         'cashierId': user_id, 
         'timeOut': { '$ne': None } 
     })
-    
 
     query = {} if cashierId is None else { 'cashierId': cashierId }
 

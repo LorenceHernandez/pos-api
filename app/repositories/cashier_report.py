@@ -2,6 +2,7 @@
 
 
 from app.repositories.base import BackupRepository
+from app.utils.invoice_setting import generate_invoice_str
 
 
 class CashierReportRepository(BackupRepository):
@@ -64,7 +65,9 @@ class CashierReportRepository(BackupRepository):
                             {
                                 "$group": {
                                     "_id": "$cashierId",
-                                    "total": { "$sum": "$amount" }
+                                    "total": { "$sum": "$amount" },
+                                    "invoiceStartNumber": { '$min': "$invoiceNumber" },
+                                    "invoiceEndNumber": { '$max': "$invoiceNumber" }
                                 }
                             },
                         ],
@@ -80,6 +83,8 @@ class CashierReportRepository(BackupRepository):
                                 None
                             ]
                         },
+                        "invoiceStartNumber": "$cashSales.invoiceStartNumber",
+                        "invoiceEndNumber": "$cashSales.invoiceEndNumber",
                         "cashier.name": {
                             "$concat": [
                                 "$cashier.first_name",
@@ -87,6 +92,12 @@ class CashierReportRepository(BackupRepository):
                                 "$cashier.last_name"
                             ]
                         }
+                    }
+                },
+                {
+                    "$addFields": {
+                        "invoiceStartNumber": "$cashSales.invoiceStartNumber",
+                        "invoiceEndNumber": "$cashSales.invoiceEndNumber",
                     }
                 },
                 {
@@ -125,6 +136,11 @@ class CashierReportRepository(BackupRepository):
 
                 if(item.get('cashSales') is not None):
                     item['cashSales'] = item['cashSales']['total']
+                
+                item['invoiceNumberStr'] = generate_invoice_str(
+                    item['branch']['code'],
+                    ''
+                )
                 reports.append(item)
             return reports
         except Exception as e:
