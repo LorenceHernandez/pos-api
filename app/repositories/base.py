@@ -47,25 +47,44 @@ class Repository(abc.ABC):
             return self._db[self._collection].update_one(query, data)
         except Exception as e:
             raise Exception(f"MongoDB update_one error: {e}")
+    
+    def _get_next_sequence(self, name):
+        counter = self._db['counters'].find_one_and_update(
+            {"_id": name},
+            {"$inc": {"seq": 1}},
+            upsert=True,
+            return_document=True
+        )
+        return counter['seq']
 
 class BackupRepository(Repository):
     _backup_db = None
     _db = None
     _collection = None
+    _backup_db_client = None
+    _db_client = None
 
     def __init__(self):
+        self._db_client = current_database._connection
         self._db = current_database.connect()
 
         if(current_backup_database is not None):
+            self._backup_db_client = current_backup_database._connection
             self._backup_db = current_backup_database.connect()
 
     def insert_one(self, data):
-        try:
-            self.backup_one(data)
-            return self._db[self._collection].insert_one(data)
-        except Exception as e:
-            raise Exception(f"MongoDB insert_one error: {e}")
+        with self._db_client.start_session() as session:
+            with session.start_transaction():
+                try:
+                    self.backup_one(data)
+                    result = self._db[self._collection].insert_one(data)
+                    session.commit_transaction()
+                    return result
+                except Exception as e:
+                    session.abort_transaction()
+                    raise Exception(f"MongoDB insert_one error: {e}")
+                
 
     def backup_one(self, data):
-        if(self._backup_db is not None):
+        if(self._backup_db is not None and IS_INTERNAL_PRODUCTION):
             self._backup_db[self._collection].insert_one(data)

@@ -34,3 +34,4 @@ bookings = database.bookings
 cashier_reports = database.cashier_reports
 sales_deposits = database.sales_deposits  
 branch_reports = database.branch_reports  
+counters = database.counters

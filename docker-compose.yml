@@ -1,13 +1,19 @@
 version: '4'
 
 services:
+  app:
+    image: chrisn0tdev/pos-client
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_APP_SERVER_URL: "http://192.168.1.3:8080"
   server:
     build: ./
     image: chrisn0tdev/pos-app
     ports:
       - "5000:5000" 
-    # networks:
-    #   - pos-network
+    networks:
+      - pos-network
     env_file: .env
     environment:
       LOCAL_DATABASE_URL: mongodb://mongo:27017
@@ -23,8 +29,8 @@ services:
     depends_on:
       - mongo
       - server
-    # networks:
-    #   - pos-network
+    networks:
+      - pos-network
     restart: always
     env_file: .env
     environment:
@@ -36,8 +42,8 @@ services:
     image: chrisn0tdev/pos-sync
     depends_on:
       - mongo
-    # networks:
-    #   - pos-network
+    networks:
+      - pos-network
     restart: always
     env_file: .env
     environment:
@@ -50,12 +56,12 @@ services:
       - "27018:27017" 
     volumes:
       - mongo-data:/data/db
-    # networks:
-    #   - pos-network
+    networks:
+      - pos-network
 
-# networks:
-#   pos-network:
-#     driver: bridge
+networks:
+  pos-network:
+    driver: bridge
 volumes:
   mongo-data:
     driver: local

@@ -104,7 +104,7 @@ def _update_transaction():
             'discount': discount,
             'referrer': doctor_full_name,
             'branch': branch,
-            'cashierId': updated_trans['createBy'],
+            'cashierId': updated_trans['cashierId'],
             'transactionId': str(updated_trans['_id']),
             'date': str(date.today()),
             'created_at': getLocalTime()

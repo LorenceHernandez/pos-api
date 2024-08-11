@@ -1,7 +1,7 @@
 import copy
 
 import moment
-import pandas as pd
+# import pandas as pd
 from bson.objectid import ObjectId
 
 from app.database.config import (branches, packages, product_categories,
@@ -16,8 +16,8 @@ def generatePackagesReports(args):
    objectIds = []
    min = moment.date(args.get('min'), 'MM/YYYY').format('YYYY/MM')
    max = moment.date(args.get('max'), 'MM/YYYY').format('YYYY/MM')
-   month_list = [i.strftime("%B %Y") for i in pd.date_range(start=args.get('min'), end=args.get('max'), freq='MS')]
-
+   # month_list = [i.strftime("%B %Y") for i in pd.date_range(start=args.get('min'), end=args.get('max'), freq='MS')]
+   month_list = []
    res = transactions.find({
       "services.source": 'package',
       "status": "Completed",
