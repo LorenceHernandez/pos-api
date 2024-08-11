@@ -15,27 +15,31 @@ from app.utils.filter_values import filterValues
 from app.utils.utils import getTimeZone
 
 api = '/v2/cashier-reports'
-cashier_report = Blueprint('cashier-reports', __name__)
+cashier_report_bp = Blueprint('cashier-reports', __name__)
 repository = CashierReportRepository()
 
-@cashier_report.route(api)
+@cashier_report_bp.route(api)
 @authorized
 def get_reports(user_id):
-    date_today = str(date.today())
-    date_filter = request.args.get('dateFilter', DateFilter.ALL)
+    date_filter = int(request.args.get('dateFilter', DateFilter.ALL))
     custom_date = request.args.get('customDate')
     start_date = request.args.get('startDate')
     end_date = request.args.get('endDate')
+    cashierId = request.args.get('cashierId')
+
 
     previous_report = repository.find_one({ 
         'cashierId': user_id, 
         'timeOut': { '$ne': None } 
     })
-    reports = repository.find({ 'cashierId': user_id })
+    
+
+    query = {} if cashierId is None else { 'cashierId': cashierId }
+
+    reports = repository.find(query)
 
     filtered_reports = [
-        report 
-        for report in reports 
+        report for report in reports 
         if compare_date_filter(
             date_filter, 
             report['date'],
@@ -52,7 +56,7 @@ def get_reports(user_id):
         }
     })
 
-@cashier_report.post(api + '/time-in')
+@cashier_report_bp.post(api + '/time-in')
 @authorized
 def time_in_report(user_id):
     request_data = request.get_json()
@@ -79,7 +83,7 @@ def time_in_report(user_id):
     else:
         return jsonify({'error': 'Unable to create report'}), 500
 
-@cashier_report.post(api + '/time-out')
+@cashier_report_bp.post(api + '/time-out')
 @authorized
 def time_out_report(user_id):
     request_data = request.get_json()

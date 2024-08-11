@@ -24,7 +24,7 @@ def compare_date_today(dateFilter, date):
      date = datetime.fromisoformat(date)
      today = datetime.now()
 
-     match int(dateFilter):
+     match dateFilter:
           case DateFilter.TODAY:
                return date.date() == today.date()
           case DateFilter.YESTERDAY:
@@ -64,14 +64,15 @@ def compare_date_range(date, startDate, endDate):
 
 
 def compare_date_filter(date_filter: DateFilter, date, custom_date, start_date, end_date):
-    if(date_filter == DateFilter.ALL):
-        return False
-    if(date_filter == DateFilter.CUSTOM_DATE and custom_date is not None and not compare_date_year_month(date, custom_date)):
-        return False
-    if(date_filter == DateFilter.CUSTOM_FILTER and start_date is not None and end_date is not None and not compare_date_range(date, start_date,  end_date)):
-        return False
-    if(int(date_filter) < 9 and not compare_date_today(date_filter, date)):
-        return False
 
-    return True
+     if(date_filter == DateFilter.ALL):
+          return True
+     if(date_filter == DateFilter.CUSTOM_DATE and custom_date is not None and not compare_date_year_month(date, custom_date)):
+          return False
+     if(date_filter == DateFilter.CUSTOM_FILTER and start_date is not None and end_date is not None and not compare_date_range(date, start_date,  end_date)):
+          return False
+     if(date_filter < 9 and not compare_date_today(date_filter, date)):
+          return False
+
+     return True
 
