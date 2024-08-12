@@ -22,7 +22,7 @@ def _get_betalife_reports():
         ret.append({
           "customerData": sale.get("customerData"),
           "labExams": sale.get("labExams"),
-          "orNo": sale.get("orNo"),
+          "invoiceNumber": sale.get("invoiceNumber"),
           "amount": sale.get("amount"),
           "categories": sale.get("categories"),
           "discount": sale.get("discount"),

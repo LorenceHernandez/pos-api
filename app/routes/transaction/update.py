@@ -45,7 +45,6 @@ def _update_transaction():
       if transaction_dict['status'].lower() == 'completed':
          categories = product_categories.find()
          services = updated_trans.get('services')
-         orNo = updated_trans.get('invoiceNo')
          invoiceNumber = updated_trans.get('invoiceNumber')
          amount = updated_trans.get('paymentDetails').get('paymentDue')
          branch = updated_trans.get('branchId')
@@ -99,7 +98,6 @@ def _update_transaction():
          sale = insert_one('sales', {
             'customerData': updated_trans.get('customerData'),
             'labExams': ', '.join(name),
-            'orNo': orNo,
             'invoiceNumber': invoiceNumber,
             'amount': amount,
             'categories': _categories,
