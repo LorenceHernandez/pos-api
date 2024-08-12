@@ -44,7 +44,14 @@ def getMancomPaymentType(args):
             'AR': 0,
             'Count': 0
          })
-         
+   
+      categories.append({
+            'id': None,
+            'name': 'Package',
+            'Cash': 0,
+            'AR': 0,
+            'Count': 0
+         })      
    if res_branch:
       for branch in res_branch:
          _branches.append({
@@ -54,13 +61,6 @@ def getMancomPaymentType(args):
             'totalCash': 0,
             'totalAr': 0
          })
-      _branches.append({
-            'id': None,
-            'name': 'Package',
-            'categories': copy.deepcopy(categories),
-            'totalCash': 0,
-            'totalAr': 0
-      })
 
    if res_copy:
       for transaction in res_copy:
