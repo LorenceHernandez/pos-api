@@ -27,10 +27,8 @@ def _get_reports():
       return { 'data': typesOfClient(request.args) }, 200
    if type == 'summaryIncome':
       return { 'data': generateSummaryIncome(request.args) }, 200
-   if type == 'summaryIncome':
-      return { 'data': generateSummaryIncome(request.args) }, 200
-   # if type == 'packagesReports':
-   #    return { 'data': generatePackagesReports(request.args) }, 200
+   if type == 'packagesReports':
+      return { 'data': generatePackagesReports(request.args) }, 200
    return {
       'message': 'unkwown report type.'
    }, 401

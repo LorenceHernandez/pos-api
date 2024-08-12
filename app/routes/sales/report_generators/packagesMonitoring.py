@@ -1,23 +1,37 @@
 import copy
 
 import moment
-# import pandas as pd
 from bson.objectid import ObjectId
 
 from app.database.config import (branches, packages, product_categories,
                                  transactions)
 
+months = ['January', 'February', 'March','April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+def getMonthList(min, max):
+   month1, month2 = min.month - 1, max.month - 1
+   year1, year2 = min.year, max.year
+   ret = []
+   while year1 <= year2:
+      month2 = 11 if abs(year2 - year1) > 0 else max.month - 1
+      while month1 <= month2:
+         ret.append(months[month1] + " " + str(year1))
+         month1 += 1
+      month1 = 0
+      year1 += 1
+
+   return ret
 
 def generatePackagesReports(args):
    branchIds = args.getlist('branchIds')
 
-   categories = []
    _branches = []
    objectIds = []
-   min = moment.date(args.get('min'), 'MM/YYYY').format('YYYY/MM')
-   max = moment.date(args.get('max'), 'MM/YYYY').format('YYYY/MM')
-   # month_list = [i.strftime("%B %Y") for i in pd.date_range(start=args.get('min'), end=args.get('max'), freq='MS')]
-   month_list = []
+   min = moment.date(args.get('min'), 'MM/YYYY')
+   max = moment.date(args.get('max'), 'MM/YYYY')
+   month_list = getMonthList(min, max)
+   min = min.format('YYYY/MM')
+   max = max.format('YYYY/MM')
    res = transactions.find({
       "services.source": 'package',
       "status": "Completed",
