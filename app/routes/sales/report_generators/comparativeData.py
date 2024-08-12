@@ -1,4 +1,5 @@
 import copy
+from pprint import pprint
 
 import moment
 from bson.objectid import ObjectId
@@ -20,11 +21,18 @@ def comparativeData(args):
          })
   
       categories.append({
+         'id': None,
+         'name': 'Package',
+         'count': 0,
+         'revenue': 0,
+      })
+      categories.append({
             'id': None,
             'name': 'NO. OF CLIENTS',
             '% INCREASE/DECREASE': 0,
       })
    #(currnt year rev - last year rev) / last year rev * 100
+    pprint(year1)
     for i, x in enumerate(year1):
        if x['revenue'] <= 0:
            if year2[i]['revenue'] <= 0:
@@ -33,6 +41,7 @@ def comparativeData(args):
            categories[i]['% INCREASE/DECREASE'] = 100
            continue
        percent = abs(x['revenue'] - year2[i]['revenue']) / x['revenue'] * 100
+  
        categories[i]['% INCREASE/DECREASE'] = percent
 
     return {

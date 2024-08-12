@@ -80,12 +80,12 @@ def generateSummaryIncome(args):
                     for branch in _branches:
                        if transaction['branchId'] == branch['id']:
                           for category in branch['categories']:
-                             if category['name'] == 'package':
+                             
+                             if category['name'].lower() == 'package':
                                 if transaction['paymentDetails']['tenderType'].lower() == 'cash':
                                     category['cash'] += item['amount']
                                     category['total'] += item['amount']
                                     branch['totalCash'] += item['amount']
-                                    
                                 else: #charge
                                     category['charge'] += item['amount']
                                     category['total'] += item['amount']
