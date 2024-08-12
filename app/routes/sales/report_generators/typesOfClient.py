@@ -62,7 +62,6 @@ def typesOfClient(args):
            if branch['id'] == transaction['branchId']:
               for type in branch['types']:
                  if type['name'] == transaction['customerData']['customerType'] or type['name'] == transaction['customerData']['type']:
-                    print(type['name'])
                     type['count'] += 1
                     type['amount'] += transaction['paymentDetails']['paymentDue']
                     index = len(branch['types']) - 1

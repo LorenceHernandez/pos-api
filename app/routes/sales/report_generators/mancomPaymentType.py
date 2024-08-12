@@ -54,6 +54,13 @@ def getMancomPaymentType(args):
             'totalCash': 0,
             'totalAr': 0
          })
+      _branches.append({
+            'id': None,
+            'name': 'Package',
+            'categories': copy.deepcopy(categories),
+            'totalCash': 0,
+            'totalAr': 0
+      })
 
    if res_copy:
       for transaction in res_copy:
@@ -63,7 +70,7 @@ def getMancomPaymentType(args):
                     for branch in _branches:
                        if transaction['branchId'] == branch['id']:
                           for category in branch['categories']:
-                             if category['id'] == item['category']['id']:
+                             if category['name'].lower() == 'package':
                                 if item['name'].lower() == 'account receivable':
                                     category['AR'] += item['amount']
                                     category['Count'] += 1

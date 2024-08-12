@@ -55,6 +55,15 @@ def generateSummaryIncome(args):
             'totalCash': 0,
             'totalCharge': 0
          })
+      _branches.append({
+            'id': None,
+            'name': 'Package',
+            'categories': copy.deepcopy(categories),
+            'total': 0,
+            'totalCash': 0,
+            'totalCharge': 0
+         })
+
 
    if res_copy:
       for transaction in res_copy:
@@ -64,7 +73,7 @@ def generateSummaryIncome(args):
                     for branch in _branches:
                        if transaction['branchId'] == branch['id']:
                           for category in branch['categories']:
-                             if category['id'] == item['category']['id']:
+                             if category['name'] == 'package':
                                 if transaction['paymentDetails']['tenderType'].lower() == 'cash':
                                     category['cash'] += item['amount']
                                     category['total'] += item['amount']
