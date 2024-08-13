@@ -13,7 +13,7 @@ def generateSummaryIncome(args):
    _branches = []
    objectIds = []
    min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
-   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00')
+   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
@@ -21,7 +21,6 @@ def generateSummaryIncome(args):
    res_copy = []
    if res:
       for transaction in res:
-
          if (str(moment.date(transaction['transactionDate'])) >= str(min)) and (str(moment.date(transaction['transactionDate'])) <= str(max)):
                 res_copy.append(transaction)
 

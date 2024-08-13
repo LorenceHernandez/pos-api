@@ -14,7 +14,7 @@ def typesOfClient(args):
    objectIds = []
    types = []
    min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
-   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00')
+   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
 
    res = transactions.find({
       "status": "Completed",
