@@ -2,8 +2,11 @@ import copy
 
 import moment
 from bson.objectid import ObjectId
+from pydash import merge, omit
 
-from app.database.config import branches, product_categories, transactions
+from app.database.config import (branches, customers, product_categories,
+                                 transactions)
+from app.models.Transaction import DiscountApplied
 
 # 1.Sales Journal (All Payment Method)
 
@@ -17,90 +20,39 @@ from app.database.config import branches, product_categories, transactions
 # Net Sales Amount
 def getSalesJournal(args):
    branchIds = args.getlist('branchIds')
-
-   categories = []
-   _branches = []
-   objectIds = []
    min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
-   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00')
+   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
    res = transactions.find({
       "status": "Completed",
-      "branchId": {"$in": branchIds},
+      "branchId": {"$in": branchIds}
    })
+   ret = []
+
    res_copy = []
    if res:
       for transaction in res:
-
          if (str(moment.date(transaction['transactionDate'])) >= str(min)) and (str(moment.date(transaction['transactionDate'])) <= str(max)):
                 res_copy.append(transaction)
-   
-   for branchId in branchIds:
-      objectIds.append(ObjectId(branchId))
-   
-   res_branch = branches.find({
-      "_id": {"$in": objectIds}
-   })
-
-   
-   
-   res_categories = product_categories.find()
-   if res_categories:
-      for category in res_categories:
-         categories.append({
-            'id': str(category['_id']),
-            'name': category['name'],
-            'Cash': 0,
-            'AR': 0,
-            'Count': 0
-         })
-   
-      categories.append({
-            'id': None,
-            'name': 'Package',
-            'Cash': 0,
-            'AR': 0,
-            'Count': 0
-         })      
-   if res_branch:
-      for branch in res_branch:
-         _branches.append({
-            'id': str(branch['_id']),
-            'name': branch['name'],
-            'categories': copy.deepcopy(categories),
-            'totalCash': 0,
-            'totalAr': 0
-         })
-
+   total = 0
+   discount = 0
    if res_copy:
       for transaction in res_copy:
-        for service in transaction['services']:
-           if service['source'] == 'package':
-                for item in service['items']:
-                    for branch in _branches:
-                       if transaction['branchId'] == branch['id']:
-                          for category in branch['categories']:
-                             if category['name'].lower() == 'package':
-                                if item['name'].lower() == 'account receivable' or transaction['paymentDetails']['tenderType'].lower() == 'charge':
-                                    category['AR'] += item['amount']
-                                    category['Count'] += 1
-                                    branch['totalAr'] += item['amount']
-                                else:
-                                    category['Cash'] += item['amount']
-                                    category['Count'] += 1
-                                    branch['totalCash'] += item['amount']
-           else: 
-              for branch in _branches:
-                if transaction['branchId'] == branch['id']:
-                   for category in branch['categories']:
-                      if category['id'] == service['category']['id']:
-                        if service['name'].lower() == 'account receivable' or transaction['paymentDetails']['tenderType'].lower() == 'charge':
-                            category['AR'] += service['amount']
-                            category['Count'] += 1
-                            branch['totalAr'] += service['amount']
-                        else:
-                            category['Cash'] += service['amount']
-                            category['Count'] += 1
-                            branch['totalCash'] += service['amount']
-   return _branches
+          discountApplied = DiscountApplied.toDict(DiscountApplied.fromDict(transaction.get('discountApplied')))
+          discount += 0 if discountApplied["totalDiscount"] is None else discountApplied["totalDiscount"] 
+          total += transaction["paymentDetails"]["subTotal"]
+       
+          ret.append({
+              "Ref No.": transaction['transactionNo'],
+              "Date": transaction['transactionDate'],
+              "Customer": transaction['customerData']['name'],
+              "Address": transaction['customerData']['address'],
+              "Discount": discountApplied["totalDiscount"],
+              "Discount Type": discountApplied["type"],
+              "Net Sales": transaction["paymentDetails"]["subTotal"] - (0 if discountApplied["totalDiscount"] is None else discountApplied["totalDiscount"]),
+              "Gross Sales": transaction["paymentDetails"]["subTotal"],
+              "id": str(transaction['_id'])
+            },)
+   
+   return ret
 
 
