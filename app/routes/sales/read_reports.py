@@ -10,6 +10,7 @@ from app.routes.sales.report_generators.mancomPaymentType import \
     getMancomPaymentType
 from app.routes.sales.report_generators.packagesMonitoring import \
     generatePackagesReports
+from app.routes.sales.report_generators.salesJournal import getSalesJournal
 from app.routes.sales.report_generators.summaryIncome import \
     generateSummaryIncome
 from app.routes.sales.report_generators.typesOfClient import typesOfClient
@@ -29,6 +30,8 @@ def _get_reports():
       return { 'data': generateSummaryIncome(request.args) }, 200
    if type == 'packagesReports':
       return { 'data': generatePackagesReports(request.args) }, 200
+   if type == 'salesJournal':
+      return { 'data': getSalesJournal(request.args) }, 200
    return {
       'message': 'unkwown report type.'
    }, 401
