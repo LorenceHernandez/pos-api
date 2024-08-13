@@ -17,6 +17,7 @@ def generateSummaryIncome(args):
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
+      "paymentDetails.tenderType": {'$ne': 'Charge'}
    })
    res_copy = []
    if res:
