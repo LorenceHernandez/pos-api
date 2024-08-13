@@ -62,14 +62,6 @@ def generateSummaryIncome(args):
             'totalCash': 0,
             'totalCharge': 0
          })
-      _branches.append({
-            'id': None,
-            'name': 'Package',
-            'categories': copy.deepcopy(categories),
-            'total': 0,
-            'totalCash': 0,
-            'totalCharge': 0
-         })
 
 
    if res_copy:
