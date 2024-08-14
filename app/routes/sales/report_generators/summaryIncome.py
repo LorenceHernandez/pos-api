@@ -16,8 +16,7 @@ def generateSummaryIncome(args):
    max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
    res = transactions.find({
       "status": "Completed",
-      "branchId": {"$in": branchIds},
-      "paymentDetails.tenderType": {'$ne': 'Charge'}
+      "branchId": {"$in": branchIds}
    })
    res_copy = []
    if res:
@@ -72,8 +71,7 @@ def generateSummaryIncome(args):
                     for branch in _branches:
                        if transaction['branchId'] == branch['id']:
                           for category in branch['categories']:
-                             
-                             if category['name'].lower() == 'package':
+                             if category['id'] == item['category']['id']:
                                 if transaction['paymentDetails']['tenderType'].lower() == 'cash':
                                     category['cash'] += item['amount']
                                     category['total'] += item['amount']

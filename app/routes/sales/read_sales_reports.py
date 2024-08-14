@@ -12,8 +12,17 @@ def _get_sales():
   
    res = sales.find({
       "branch": request.args.get('branchId'),
-      "cashierId": request.args.get('cashierId')
+      "cashierId": request.args.get('cashierId'),
+   
+         "$expr": {
+            "$eq": [
+                  { "$dateToString": { "format": '%Y-%m-%d', "date": '$$NOW' } },
+                  { "$dateToString": { "format": '%Y-%m-%d', "date": '$created_at' } },
+            ],
+         },
+      
    })
+   print()
    total = 0
    ret = []
    if res:
