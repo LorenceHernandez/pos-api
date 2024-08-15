@@ -52,7 +52,7 @@ def getSalesJournal(args, filter):
               "refNo": transaction['transactionNo'],
               "date": transaction['transactionDate'],
               "customer": transaction['customerData']['name'],
-              "dddress": transaction['customerData']['address'],
+              "address": transaction['customerData']['address'],
               "discount": discountApplied["totalDiscount"],
               "discountType": discountApplied["type"],
               "netSales": transaction["paymentDetails"]["subTotal"] - (0 if discountApplied["totalDiscount"] is None else discountApplied["totalDiscount"]),
