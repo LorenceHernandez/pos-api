@@ -31,7 +31,9 @@ def _get_reports():
    if type == 'packagesReports':
       return { 'data': generatePackagesReports(request.args) }, 200
    if type == 'salesJournal':
-      return { 'data': getSalesJournal(request.args) }, 200
+      return { 'data': getSalesJournal(args = request.args, filter = None) }, 200
+   if type == 'cashReceiptsJournal':
+      return { 'data': getSalesJournal(args = request.args, filter = {'tenderType': 'Cash'})  }, 200
    return {
       'message': 'unkwown report type.'
    }, 401

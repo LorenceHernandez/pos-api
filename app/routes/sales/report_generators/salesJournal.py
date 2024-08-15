@@ -18,16 +18,23 @@ from app.models.Transaction import DiscountApplied
 # Discount
 # Discount Type
 # Net Sales Amount
-def getSalesJournal(args):
+def getSalesJournal(args, filter):
    branchIds = args.getlist('branchIds')
-   min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
-   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
-   res = transactions.find({
+   _filter = None
+   query = {
       "status": "Completed",
       "branchId": {"$in": branchIds}
-   })
+   }
+   if filter and filter['tenderType']:
+       query['paymentDetails.tenderType'] = filter['tenderType']
+
+   print(query)
+   min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
+   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
+   res = transactions.find(query)
    ret = []
 
+   
    res_copy = []
    if res:
       for transaction in res:
@@ -42,7 +49,7 @@ def getSalesJournal(args):
           total += transaction["paymentDetails"]["subTotal"]
        
           ret.append({
-              "Ref No.": transaction['transactionNo'],
+              "RefNo": transaction['transactionNo'],
               "Date": transaction['transactionDate'],
               "Customer": transaction['customerData']['name'],
               "Address": transaction['customerData']['address'],
