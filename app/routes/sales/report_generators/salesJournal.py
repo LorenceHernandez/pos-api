@@ -49,14 +49,14 @@ def getSalesJournal(args, filter):
           total += transaction["paymentDetails"]["subTotal"]
        
           ret.append({
-              "RefNo": transaction['transactionNo'],
-              "Date": transaction['transactionDate'],
-              "Customer": transaction['customerData']['name'],
-              "Address": transaction['customerData']['address'],
-              "Discount": discountApplied["totalDiscount"],
-              "Discount Type": discountApplied["type"],
-              "Net Sales": transaction["paymentDetails"]["subTotal"] - (0 if discountApplied["totalDiscount"] is None else discountApplied["totalDiscount"]),
-              "Gross Sales": transaction["paymentDetails"]["subTotal"],
+              "refNo": transaction['transactionNo'],
+              "date": transaction['transactionDate'],
+              "customer": transaction['customerData']['name'],
+              "dddress": transaction['customerData']['address'],
+              "discount": discountApplied["totalDiscount"],
+              "discountType": discountApplied["type"],
+              "netSales": transaction["paymentDetails"]["subTotal"] - (0 if discountApplied["totalDiscount"] is None else discountApplied["totalDiscount"]),
+              "grossSales": transaction["paymentDetails"]["subTotal"],
               "id": str(transaction['_id'])
             },)
    
