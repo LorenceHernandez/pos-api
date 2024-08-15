@@ -43,13 +43,7 @@ def generateSummaryIncome(args):
             'cash': 0,
             'charge': 0
          })
-      categories.append({
-            'id': None,
-            'name': 'Package',
-            'total': 0,
-            'cash': 0,
-            'charge': 0
-         })
+
       
    if res_branch:
       for branch in res_branch:

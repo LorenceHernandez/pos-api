@@ -44,14 +44,7 @@ def getMancomPaymentType(args):
             'AR': 0,
             'Count': 0
          })
-   
-      categories.append({
-            'id': None,
-            'name': 'Package',
-            'Cash': 0,
-            'AR': 0,
-            'Count': 0
-         })      
+     
    if res_branch:
       for branch in res_branch:
          _branches.append({
@@ -70,7 +63,7 @@ def getMancomPaymentType(args):
                     for branch in _branches:
                        if transaction['branchId'] == branch['id']:
                           for category in branch['categories']:
-                             if category['name'].lower() == 'package':
+                             if category['id'] == item['category']['id']:
                                 if item['name'].lower() == 'account receivable':
                                     category['AR'] += item['amount']
                                     category['Count'] += 1

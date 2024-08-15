@@ -21,12 +21,6 @@ def comparativeData(args):
          })
   
       categories.append({
-         'id': None,
-         'name': 'Package',
-         'count': 0,
-         'revenue': 0,
-      })
-      categories.append({
             'id': None,
             'name': 'NO. OF CLIENTS',
             '% INCREASE/DECREASE': 0,
@@ -81,23 +75,17 @@ def generateYearReport(branchIds, year):
             'count': 0,
             'revenue': 0,
          })
-      categories.append({
-         'id': None,
-         'name': 'Package',
-         'count': 0,
-         'revenue': 0,
-      })
    if res_copy:
       for transaction in res_copy:
         for service in transaction['services']:
            if service['source'] == 'package':
+              for item in service['items']:
                 for category in categories:
-                    if category['name'].lower() == 'package':
-                       for item in service['items']:
+                    if category['id'] == item['category']['id']:
                          category['count'] += 1
                          category['revenue'] += item['amount']
                          total += item['amount']
-                       break
+                    break
            else:
                    for category in categories:
                       if category['id'] == service['category']['id']:
