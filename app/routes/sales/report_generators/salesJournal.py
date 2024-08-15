@@ -7,6 +7,7 @@ from pydash import merge, omit
 from app.database.config import (branches, customers, product_categories,
                                  transactions)
 from app.models.Transaction import DiscountApplied
+from app.utils.invoice_setting import generate_invoice_str
 
 # 1.Sales Journal (All Payment Method)
 
@@ -34,7 +35,9 @@ def getSalesJournal(args, filter):
    res = transactions.find(query)
    ret = []
 
-   
+   # branch = branches.find_one({
+   #    "_id": ObjectId(args.get('branchIds'))
+   #  })
    res_copy = []
    if res:
       for transaction in res:
@@ -47,9 +50,11 @@ def getSalesJournal(args, filter):
           discountApplied = DiscountApplied.toDict(DiscountApplied.fromDict(transaction.get('discountApplied')))
           discount += 0 if discountApplied["totalDiscount"] is None else discountApplied["totalDiscount"] 
           total += transaction["paymentDetails"]["subTotal"]
-       
+          branch = branches.find_one({
+              "_id": ObjectId(transaction['branchId'])
+          })
           ret.append({
-              "refNo": transaction['transactionNo'],
+              "refNo": generate_invoice_str(branch['code'], transaction['invoiceNumber']),
               "date": transaction['transactionDate'],
               "customer": transaction['customerData']['name'],
               "address": transaction['customerData']['address'],
