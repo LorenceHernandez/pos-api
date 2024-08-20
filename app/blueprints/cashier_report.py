@@ -27,7 +27,6 @@ def get_reports(user_id):
     end_date = request.args.get('endDate')
     cashierId = request.args.get('cashierId')
 
-
     previous_report = repository.find_one({ 
         'cashierId': user_id, 
         'timeOut': { '$ne': None } 
@@ -60,7 +59,7 @@ def get_reports(user_id):
 def time_in_report(user_id):
     request_data = request.get_json()
 
-    date_today = str(date.today())
+    date_today = str(datetime.now(getTimeZone()).date())
     report = repository.find_one({ 
         'cashierId': user_id, 
         'date': date_today,

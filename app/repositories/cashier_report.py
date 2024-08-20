@@ -80,7 +80,7 @@ class CashierReportRepository(BackupRepository):
                             "$cond": [
                                 { "$gt": [ { "$size": "$sales" }, 0 ] },
                                 { "$arrayElemAt": ["$sales", 0] },
-                                None
+                                0
                             ]
                         },
                         "invoiceStartNumber": "$cashSales.invoiceStartNumber",
@@ -127,20 +127,21 @@ class CashierReportRepository(BackupRepository):
                 item['cashGain'] = None
                 item['cashLoss'] = None
 
-                cashSales = item['cashSales']['total'] if item.get('cashSales') is not None else 0
+                cashSales = item['cashSales']['total'] if item.get('cashSales') != 0 else 0
                 cashOnHand = item['endingCashOnHand']['total'] if item.get('endingCashOnHand') is not None else 0
                 
                 difference = cashOnHand - cashSales 
                 item['cashGain'] = difference if difference > 0 else 0
                 item['cashLoss'] = difference * -1 if difference < 0 else 0
 
-                if(item.get('cashSales') is not None):
+                if(item.get('cashSales') != 0):
                     item['cashSales'] = item['cashSales']['total']
                 
                 item['invoiceNumberStr'] = generate_invoice_str(
                     item['branch']['code'],
                     ''
                 )
+
                 reports.append(item)
             return reports
         except Exception as e:
