@@ -1,3 +1,4 @@
+from datetime import datetime
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 
@@ -5,6 +6,7 @@ from app.filters.date_filter import DateFilter, compare_date_filter
 from app.middlewares.authorized_attribute import authorized
 from app.new_models.Transaction import CreateTransaction
 from app.repositories.transaction import TransactionRepository
+from app.utils.utils import getTimeZone
 
 api = '/v2/transactions'
 transaction_bp = Blueprint('transactions', __name__)
@@ -54,7 +56,7 @@ def create_transaction(user_id):
             
         transaction = CreateTransaction(
             branchId=request_data['branchId'],
-            cashierId=user_id
+            cashierId=user_id,
         )
 
         result = repository.insert_one(transaction.dict())
