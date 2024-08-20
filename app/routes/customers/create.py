@@ -18,7 +18,7 @@ create_customer = Blueprint("/customer/create", __name__)
 def _create_customer():
    request_data = request.get_json()
    f_name = request_data['firstName']
-   m_name = request_data['middleName']
+   m_name = request_data.get('middleName')
    l_name = request_data['lastName']
    age = request_data['age']
    gender = request_data['gender']
