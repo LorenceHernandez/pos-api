@@ -1,3 +1,4 @@
+import datetime
 import os
 from flask import Flask, request, Response
 from flask_cors import CORS
@@ -8,9 +9,6 @@ from escpos import *
 
 app = Flask(__name__)
 
-from dotenv import load_dotenv
-
-load_dotenv('../.env')
 from dotenv import load_dotenv
 
 load_dotenv('../.env')
@@ -68,21 +66,33 @@ def proxy(path):
     except requests.exceptions.RequestException as e:
         return f"Error proxying request: {e}", 500
 
-@app.route('/print')
+@app.post('/print')
 def print_text():
+    print('printing...')
     request_data = request.get_json()
     p = None
     try:
-        p = printer.Usb(0x04b8,0x0202, 0, profile="TM-U220")
+        # p = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
+        p = printer.Usb(0x04B8,0x0202)
+
+        if p is None:
+            raise
     except Exception as e:
-        return {
-            'message': 'Unable to print the request',
-            'error': repr(e)
-        }, 500
+        try:
+            p = printer.Network("192.168.5.200")
+
+            if p is None:
+                raise
+        except Exception as e:
+            return {
+                'message': 'Unable to print the request',
+                'error': repr(e)
+            }, 500
     
     # p = escpos.printer(Usb(0x04b8, 0x0202))  # For USB connection
     # p = escpos.Network("192.168.1.100")  # For network connection
     # try:
+    
     data = request_data['combinedData']
     dvote = request_data['dvoteDetails'][0]
     customer = data['customerData']
@@ -104,7 +114,7 @@ def print_text():
         p.text('Address: ' + customer['address'] +  '\n')
         p.text('TIN: ' + customer['tin'] +  '\n\n')
 
-        if(request_data['showAddress'] and customer['type'] == 'customer'):
+        if(request_data.get('showAddress') is not None and customer['type'] == 'customer'):
             p.text('Age: ' + customer['age'] +  '\n')
             p.text('Birth Date: ' + customer['birthDate'] +  '\n')
         
@@ -114,9 +124,11 @@ def print_text():
         p.text('Items\n')
         p.set(align='left', bold=False)
         for item_x in data['items']:
-            for item_y in item_x['items']:
-                p.text(f'{item_y['name']} ({'Package' if item_x['source'] == 'package' else 'Lab Test' }) \n')
-                p.text(f'{item_y['qty']} x {item_y['price']} = {item_y['amount']} \n')
+            p.set(align='left')
+            p.text(f'{item_x['name']} ({'Package' if item_x['source'] == 'package' else 'Lab Test' }) \n')
+            
+            p.set(align='right')
+            p.text(f'{item_x['qty']} x {item_x['price']} = {item_x['amount']} \n')
 
         p.set(align='left', bold=True)
 
@@ -131,9 +143,12 @@ def print_text():
         p.text(f'Number of Items: {request_data['totalQuantity']}\n\n')
 
         p.set(align='center')
-        p.text('Invoice No.: ' + data['invoiceNo'] +  '\n')
+        # p.text('Invoice No.: ' + data['invoiceNo'] +  '\n')
         p.text('Cashier: ' + data['cashierName'] +  '\n')
-        p.text('Date: ' + data['transactionDate'] +  '\n\n')
+
+        dt = datetime.datetime.fromisoformat(data['transactionDate'])
+
+        p.text('Date: ' + dt.strftime("%B %d, %Y, %I:%M:%S %p") +  '\n\n')
 
         p.text('This document is not valid for income tax\n\n')
         p.text('Signature of SC/PWD:\n\n\n\n')
@@ -156,12 +171,6 @@ def print_text():
             'error': repr(e)
         }, 500
     return { 'message': 'Printed successfully' }, 200
-
-
-def run_schedule():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=8080)
