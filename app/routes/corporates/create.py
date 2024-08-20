@@ -21,7 +21,7 @@ def _create_company():
    created_by = g.user_id
    created_at = getLocalTime()
    
-   doc = insert_one('corporate', {
+   doc = insert_one('corporates', {
       "name": name,
       "street_address": street_address,
       "city": city,
