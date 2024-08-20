@@ -42,9 +42,9 @@ class Repository(abc.ABC):
         except Exception as e:
             raise Exception(f"MongoDB insert_one error: {e}")
    
-    def update_one(self, query, data):
+    def update_one(self, query, data, *args, **kwargs):
         try:
-            return self._db[self._collection].update_one(query, data)
+            return self._db[self._collection].update_one(query, data, *args, **kwargs)
         except Exception as e:
             raise Exception(f"MongoDB update_one error: {e}")
     
@@ -65,12 +65,12 @@ class BackupRepository(Repository):
     _db_client = None
 
     def __init__(self):
-        self._db_client = current_database._connection
         self._db = current_database.connect()
+        self._db_client = current_database._connection
 
         if(current_backup_database is not None):
-            self._backup_db_client = current_backup_database._connection
             self._backup_db = current_backup_database.connect()
+            self._backup_db_client = current_backup_database._connection
 
     def insert_one(self, data):
         with self._db_client.start_session() as session:
