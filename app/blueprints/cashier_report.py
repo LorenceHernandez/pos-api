@@ -33,24 +33,12 @@ def get_reports(user_id):
     })
 
     query = {} if cashierId is None else { 'cashierId': cashierId }
-
-    reports = repository.find(query)
-
-    filtered_reports = [
-        report for report in reports 
-        if compare_date_filter(
-            date_filter, 
-            report['date'],
-            custom_date,
-            start_date,
-            end_date
-        )
-    ]
+    reports = repository.find_by_date_and(date_filter, start_date, end_date, custom_date, query)
 
     return jsonify({
         'data': {
             'previousReports': previous_report,
-            'reports': filtered_reports
+            'reports': reports
         }
     })
 

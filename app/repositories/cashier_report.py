@@ -1,6 +1,7 @@
 
 
 
+from app.filters.date_filter import DateFilter, compare_date_filter
 from app.repositories.base import BackupRepository
 from app.utils.invoice_setting import generate_invoice_str
 
@@ -146,3 +147,19 @@ class CashierReportRepository(BackupRepository):
             return reports
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")
+        
+    def find_by_date_and(self, date_filter: DateFilter, start_date, end_date, custom_date, query={}):
+        reports = self.find(query)
+
+        filtered_reports = [
+            report for report in reports 
+            if compare_date_filter(
+                date_filter, 
+                report['date'],
+                custom_date,
+                start_date,
+                end_date
+            )
+        ]
+
+        return filtered_reports
