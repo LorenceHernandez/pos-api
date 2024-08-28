@@ -94,31 +94,29 @@ def print_text():
     # try:
     
     data = request_data['combinedData']
+    branch = data['branch']
+    cashier = data['cashier']
     dvote = request_data['dvoteDetails'][0]
     customer = data['customerData']
 
-    referred_name = data['referredByName']
-    referred_name = referred_name if referred_name is not None else '---'
-
     try:
         p.set(align='center', bold=True)
-        p.text(data['branchName'] + '\n')
-        p.set(align='left', bold=False)
-        p.text(data['branchAddress'] + '\n')
-        p.text(data['branchTIN'] + '\n')
+        p.text(branch['name'] + '\n')
+        p.text(branch['city'] + ', ' + branch['state'] + '\n')
+        p.text(branch['tin'] + '\n\n')
         p.set(align='center', bold=True)
         p.text('Customer Information\n')
         p.set(align='left')
 
         p.text('Name: ' + customer['name'] +  '\n')
         p.text('Address: ' + customer['address'] +  '\n')
-        p.text('TIN: ' + customer['tin'] +  '\n\n')
+        p.text('TIN: ' + customer['tin'] +  '\n')
 
         if(request_data.get('showAddress') is not None and customer['type'] == 'customer'):
             p.text('Age: ' + customer['age'] +  '\n')
             p.text('Birth Date: ' + customer['birthDate'] +  '\n')
         
-        p.text('Referred By: ' + referred_name +  '\n\n')
+        p.text('Referred By: ' + data.get('referredByName', '---') +  '\n\n')
 
         p.set(align='center')
         p.text('Items\n')
@@ -130,10 +128,10 @@ def print_text():
             p.set(align='right')
             p.text(f'{item_x['qty']} x {item_x['price']} = {item_x['amount']} \n')
 
-        p.set(align='left', bold=True)
 
+        p.set(align='center', bold=True)
         p.text('\nDetails\n')
-        p.set(bold=False)
+        p.set(align='left', bold=False)
         p.text(f'Sub-Total: {data['subTotal']}\n')
         p.text(f'Discount Applied: {data['discountApplied']['totalDiscount']}\n')
         p.text(f'Amount Due: {data['paymentDue']}\n')
@@ -143,12 +141,12 @@ def print_text():
         p.text(f'Number of Items: {request_data['totalQuantity']}\n\n')
 
         p.set(align='center')
-        # p.text('Invoice No.: ' + data['invoiceNo'] +  '\n')
-        p.text('Cashier: ' + data['cashierName'] +  '\n')
+        p.text('Invoice No.: ' + str(data['invoiceNumber']).zfill(6) +  '\n')
+        p.text('Cashier: ' + cashier['first_name'] + ' ' + cashier['last_name'] +  '\n')
 
         dt = datetime.datetime.fromisoformat(data['transactionDate'])
 
-        p.text('Date: ' + dt.strftime("%B %d, %Y, %I:%M:%S %p") +  '\n\n')
+        p.text('Date: ' + dt.strftime("%B-%d-%Y %I:%M:%S %p") +  '\n\n')
 
         p.text('This document is not valid for income tax\n\n')
         p.text('Signature of SC/PWD:\n\n\n\n')
@@ -161,10 +159,10 @@ def print_text():
         p.text(dvote['tin'] + '\n\n')
         p.text(dvote['accredNo'] + '\n')
         p.text(dvote['dateIssued'] + '\n\n')
-        p.text('\n\n')
+        p.text('\n')
         p.cut()
     except Exception as e: 
-        p.text('\n\n\n')
+        p.text('\n\n')
         p.cut()
         return {
             'message': 'Unable to print the request',
