@@ -41,6 +41,8 @@ def _update_package():
       update_val['lab_test'] = request_data['labTest']
    if 'discount' in request_data:
       update_val['discount'] = request_data['discount']
+   if 'packageForMemberType' in request_data:
+      update_val['packageForMemberType'] = request_data['packageForMemberType']
    
    if not update_val:
         return {

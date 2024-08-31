@@ -28,6 +28,7 @@ def _get_package():
             # "discountType": record["discount_type"],
             # "applyDiscountBy": record["apply_discount_by"],
             "packageType": record["package_type"],
+            "packageForMemberType": record.get('packageForMemberType'),
             "labTest": record["lab_test"],
             "discount": record.get('discount')
           },
