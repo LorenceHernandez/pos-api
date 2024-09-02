@@ -19,6 +19,8 @@ def _create_package():
    name, desc, package_type, lab_test = request_data['name'], request_data['description'], request_data['packageType'], request_data['labTest']
    discount = request_data['discount']
    packageForMemberType = request_data['packageForMemberType']
+   totalPackagePrice = request_data['totalPackagePrice']
+   totalDiscountedPrice = request_data['totalDiscountedPrice']
    created_by = g.user_id
    created_at = getLocalTime()
 
@@ -32,6 +34,8 @@ def _create_package():
       "packageForMemberType": packageForMemberType,
       "package_type": package_type,
       "lab_test": lab_test,
+      "totalPackagePrice": totalPackagePrice,
+      "totalDiscountedPrice": totalDiscountedPrice,
       "created_by": created_by,
       "created_at": created_at
    })

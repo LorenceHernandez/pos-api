@@ -43,6 +43,10 @@ def _update_package():
       update_val['discount'] = request_data['discount']
    if 'packageForMemberType' in request_data:
       update_val['packageForMemberType'] = request_data['packageForMemberType']
+   if 'totalPackagePrice' in request_data:
+      update_val['totalPackagePrice'] = request_data['totalPackagePrice']
+   if 'totalDiscountedPrice' in request_data:
+      update_val['totalDiscountedPrice'] = request_data['totalDiscountedPrice']
    
    if not update_val:
         return {
