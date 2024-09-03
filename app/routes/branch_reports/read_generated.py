@@ -44,38 +44,31 @@ def generate_branch_report(branchId, date):
                     "totalCashLoss": { "$sum": "$cashLoss" }
                }
           },
-          { 
-               '$lookup': {
-                    'from': 'sales_deposits',
-                    "let": {
-                         "date": "$date",
-                         "branchId": "$_id"
-                    },
-                    "pipeline": [
-                         {
-                              "$match": {
-                              "$expr": {
-                                        "$and": [
-                                             { "$eq": ["$dateDeposited", "$$date"] },
-                                             { "$eq": ["$branchId", "$$branchId"] }
-                                        ]
-                                   }
-                              }
-                         }
-                    ],
-                    'as': 'salesDeposit'
-               }, 
-          },
+          # { 
+          #      '$lookup': {
+          #           'from': 'sales_deposits',
+          #           "let": {
+          #                "date": "$date",
+          #                "branchId": "$_id"
+          #           },
+          #           "pipeline": [
+          #                {
+          #                     "$match": {
+          #                     "$expr": {
+          #                               "$and": [
+          #                                    { "$eq": ["$dateDeposited", "$$date"] },
+          #                                    { "$eq": ["$branchId", "$$branchId"] }
+          #                               ]
+          #                          }
+          #                     }
+          #                }
+          #           ],
+          #           'as': 'salesDeposit'
+          #      }, 
+          # },
           {
                "$addFields": {
                     "branchId": {"$toObjectId": "$_id"},
-                    "salesDeposit": {
-                         "$cond": [
-                              { "$gt": [ { "$size": "$salesDeposit" }, 0 ] },
-                              { "$arrayElemAt": ["$salesDeposit", 0] },
-                              None
-                         ]
-                    },
                }
           },
           { 
@@ -105,6 +98,6 @@ def generate_branch_report(branchId, date):
 
      report = reports[0]
      report['branch'] = ToStringId(report['branch'])
-     report['salesDeposit'] = ToStringId(report['salesDeposit'])
+     # report['salesDeposit'] = ToStringId(report['salesDeposit'])
      report = ToStringId(report)
      return report

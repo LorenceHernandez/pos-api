@@ -7,6 +7,7 @@ from app.database.config import branch_reports
 from app.database.store import insert_one
 from app.models.BranchReports import BranchReport
 from app.routes.branch_reports.read_generated import generate_branch_report
+from app.utils.utils import getTimeZone
 
 create_branch_reports = Blueprint("/branch-reports/create", __name__)
 
@@ -14,7 +15,7 @@ create_branch_reports = Blueprint("/branch-reports/create", __name__)
 def _create_branch_reports():
    request_data = request.get_json()
    report = None
-   today = str(date.today())
+   today = str(datetime.now(getTimeZone()).date())
 
    try:
       existing_report = branch_reports.find({ "branchId": request_data['branchId'], 'date': today })
@@ -22,12 +23,10 @@ def _create_branch_reports():
       if len(list(existing_report)) > 0:
          raise Exception('Only one branch report is allowed per day.')
 
-
       generated_branch_report = generate_branch_report(request_data['branchId'], today)
-      request_data['salesDepositId'] = generated_branch_report['salesDeposit']['id']
 
       report = BranchReport.fromDict(merge(request_data, generated_branch_report))
-      report.created_at = datetime.now()
+      report.created_at = datetime.now(getTimeZone())
       report.date = today
       report.cashier_id = g.user_id
       

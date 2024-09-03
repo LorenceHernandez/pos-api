@@ -23,7 +23,6 @@ def _get_branch_reports():
                     "$addFields": {
                          "cashierId": {"$toObjectId": "$cashierId"},
                          "branchId": {"$toObjectId": "$branchId"},
-                         "salesDepositId": {"$toObjectId": "$salesDepositId"}
                     }
                },
               { 
@@ -42,33 +41,23 @@ def _get_branch_reports():
                         'as': 'branch'
                     }, 
                },
-               { 
-                    '$lookup': {
-                        'from': 'sales_deposits',
-                        'localField': 'salesDepositId',
-                        'foreignField': '_id',
-                        'as': 'salesDeposit'
-                    }, 
-               },
                {
                     "$addFields": {
                          "branch": { "$arrayElemAt": ["$branch", 0] },
                          "cashier": { "$arrayElemAt": ["$cashier", 0] },
-                         "salesDeposit": { "$arrayElemAt": ["$salesDeposit", 0] }
                     }
                },
+               { "$sort": { "_id": -1 }},
                {
                    '$project': {
                        'cashierId': 0,
                        'branchId': 0,
-                       'salesDepositId': 0,
                        'cashier': {
                            'password': 0,
                            'branches': 0
                        }
                    }
                },
-               { "$sort": { "_id": -1 }}
           ])
           reports = list(data)
 
@@ -91,7 +80,6 @@ def _get_branch_reports():
                
                report['branch'] = ToStringId(report['branch'])
                report['cashier'] = ToStringId(report['cashier'])
-               report['salesDeposit'] = ToStringId(report['salesDeposit'])
                report = ToStringId(report)
                report_list.append(report)
 

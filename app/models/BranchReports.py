@@ -5,9 +5,9 @@ class BranchReport:
     _id = None
     _cashier_id = None
     _branch_id = None
-    _sales_deposit_id = None
     _ending_cash_balance = None
 
+    sales_deposits = None
     total_beginning_cash = None
     total_ending_cash = None
     total_cash_sales = None
@@ -23,8 +23,7 @@ class BranchReport:
         report.id = data.get('_id')
         report.cashier_id = data.get('cashierId')
         report.branch_id = data.get('branchId')
-        report.sales_deposit_id = data.get('salesDepositId')
-
+        report.sales_deposits = data.get('salesDeposits')
         report.total_beginning_cash = data.get('totalBeginningCash')
         report.total_ending_cash = data.get('totalEndingCash')
         report.total_cash_sales = data.get('totalCashSales')
@@ -41,7 +40,7 @@ class BranchReport:
             "id": self.id,
             "cashierId": self.cashier_id,
             "branchId": self.branch_id,
-            "salesDepositId": self.sales_deposit_id,
+            "salesDeposits": self.sales_deposits,
             "totalBeginningCash": self.total_beginning_cash,
             "totalEndingCash": self.total_ending_cash,
             "totalCashSales": self.total_cash_sales,
@@ -82,15 +81,15 @@ class BranchReport:
         if value is not None:
             self._branch_id = ObjectId(value)
     
-    @property
-    def sales_deposit_id(self): 
-        if(self._sales_deposit_id is not None):
-            return str(self._sales_deposit_id)
+    # @property
+    # def sales_deposits(self): 
+    #     if(self._sales_deposits is not None):
+    #         return str(self._sales_deposits)
 
-    @sales_deposit_id.setter
-    def sales_deposit_id(self, value): 
-        if value is not None:
-            self._sales_deposit_id = ObjectId(value)
+    # @sales_deposits.setter
+    # def sales_deposits(self, value): 
+    #     if value is not None:
+    #         self._sales_deposits = ObjectId(value)
     
     @property
     def ending_cash_balance(self): 
