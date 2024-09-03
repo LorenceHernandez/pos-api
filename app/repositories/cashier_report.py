@@ -148,7 +148,7 @@ class CashierReportRepository(BackupRepository):
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")
         
-    def find_by_date_and(self, date_filter: DateFilter, start_date, end_date, custom_date, query={}):
+    def find_by_date_and(self, date_filter: DateFilter, start_date=None, end_date=None, custom_date=None, query={}):
         reports = self.find(query)
 
         filtered_reports = [

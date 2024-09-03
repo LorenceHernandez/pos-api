@@ -29,7 +29,6 @@ def get_reports(user_id):
 
     previous_report = repository.find_one({ 
         'cashierId': user_id, 
-        'timeOut': { '$ne': None } 
     })
 
     query = {} if cashierId is None else { 'cashierId': cashierId }
