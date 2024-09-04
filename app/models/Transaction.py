@@ -47,6 +47,7 @@ class Transaction:
     invoice_no = None
     discount_applied = None
     customer_data = None
+    promoDiscount = None
     payment_details = None
 
     @staticmethod
@@ -72,6 +73,7 @@ class Transaction:
         transaction.discount_applied = DiscountApplied.fromDict(data.get('discountApplied'))
         transaction.customer_data = data.get('customerData')
         transaction.payment_details = data.get('paymentDetails')
+        transaction.promoDiscount = data.get('promoDiscount')
         return transaction
     
     def toDict(self): 
@@ -96,6 +98,7 @@ class Transaction:
             "customerData": self.customer_data,
             "discountApplied": discount_applied,
             "paymentDetails": self.payment_details
+            "promoDiscount": self.promoDiscount
         }
     
     @property

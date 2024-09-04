@@ -41,6 +41,8 @@ def _update_company():
       update_val['contact_number'] = request_data['contactNo']
    if 'emailAddress' in request_data:
       update_val['email_address'] = request_data['emailAddress']
+   if 'promoDiscount' in request_data:
+      update_val['promoDiscount'] = request_data['promoDiscount']
    
    if not update_val:
         return {

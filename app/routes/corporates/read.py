@@ -22,6 +22,7 @@ def _get_companies():
             "postalCode": record["postal_code"],
             "contactNumber": record["contact_number"],
             "emailAddress": record["email_address"],
+            "promoDiscount": record.get("promoDiscount"),
             "name": record["name"],
             "tinId": record["tin_id"],
           })
