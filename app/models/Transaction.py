@@ -97,7 +97,7 @@ class Transaction:
             "createBy": self.create_by,
             "customerData": self.customer_data,
             "discountApplied": discount_applied,
-            "paymentDetails": self.payment_details
+            "paymentDetails": self.payment_details,
             "promoDiscount": self.promoDiscount
         }
     
