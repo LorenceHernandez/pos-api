@@ -4,17 +4,20 @@ services:
   app:
     image: chrisn0tdev/pos-client
     ports:
-      - "3000:3000"
+      - "4000:5173"
+    depends_on:
+      - proxy
+    env_file: 
+      - .env
     environment:
       - VITE_APP_SERVER_URL=http://proxy:5001
     restart: always
-    depends_on:
-      - proxy
+    
   server:
     build: ./
     image: chrisn0tdev/pos-app
-    # ports:
-    #   - "5000:5000" 
+    ports:
+      - "5000:5000"
     depends_on:
       - mongo
     networks:
@@ -25,13 +28,11 @@ services:
       - LOCAL_DATABASE_URL=mongodb://mongo:27017
       - APP_ENV=internal-production
     restart: always
-    
-
   proxy:
     build: ./proxy
     image: chrisn0tdev/pos-proxy
-    # ports:
-    #   - "5001:5001" 
+    ports:
+      - "5001:5001" 
     depends_on:
       - mongo
       - server
