@@ -73,7 +73,7 @@ def print_text():
     p = None
     try:
         # p = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
-        p = printer.Usb(0x04B8,0x0202)
+        p = printer.Usb(0x04B8, 0x0202)
 
         if p is None:
             raise
@@ -91,7 +91,6 @@ def print_text():
     
     # p = escpos.printer(Usb(0x04b8, 0x0202))  # For USB connection
     # p = escpos.Network("192.168.1.100")  # For network connection
-    # try:
     
     data = request_data['combinedData']
     branch = data['branch']
@@ -104,7 +103,7 @@ def print_text():
         p.text(branch['name'] + '\n')
         p.text(branch['city'] + ', ' + branch['state'] + '\n')
         p.text(branch['tin'] + '\n\n')
-        p.set(align='center', bold=True)
+        # p.set(align='center', bold=True)
         p.text('Customer Information\n')
         p.set(align='left')
 
@@ -171,4 +170,4 @@ def print_text():
     return { 'message': 'Printed successfully' }, 200
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True, port=8080)
+    app.run(host="0.0.0.0", port=5001)
