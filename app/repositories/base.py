@@ -3,23 +3,18 @@ import abc
 
 from dotenv import load_dotenv
 from app.config import IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION
-from app.database.database import remote_database, backup_database, internal_prod_database
+from app.database.database import get_current_backup_database, get_current_database, remote_database, backup_database, internal_prod_database
 
-load_dotenv()
-current_database = remote_database
-current_backup_database = None
 
-if IS_INTERNAL_PRODUCTION:
-    current_database = internal_prod_database
-    current_backup_database = backup_database
-if IS_PRODUCTION:
-    current_database = remote_database
+# if IS_DEVELOPMENT:
+
 
 class Repository(abc.ABC):
     _db = None
     _collection = None
 
     def __init__(self):
+        current_database = get_current_database()
         self._db = current_database.connect()
     
     def find(self, query):
@@ -65,6 +60,9 @@ class BackupRepository(Repository):
     _db_client = None
 
     def __init__(self):
+        current_database = get_current_database()
+        current_backup_database = get_current_backup_database()
+
         self._db = current_database.connect()
         self._db_client = current_database._connection
 

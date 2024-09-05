@@ -1,7 +1,7 @@
 
 import abc
 import pymongo
-from app.config import BACKUP_DATABASE, LOCAL_DATABASE, LOCAL_DATABASE_URL, REMOTE_DATABASE, REMOTE_DATABASE_URL
+from app.config import BACKUP_DATABASE, ENVIRONMENT, IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION, LOCAL_DATABASE, LOCAL_DATABASE_URL, REMOTE_DATABASE, REMOTE_DATABASE_URL
 
 class Database(abc.ABC):
     def __init__(self, config):
@@ -21,7 +21,7 @@ class MongoDB(Database):
         self._connection = pymongo.MongoClient(self.config['uri'])
         db = self._connection[self.config['database']]
 
-        print('CONNECTED_DB: ', self.config['database'], self._connection)
+        print(f'CONNECTED_DB [{ENVIRONMENT}]: ', self.config['database'], self.config['uri'])
         return db
 
     def close(self):
@@ -47,3 +47,16 @@ internal_prod_database = MongoDB({
     "uri": LOCAL_DATABASE_URL, 
     "database": LOCAL_DATABASE, 
 })
+
+def get_current_database():
+    if IS_DEVELOPMENT:
+        return remote_database
+    if IS_INTERNAL_PRODUCTION:
+        return internal_prod_database
+    if IS_PRODUCTION:
+        return remote_database
+    
+def get_current_backup_database():
+    if IS_INTERNAL_PRODUCTION:
+        return backup_database
+    return None

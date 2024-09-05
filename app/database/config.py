@@ -1,23 +1,17 @@
-import os
 
 from pymongo import MongoClient
 
 from app.config import IS_INTERNAL_PRODUCTION, IS_PRODUCTION
-from .database import remote_database, internal_prod_database
+from .database import get_current_database, remote_database, internal_prod_database
 
-MONGO_PORT = os.getenv('MONGO_PORT')
-MONGO_HOST_PY = os.getenv('MONGO_HOST_PY')
-MONGO_USER = os.getenv('MONGO_USER')
-MONGO_PASS = os.getenv('MONGO_PASS')
-LOCAL = os.getenv('LOCAL')
+# MONGO_PORT = os.getenv('MONGO_PORT')
+# MONGO_HOST_PY = os.getenv('MONGO_HOST_PY')
+# MONGO_USER = os.getenv('MONGO_USER')
+# MONGO_PASS = os.getenv('MONGO_PASS')
+# LOCAL = os.getenv('LOCAL')
 
-database = remote_database
-if IS_INTERNAL_PRODUCTION:
-  database = internal_prod_database
-if IS_PRODUCTION:
-  database = remote_database
-
-database = database.connect()
+# if IS_DEVELOPMENT:
+database = get_current_database().connect()
 users = database.users
 products = database.products
 doctors = database.doctors

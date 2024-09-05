@@ -8,6 +8,7 @@ from flask_cors import CORS, cross_origin
 
 from app.blueprints.transaction import transaction_bp
 from app.blueprints.cashier_report import cashier_report_bp
+from app.config import IS_DEVELOPMENT
 from app.utils.utils import getLocalTime
 
 load_dotenv(override=True)
@@ -366,5 +367,5 @@ app.register_blueprint(get_reports)
 
 
 if __name__ == '__main__':
-   app.run(HOST, PORT, debug=True)
+   app.run(host="0.0.0.0", port=5000, debug=IS_DEVELOPMENT)
    

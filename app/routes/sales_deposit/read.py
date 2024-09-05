@@ -59,6 +59,7 @@ def _get_sales_deposits():
                          }
                     }
                },
+               { "$sort": { "_id": -1 }},
                {
                    '$project': {
                        'cashierId': 0,
