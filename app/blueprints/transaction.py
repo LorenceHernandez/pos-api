@@ -1,6 +1,7 @@
 from datetime import datetime
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+from pydantic import ValidationError
 
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.middlewares.authorized_attribute import authorized
@@ -55,13 +56,17 @@ def create_transaction(user_id):
             }, 200
             
         transaction = CreateTransaction(
-            branchId=request_data['branchId'],
+            **request_data,
             cashierId=user_id,
         )
 
-        result = repository.insert_one(transaction.dict())
-        if result is not None:
-            return jsonify({'message': 'Transaction created successfully', 'data': result })
+        result = repository.insert_one(transaction.model_dump())
+        if result is None:
+            raise Exception()
+        
+        return jsonify({'message': 'Transaction created successfully', 'data': result })
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
     except Exception as e:
         return jsonify({'message': 'Unable to create transaction', 'error': repr(e)}), 500
 

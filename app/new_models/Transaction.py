@@ -1,20 +1,14 @@
 
-from datetime import datetime
-from typing import Optional
 import uuid
-from bson import ObjectId
 from pydantic import BaseModel
 
-from app.new_models.CashCount import CashCount
-from app.utils.utils import getTimeZone
+from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 
 class CreateTransaction(BaseModel):
     branchId: str
     cashierId: str
-    # date: Optional[str]
-    # date: Optional[str] = str(datetime.now(getTimeZone()).date())
-    # transactionDate: Optional[str]
-    # transactionDate: Optional[str] = datetime.now(getTimeZone()).isoformat()
-    status: Optional[str] = 'active'
-    transactionNo: Optional[str] = str(uuid.uuid4())
+    date: str = getLocalDateStr()
+    transactionDate: str = getLocalTimeStr()
+    status: str = 'active'
+    transactionNo: str = str(uuid.uuid4())

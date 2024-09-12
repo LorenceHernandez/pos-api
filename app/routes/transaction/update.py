@@ -1,20 +1,14 @@
 
-import os
-from datetime import date, datetime
 
-import bcrypt
-import jwt
 from bson import ObjectId
 from flask import Blueprint, request
 from pydash import omit
 
-from app.database.config import (customers, doctors, packages,
-                                 product_categories, products, sales,
-                                 transactions, users)
+from app.database.config import (doctors, product_categories, products, transactions)
 from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.utils.filter_values import filterValues
-from app.utils.utils import getLocalDateStr, getLocalTime, getLocalTimeStr, getTimeZone
+from app.utils.utils import ToStringId, getLocalDateStr, getLocalTimeStr
 
 update_transaction = Blueprint("/transaction/edit", __name__)
 
@@ -38,7 +32,6 @@ def _update_transaction():
    new_val = { "$set": filterValues(omit(transaction_dict, 'id')) }
 
    res = transactions.update_one(filter, new_val)
-   
    if res.modified_count > 0:
       updated_trans = transactions.find_one({"_id": ObjectId(id)})
       # FOR REFACTORING
@@ -117,9 +110,11 @@ def _update_transaction():
                'message': 'Unable to create sale',
                'code': 16
             }, 500
+         
       return {
          'message': 'Transaction update success',
-         'code': 18
+         'code': 18,
+         'data': ToStringId(updated_trans)
       }, 200
    else:
       return {

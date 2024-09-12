@@ -5,6 +5,7 @@ from bson import ObjectId
 from app.repositories.base import BackupRepository
 from app.utils.invoice_setting import generate_invoice_str
 from app.database.config import counters
+from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 
 class TransactionRepository(BackupRepository):
@@ -105,21 +106,14 @@ class TransactionRepository(BackupRepository):
 
     def find_active(self, user_id):
         
-        id = ObjectId()
         return self.find_one({
           "status": "active",
           "cashierId": user_id,
-           "date": str(id.generation_time.date()),
+           "date": getLocalDateStr(),
         })
 
     def insert_one(self, data):
         data['invoiceNumber'] = self._get_next_sequence('invoice')
-
-        id = ObjectId()
-        result = super().insert_one({
-            **data,
-            "date": str(id.generation_time.date()),
-            "transactionDate": id.generation_time.isoformat(),
-        })
+        result = super().insert_one(data)
 
         return self.find_one({ "_id": result.inserted_id })
