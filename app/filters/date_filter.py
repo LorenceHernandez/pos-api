@@ -50,7 +50,7 @@ def compare_date_year_month(dateA, dateB):
      dateA = datetime.fromisoformat(dateA)
      dateB = datetime.fromisoformat(dateB)
 
-     return dateA.year == dateB.year and dateA.month == dateB.month
+     return dateA.date() == dateB.date()
 
 def compare_date_range(date, startDate, endDate):
      if startDate is None or endDate is None:

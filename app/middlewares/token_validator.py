@@ -19,7 +19,7 @@ excluded_routes_for_validator = [
 ]
 
 def token_validator(): 
-   print('JWT_SECRET_KEY', JWT_SECRET)
+  #  print('JWT_SECRET_KEY', JWT_SECRET)
    if request.path not in excluded_routes_for_validator:
        headers = request.headers
        bearer = headers.get('Authorization')
