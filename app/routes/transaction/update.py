@@ -14,7 +14,7 @@ from app.database.config import (customers, doctors, packages,
 from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.utils.filter_values import filterValues
-from app.utils.utils import getLocalTime
+from app.utils.utils import getLocalDate, getLocalDateTime, getLocalTimeISO, getTimeZone
 
 update_transaction = Blueprint("/transaction/edit", __name__)
 
@@ -46,10 +46,12 @@ def _update_transaction():
          categories = product_categories.find()
          services = updated_trans.get('services')
          invoiceNumber = updated_trans.get('invoiceNumber')
-         amount = updated_trans.get('paymentDetails').get('paymentDue')
+         paymentDetails = updated_trans.get('paymentDetails')
+         amount = paymentDetails.get('paymentDue')
          branch = updated_trans.get('branchId')
          discount = 0
          applied = updated_trans.get('discountApplied')
+
          if applied:    
             discount = applied['totalDiscount']
          doctor_full_name = ''
@@ -73,7 +75,7 @@ def _update_transaction():
 
          for service in services: 
             if service['source'] == "package": 
-               for item in service['items']:
+               for item in service['labTest']:
                   name.append(item['name'])
                   product_filter = { '_id': ObjectId(item['_id'])  }
                   product_new_val = { "$inc": { 'transaction_count': 1 } }
@@ -100,20 +102,21 @@ def _update_transaction():
             'labExams': ', '.join(name),
             'invoiceNumber': invoiceNumber,
             'amount': amount,
+            'paymentDetails': paymentDetails,
             'categories': _categories,
             'discount': discount,
             'referrer': doctor_full_name,
             'branch': branch,
             'cashierId': updated_trans['cashierId'],
             'transactionId': str(updated_trans['_id']),
-            'date': str(date.today()),
-            'created_at': getLocalTime()
+            'date': getLocalDate(),
+            'created_at': getLocalTimeISO(),
          })   
          if sale.inserted_id is None:
             return {
                'message': 'Unable to create sale',
                'code': 16
-            }
+            }, 500
       return {
          'message': 'Transaction update success',
          'code': 18
@@ -122,6 +125,6 @@ def _update_transaction():
       return {
          'message': 'Unable to update transaction',
          'code': 16
-      }
+      }, 500
 
 
