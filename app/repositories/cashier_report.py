@@ -2,8 +2,8 @@
 
 
 from app.filters.date_filter import DateFilter, compare_date_filter
+from app.new_models.CashierReport import CashierReport
 from app.repositories.base import BackupRepository
-from app.utils.invoice_setting import generate_invoice_str
 
 
 class CashierReportRepository(BackupRepository):
@@ -66,7 +66,9 @@ class CashierReportRepository(BackupRepository):
                             {
                                 "$group": {
                                     "_id": "$cashierId",
-                                    "total": { "$sum": "$amount" },
+                                    "totalGrossSales": { "$sum": "$paymentDetails.subTotal" },
+                                    "totalNetSales": { "$sum": "$paymentDetails.paymentDue" },
+                                    "totalDiscount": { "$sum": { "$subtract": ["$paymentDetails.subTotal", "$paymentDetails.paymentDue"] } },
                                     "invoiceStartNumber": { '$min': "$invoiceNumber" },
                                     "invoiceEndNumber": { '$max': "$invoiceNumber" }
                                 }
@@ -81,7 +83,7 @@ class CashierReportRepository(BackupRepository):
                             "$cond": [
                                 { "$gt": [ { "$size": "$sales" }, 0 ] },
                                 { "$arrayElemAt": ["$sales", 0] },
-                                0
+                                None
                             ]
                         },
                         "invoiceStartNumber": "$cashSales.invoiceStartNumber",
@@ -125,31 +127,22 @@ class CashierReportRepository(BackupRepository):
 
             reports = []
             for item in data:
-                item['cashGain'] = None
-                item['cashLoss'] = None
 
-                cashSales = item['cashSales']['total'] if item.get('cashSales') != 0 else 0
-                cashOnHand = item['endingCashOnHand']['total'] if item.get('endingCashOnHand') is not None else 0
-                
-                difference = cashOnHand - cashSales 
-                item['cashGain'] = difference if difference > 0 else 0
-                item['cashLoss'] = difference * -1 if difference < 0 else 0
-
-                if(item.get('cashSales') != 0):
-                    item['cashSales'] = item['cashSales']['total']
-                
-                item['invoiceNumberStr'] = generate_invoice_str(
-                    item['branch']['code'],
-                    ''
-                )
-
-                reports.append(item)
+                report = CashierReport.model_construct(**item)
+                reports.append(report.model_dump())
             return reports
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")
         
     def find_by_date_and(self, date_filter: DateFilter, start_date=None, end_date=None, custom_date=None, query={}):
         reports = self.find(query)
+
+        if(date_filter == DateFilter.CUSTOM_DATE and custom_date is None):
+            return []
+        
+        if(date_filter == DateFilter.CUSTOM_FILTER and start_date is None and end_date is None):
+            return []
+
 
         filtered_reports = [
             report for report in reports 
