@@ -25,6 +25,7 @@ if ENVIRONMENT is None:
     raise Exception('APP_ENV is None')
 
 IS_DEVELOPMENT = ENVIRONMENT == 'development'
+IS_LOCAL_DEVELOPMENT = ENVIRONMENT == 'local-development'
 IS_INTERNAL_PRODUCTION = ENVIRONMENT == 'internal-production'
 IS_PRODUCTION = ENVIRONMENT == 'production'
 

@@ -1,7 +1,7 @@
 
 import abc
 import pymongo
-from app.config import BACKUP_DATABASE, ENVIRONMENT, IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION, LOCAL_DATABASE, LOCAL_DATABASE_URL, REMOTE_DATABASE, REMOTE_DATABASE_URL
+from app.config import BACKUP_DATABASE, ENVIRONMENT, IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_LOCAL_DEVELOPMENT, IS_PRODUCTION, LOCAL_DATABASE, LOCAL_DATABASE_URL, REMOTE_DATABASE, REMOTE_DATABASE_URL
 
 class Database(abc.ABC):
     def __init__(self, config):
@@ -55,6 +55,8 @@ def get_current_database():
         return internal_prod_database
     if IS_PRODUCTION:
         return remote_database
+    if IS_LOCAL_DEVELOPMENT:
+        return dev_database
     
 def get_current_backup_database():
     if IS_INTERNAL_PRODUCTION:
