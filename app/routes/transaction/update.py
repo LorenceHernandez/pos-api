@@ -14,7 +14,7 @@ from app.database.config import (customers, doctors, packages,
 from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.utils.filter_values import filterValues
-from app.utils.utils import getLocalDate, getLocalDateTime, getLocalTimeISO, getTimeZone
+from app.utils.utils import getLocalDateStr, getLocalTime, getLocalTimeStr, getTimeZone
 
 update_transaction = Blueprint("/transaction/edit", __name__)
 
@@ -109,8 +109,8 @@ def _update_transaction():
             'branch': branch,
             'cashierId': updated_trans['cashierId'],
             'transactionId': str(updated_trans['_id']),
-            'date': getLocalDate(),
-            'created_at': getLocalTimeISO(),
+            'date': getLocalDateStr(),
+            'created_at': getLocalTimeStr(),
          })   
          if sale.inserted_id is None:
             return {

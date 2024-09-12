@@ -11,7 +11,13 @@ def ToStringId(data):
     return { **omit(data, '_id'), "id": str(data["_id"]) }
 
 def getLocalTime():
-    return datetime.now() + timedelta(hours=8)
+    return datetime.now(getTimeZone())
+
+def getLocalDateStr():
+    return str(getLocalTime())
 
 def getTimeZone():
     return pytz.timezone('Asia/Manila')
+
+def getLocalTimeStr():
+    return getLocalTime().isoformat()
