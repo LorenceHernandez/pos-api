@@ -18,7 +18,7 @@ def _create_company():
    request_data = request.get_json()
    name, street_address, city, state, postal_code, contact, email = request_data['name'], request_data['streetAddress'], request_data['city'], request_data['state'], request_data['postalCode'], request_data['contactNo'], request_data['emailAddress']
    tin_id = request_data['tinId']
-   promoDiscount = request_data['promoDiscount']
+   promoDiscount = request_data.get('promo_discount')
    created_by = g.user_id
    created_at = getLocalTime()
    
