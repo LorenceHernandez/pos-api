@@ -1,6 +1,7 @@
 import copy
+from datetime import date, datetime, timedelta
 
-import moment
+from moment import moment
 from bson.objectid import ObjectId
 
 from app.database.config import branches, product_categories, transactions
@@ -12,8 +13,11 @@ def getMancomPaymentType(args):
    categories = []
    _branches = []
    objectIds = []
-   min = moment.date(args.get('min'), 'MM/DD/YYYY 00:00:00')
-   max = moment.date(args.get('max'), 'MM/DD/YYYY 00:00:00').add(day = 1)
+   
+   min_date = datetime.strptime(args.get('min'), "%m/%d/%Y").date()
+   max_date = datetime.strptime(args.get('max'), "%m/%d/%Y")
+   max_date = (max_date  + timedelta(days=1)).date()
+
    res = transactions.find({
       "status": "Completed",
       "branchId": {"$in": branchIds},
@@ -21,9 +25,9 @@ def getMancomPaymentType(args):
    res_copy = []
    if res:
       for transaction in res:
-
-         if (str(moment.date(transaction['transactionDate'])) >= str(min)) and (str(moment.date(transaction['transactionDate'])) <= str(max)):
-                res_copy.append(transaction)
+         transaction_date = datetime.fromisoformat(transaction['transactionDate']).date()
+         if (min_date <= transaction_date <= max_date):
+            res_copy.append(transaction)
    
    for branchId in branchIds:
       objectIds.append(ObjectId(branchId))
@@ -59,32 +63,34 @@ def getMancomPaymentType(args):
       for transaction in res_copy:
         for service in transaction['services']:
            if service['source'] == 'package':
-                for item in service['items']:
-                    for branch in _branches:
-                       if transaction['branchId'] == branch['id']:
-                          for category in branch['categories']:
-                             if category['id'] == item['category']['id']:
-                                if item['name'].lower() == 'account receivable':
-                                    category['AR'] += item['amount']
-                                    category['Count'] += 1
-                                    branch['totalAr'] += item['amount']
-                                else:
-                                    category['Cash'] += item['amount']
-                                    category['Count'] += 1
-                                    branch['totalCash'] += item['amount']
+               for item in service.get('labTest', []):
+                  for branch in _branches:
+                     if transaction['branchId'] == branch['id']:
+                        for category in branch['categories']:
+                           service_category = item.get('category')
+                           if service_category != None and category['id'] == service_category['id']:
+                              if item['name'].lower() == 'account receivable':
+                                 category['AR'] += item.get('amount', 0)
+                                 category['Count'] += 1
+                                 branch['totalAr'] += item.get('amount', 0)
+                              else:
+                                 category['Cash'] += item.get('amount', 0)
+                                 category['Count'] += 1
+                                 branch['totalCash'] += item.get('amount', 0)
            else: 
               for branch in _branches:
                 if transaction['branchId'] == branch['id']:
                    for category in branch['categories']:
-                      if category['id'] == service['category']['id']:
+                      service_category = item.get('category')
+                      if service_category != None and category['id'] == service_category['id']:
                         if service['name'].lower() == 'account receivable':
-                            category['AR'] += service['amount']
+                            category['AR'] += service.get('amount', 0)
                             category['Count'] += 1
-                            branch['totalAr'] += service['amount']
+                            branch['totalAr'] += service.get('amount', 0)
                         else:
-                            category['Cash'] += service['amount']
+                            category['Cash'] += service.get('amount', 0)
                             category['Count'] += 1
-                            branch['totalCash'] += service['amount']
+                            branch['totalCash'] += service.get('amount', 0)
    return _branches
 
 
