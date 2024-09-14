@@ -4,7 +4,7 @@ from flask import Blueprint, g, request
 from pydash import merge, omit
 
 from app.database.config import cashier_reports
-from app.models.CashierReport import CashierReport
+from app.new_models.CashierReport import CashierReport
 from app.utils.filter_values import filterValues
 from app.utils.utils import ToStringId
 
@@ -34,68 +34,120 @@ def generate_branch_report(branchId, date):
                } 
           },
           {
-               "$group": {
-                    "_id": "$branchId",
-                    'date': { '$first': '$date' },
-                    "totalBeginningCash": { "$sum": "$beginningCashOnHand.total" },
-                    "totalEndingCash": { "$sum": "$endingCashOnHand.total" },
-                    "totalCashSales": { "$sum": "$cashSales" },
-                    "totalCashGain": { "$sum": "$cashGain" },
-                    "totalCashLoss": { "$sum": "$cashLoss" }
+               "$lookup": {
+                    "from": "sales",
+                    "let": {
+                         "branchId": "$branchId",
+                         "date": "$date"
+                    },
+                    "pipeline": [
+                         {
+                              "$match": {
+                                   "$expr": {
+                                        "$and": [
+                                             { "$eq": ["$branch", "$$branchId"] },
+                                             { "$eq": ["$date", "$$date"] }
+                                        ]
+                                   }
+                              }
+                         },
+                         {
+                              "$group": {
+                                   "_id": "$branch",
+                                   "totalGrossSales": { "$sum": "$paymentDetails.subTotal" },
+                                   "totalNetSales": { "$sum": "$paymentDetails.paymentDue" },
+                                   "totalDiscount": { "$sum": { "$subtract": ["$paymentDetails.subTotal", "$paymentDetails.paymentDue"] } },
+                                   "invoiceStartNumber": { '$min': "$invoiceNumber" },
+                                   "invoiceEndNumber": { '$max': "$invoiceNumber" }
+                              }
+                         },
+                    ],
+                    "as": "sales"
                }
           },
-          # { 
-          #      '$lookup': {
-          #           'from': 'sales_deposits',
-          #           "let": {
-          #                "date": "$date",
-          #                "branchId": "$_id"
-          #           },
-          #           "pipeline": [
-          #                {
-          #                     "$match": {
-          #                     "$expr": {
-          #                               "$and": [
-          #                                    { "$eq": ["$dateDeposited", "$$date"] },
-          #                                    { "$eq": ["$branchId", "$$branchId"] }
-          #                               ]
-          #                          }
-          #                     }
-          #                }
-          #           ],
-          #           'as': 'salesDeposit'
-          #      }, 
-          # },
           {
                "$addFields": {
-                    "branchId": {"$toObjectId": "$_id"},
+                    "cashSales": { 
+                         "$cond": [
+                              { "$gt": [ { "$size": "$sales" }, 0 ] },
+                              { "$arrayElemAt": ["$sales", 0] },
+                              None
+                         ]
+                    },
+                    "invoiceStartNumber": "$cashSales.invoiceStartNumber",
+                    "invoiceEndNumber": "$cashSales.invoiceEndNumber",
+               }
+          },
+          {
+               "$group": {
+                   "_id": "$branchId",
+                    'date': { '$first': '$date' },
+                    "totalBeginningCashOnHand": { "$sum": "$beginningCashOnHand.total" },
+                    "countBeginningCashOnHand": { "$push": "$beginningCashOnHand.count" },
+                    "totalEndingCashOnHand": { "$sum": "$endingCashOnHand.total" },
+                    "totalGrossSales": { "$sum": "$cashSales.totalGrossSales" },
+                    "totalNetSales": { "$sum": "$cashSales.totalNetSales" },
+                    "totalDiscount": { "$sum": "$cashSales.totalDiscount" },
+                    "invoiceStartNumber": { '$min': "$cashSales.invoiceStartNumber" },
+                    "invoiceEndNumber": { '$max': "$cashSales.invoiceEndNumber" }
+               }
+          },
+          {
+               "$addFields": {
+                    "_id": {"$toObjectId": "$_id"},
+                    "beginningCashOnHand": {
+                         "total": "$totalBeginningCashOnHand"
+                    },
+                    "endingCashOnHand": {
+                         "total": "$totalEndingCashOnHand"
+                    },
+                    "cashSales": {
+                        "totalGrossSales": "$totalGrossSales",
+                        "totalNetSales": "$totalNetSales",
+                        "totalDiscount": "$totalDiscount",
+                        "invoiceStartNumber": "$invoiceStartNumber",
+                        "invoiceEndNumber": "$invoiceEndNumber",
+                    }
                }
           },
           { 
                '$lookup': {
                     'from': 'branches',
-                    'localField': 'branchId',
+                    'localField': '_id',
                     'foreignField': '_id',
                     'as': 'branch'
                }, 
           },
+          { "$unwind": "$branch" },
           {
                "$addFields": {
-                    "branch": { "$arrayElemAt": ["$branch", 0] },
+                    "_id": { "$toString": "$_id" },
+                    "branch._id": { "$toString": "$branch._id" },
                }
           },
           {
-               '$project': {
-                    'branchId': 0,
-               }
+              "$project": {
+                  "totalBeginningCashOnHand": 0,
+                  "totalEndingCashOnHand": 0,
+                  "totalGrossSales": 0,
+                    "totalNetSales": 0,
+                    "totalDiscount": 0,
+                    "invoiceStartNumber": 0,
+                    "invoiceEndNumber": 0,
+              }
           }
      ])
 
-     reports = list(data)
+     reports = [
+     #     CashierReport.model_construct(**report).model_dump() 
+          report
+         for report in list(data)
+     ]
 
      if len(reports) == 0:
           return None
 
+     return reports
      report = reports[0]
      report['branch'] = ToStringId(report['branch'])
      # report['salesDeposit'] = ToStringId(report['salesDeposit'])
