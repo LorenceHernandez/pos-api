@@ -81,8 +81,8 @@ def getMancomPaymentType(args):
               for branch in _branches:
                 if transaction['branchId'] == branch['id']:
                    for category in branch['categories']:
-                      service_category = item.get('category')
-                      if service_category != None and category['id'] == service_category['id']:
+                     # service_category = item.get('category')
+                      #if service_category != None and category['id'] == service_category['id']:
                         if service['name'].lower() == 'account receivable':
                             category['AR'] += service.get('amount', 0)
                             category['Count'] += 1
