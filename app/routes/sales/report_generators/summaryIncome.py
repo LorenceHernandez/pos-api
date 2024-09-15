@@ -1,7 +1,7 @@
 import copy
 from datetime import datetime, timedelta
 
-from moment import moment
+import moment
 from bson.objectid import ObjectId
 
 from app.database.config import branches, product_categories, transactions
