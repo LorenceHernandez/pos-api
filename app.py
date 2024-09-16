@@ -8,6 +8,7 @@ from flask_cors import CORS, cross_origin
 
 from app.blueprints.transaction import transaction_bp
 from app.blueprints.cashier_report import cashier_report_bp
+from app.cas.models import item_bp
 from app.config import IS_DEVELOPMENT
 from app.utils.utils import getLocalTime
 
@@ -99,6 +100,7 @@ app = Flask(__name__)
 cors = CORS(app, origins=["*", "*"])
 app.register_blueprint(cashier_report_bp)
 app.register_blueprint(transaction_bp)
+app.register_blueprint(item_bp)
 
 @app.before_request
 def hook():
