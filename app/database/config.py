@@ -2,7 +2,9 @@
 from pymongo import MongoClient
 
 from app.config import IS_INTERNAL_PRODUCTION, IS_PRODUCTION
-from .database import get_current_database, remote_database, internal_prod_database
+
+from .database import (get_current_database, internal_prod_database,
+                       remote_database)
 
 # MONGO_PORT = os.getenv('MONGO_PORT')
 # MONGO_HOST_PY = os.getenv('MONGO_HOST_PY')
@@ -29,3 +31,19 @@ cashier_reports = database.cashier_reports
 sales_deposits = database.sales_deposits  
 branch_reports = database.branch_reports  
 counters = database.counters
+suppliers = database.suppliers
+invoices = database.invoices
+invoice_line_items  = database.invoice_line_items
+purchase_orders = database.purchase_orders
+purchase_order_items = database.purchase_order_items
+received_goods = database.received_goods
+goods_receipt_items = database.goods_receipt_items
+dicrepancies = database.discrepancies
+approvals = database.approvals
+payments = database.payments
+financial_records = database.financial_records
+reports = database.reports
+
+#CAS
+items = database.items
+inventories = database.inventories

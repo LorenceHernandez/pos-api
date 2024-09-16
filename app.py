@@ -6,9 +6,10 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
-from app.blueprints.transaction import transaction_bp
 from app.blueprints.cashier_report import cashier_report_bp
-from app.cas.models import item_bp
+from app.blueprints.transaction import transaction_bp
+from app.cas_app.blueprints.inventory import inventory_bp
+from app.cas_app.blueprints.item import item_bp
 from app.config import IS_DEVELOPMENT
 from app.utils.utils import getLocalTime
 
@@ -101,6 +102,7 @@ cors = CORS(app, origins=["*", "*"])
 app.register_blueprint(cashier_report_bp)
 app.register_blueprint(transaction_bp)
 app.register_blueprint(item_bp)
+app.register_blueprint(inventory_bp)
 
 @app.before_request
 def hook():

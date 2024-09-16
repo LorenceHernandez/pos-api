@@ -56,6 +56,15 @@ route_constraints = [
   { 'route': '/branch-reports', 'params': [], 'content-type': 'json', 'method': 'GET' },
 
   { 'route': '/booking/confirm', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+
+  
+  { 'route': '/api/cas/item/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/api/cas/item', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/api/cas/item/create', 'params': ['name', 'description', 'categoryId', 'uom', 'reorderLevel', 'criticalLevel', 'supplierId', 'purchasePrice'], 'content-type': 'json', 'method': 'POST' },
+  
+  { 'route': '/api/cas/inventory/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/api/cas/inventory', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/api/cas/inventory/create', 'params': ['itemId', 'quantityOnHand', 'reorderPoint', 'expirationDate', 'expirationWarningDays', 'expirationStatus', 'lotNumber'], 'content-type': 'json', 'method': 'POST' },
 ]
 
 
