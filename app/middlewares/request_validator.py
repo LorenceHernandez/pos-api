@@ -65,6 +65,14 @@ route_constraints = [
   { 'route': '/api/cas/inventory/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/api/cas/inventory', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
   { 'route': '/api/cas/inventory/create', 'params': ['itemId', 'quantityOnHand', 'reorderPoint', 'expirationDate', 'expirationWarningDays', 'expirationStatus', 'lotNumber'], 'content-type': 'json', 'method': 'POST' },
+
+  { 'route': '/api/cas/category/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/api/cas/category', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/api/cas/category/create', 'params': ['name'], 'content-type': 'json', 'method': 'POST' },
+  
+  { 'route': '/api/cas/supplier/edit', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/api/cas/supplier', 'params': ['id'], 'content-type': 'json', 'method': 'GET' },
+  { 'route': '/api/cas/supplier/create', 'params': ['name', 'contactInformation', 'notes'], 'content-type': 'json', 'method': 'POST' },
 ]
 
 

@@ -48,3 +48,4 @@ reports = database.reports
 items = database.items
 inventories = database.inventories
 categories = database.categories
+suppliers = database.suppliers

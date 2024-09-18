@@ -34,7 +34,10 @@ def get_category(user_id, id):
     try:
         data = categories.find_one({ '_id': ObjectId(id) })
 
-        return {'data': Category.fromDict(data).toDict() }
+        if data is not None: 
+           
+            return {'data': Category.fromDict(data).toDict() }
+        return {'message': 'Unable to find supplier.'}
 
     except Exception as e:
         return {'message': repr(e) }, 500
@@ -57,7 +60,7 @@ def create_category(user_id):
     
 @category_bp.post(api + '/edit')
 @authorized
-def edit_inventory(user_id):
+def edit_category(user_id):
     request_data = request.get_json()
     id = request_data['id']
 

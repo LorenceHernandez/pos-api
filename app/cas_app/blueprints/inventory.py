@@ -34,7 +34,10 @@ def get_inventory(user_id, id):
     try:
         data = inventories.find_one({ '_id': ObjectId(id) })
 
-        return {'data': Inventory.fromDict(data).toDict() }
+        if data is not None: 
+           
+         return {'data': Inventory.fromDict(data).toDict() }
+        return {'message': 'Unable to find supplier.'}
 
     except Exception as e:
         return {'message': repr(e) }, 500
