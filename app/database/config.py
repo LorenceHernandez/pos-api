@@ -47,3 +47,4 @@ reports = database.reports
 #CAS
 items = database.items
 inventories = database.inventories
+categories = database.categories
