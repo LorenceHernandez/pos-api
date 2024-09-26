@@ -20,4 +20,4 @@ def generate_invoice_str(prefix, postfix):
     new_date_string = date.replace("-", "")
 
     trailing = f"{postfix:0>9}" if postfix is not None else ""
-    return f'N{prefix}{trailing}'
+    return f'N{trailing}'

@@ -95,10 +95,6 @@ class TransactionRepository(BackupRepository):
                 if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
                     item['requestedBy'] = None
 
-                item['invoiceNumberStr'] = generate_invoice_str(
-                    item['branch']['code'], 
-                    item['invoiceNumber']
-                )
                 transactions.append(item)
             return transactions
         except Exception as e:
