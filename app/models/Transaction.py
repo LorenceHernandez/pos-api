@@ -7,8 +7,10 @@ class DiscountApplied:
     type = None
     value = None
     total_discount = None
+    name = None
 
-    def __init__(self, type, value, total_discount):
+    def __init__(self, name, type, value, total_discount):
+        self.name = name
         self.type = type
         self.value = value
         self.total_discount = total_discount
@@ -19,6 +21,7 @@ class DiscountApplied:
             return None
         
         return DiscountApplied(
+            data.get('name'),
             data.get('type'),
             data.get('value'),
             data.get('totalDiscount')
@@ -26,6 +29,7 @@ class DiscountApplied:
 
     def toDict(self): 
         return {
+            "name": self.name,
             "type": self.type,
             "value": self.value,
             "totalDiscount": self.total_discount,
