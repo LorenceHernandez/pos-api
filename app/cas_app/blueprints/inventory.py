@@ -3,7 +3,9 @@ from flask import Blueprint, jsonify, request
 from pydash import omit
 
 from app.cas_app.models.Inventory import Inventory
-from app.database.config import inventories
+from app.cas_app.models.Item import Item
+from app.cas_app.models.Supplier import Supplier
+from app.database.config import inventories, items, suppliers
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
 from app.utils.filter_values import filterValues
@@ -80,3 +82,29 @@ def edit_inventory(user_id):
       return { 'message': 'Inventory successfully updated.' }
     else:
       return { 'message': 'Unable to update inventories.' }, 400
+
+@inventory_bp.get(api + '/needs-assessment')
+@authorized
+def needs_assessment(user_id):
+    
+    ret = []
+    try:
+
+        data = inventories.find()
+        for item in data: 
+          inventory = Inventory.fromDict(item)
+          item = Item.fromDict(items.find_one({'_id': ObjectId(inventory.itemId)}))
+          if item.reorderLevel >= inventory.quantityOnHand:
+             supplier = Supplier.fromDict(suppliers.find_one({'_id': ObjectId(item.supplierId)}))
+             ret.append({
+                'itemId': inventory.itemId,
+                'itemName': item.name,
+                'currentQuantity': inventory.quantityOnHand,
+                'reorderLevel':item.reorderLevel,
+                'supplierId': item.supplierId,
+                'supplierName': supplier.name
+             })
+        return {'data': ret }
+
+    except Exception as e:
+        return {'message': repr(e) }, 500
