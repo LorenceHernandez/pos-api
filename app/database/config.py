@@ -49,3 +49,4 @@ items = database.items
 inventories = database.inventories
 categories = database.categories
 suppliers = database.suppliers
+purchase_orders = database.purchase_orders

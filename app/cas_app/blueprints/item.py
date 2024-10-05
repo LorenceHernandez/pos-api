@@ -67,17 +67,17 @@ def edit_item(user_id):
 
     try:
       item = Item.fromDict(request_data)
+   
+    
+      filter = { '_id': ObjectId(id) }
+      new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }
+
+      res = items.update_one(filter, new_val)
+
+      if res.modified_count > 0:
+        return { 'message': 'Item successfully updated.' }
+      else:
+        return { 'message': 'Unable to update item.' }, 400
     except Exception as e:
       print (e)
       return { 'message': 'data format is invalid' }
-   
-   
-    filter = { '_id': ObjectId(id) }
-    new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }
-
-    res = items.update_one(filter, new_val)
-
-    if res.modified_count > 0:
-      return { 'message': 'Item successfully updated.' }
-    else:
-      return { 'message': 'Unable to update item.' }, 400

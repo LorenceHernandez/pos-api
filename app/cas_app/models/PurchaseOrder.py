@@ -1,0 +1,37 @@
+
+from bson import ObjectId
+
+
+class PurchaseOrder:
+    _id = None
+    supplierId = None
+    supplierName = None
+    supplierEmail = None
+    items = []
+    totalAmount = 0
+    status = "Pending Approval"
+    
+    @staticmethod
+    def fromDict(data: dict):
+        item = PurchaseOrder()
+        if data.get('_id') is not None:
+            item._id = str(data.get('_id'))
+        item.supplierId = data.get('notes')
+        item.items = data.get('items')
+        item.totalAmount = data.get('totalAmount')
+        item.status = data.get('status')
+        item.supplierName = data.get('supplierName')
+        item.supplierEmail = data.get('supplierEmail')
+      
+        return item
+    
+    def toDict(self):
+        return {
+            "_id": self._id,
+            "supplierId": self.supplierId,
+            "items": self.items,
+            "totalAmount": self.totalAmount,
+            "status": self.status,
+            "supplierEmail": self.supplierEmail,
+            "supplierName": self.supplierName,
+        }

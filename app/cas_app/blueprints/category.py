@@ -66,17 +66,17 @@ def edit_category(user_id):
 
     try:
       item = Category.fromDict(request_data)
+   
+    
+      filter = { '_id': ObjectId(id) }
+      new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }
+
+      res = categories.update_one(filter, new_val)
+
+      if res.modified_count > 0:
+        return { 'message': 'Category successfully updated.' }
+      else:
+        return { 'message': 'Unable to update categories.' }, 400
     except Exception as e:
       print (e)
       return { 'message': 'data format is invalid' }
-   
-   
-    filter = { '_id': ObjectId(id) }
-    new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }
-
-    res = categories.update_one(filter, new_val)
-
-    if res.modified_count > 0:
-      return { 'message': 'Category successfully updated.' }
-    else:
-      return { 'message': 'Unable to update categories.' }, 400
