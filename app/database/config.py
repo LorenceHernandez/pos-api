@@ -50,3 +50,6 @@ inventories = database.inventories
 categories = database.categories
 suppliers = database.suppliers
 purchase_orders = database.purchase_orders
+accountsgroup = database.accountsgroup
+accountstype = database.accountstype
+payments = database.payments
