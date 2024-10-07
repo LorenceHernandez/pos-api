@@ -75,8 +75,12 @@ route_constraints = [
   { 'route': '/api/cas/supplier/create', 'params': ['name', 'contactInformation', 'notes'], 'content-type': 'json', 'method': 'POST' },
 
   { 'route': '/api/cas/purchase-order/create', 'params': ['supplierId', 'supplierName', 'supplierEmail', 'items', 'totalAmount'], 'content-type': 'json', 'method': 'POST' },
-  { 'route': '/api/cas/purchase-order/edit', 'params': ['status'], 'content-type': 'json', 'method': 'POST' },
+  { 'route': '/api/cas/purchase-order/edit', 'params': ['id', 'status'], 'content-type': 'json', 'method': 'POST' },
   { 'route': '/api/cas/purchase-order', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
+
+  # { 'route': '/api/cas/goods_receipt/create', 'params': ['purchaseOrderId', 'dateOfReceipt', 'supplierName', 'itemsReceived'], 'content-type': 'json', 'method': 'POST' },
+  # { 'route': '/api/cas/goods_receipt-order/edit', 'params': ['id', 'status'], 'content-type': 'json', 'method': 'POST' },
+  # { 'route': '/api/cas/goods_receipt-order', 'params': ['id'], 'content-type': 'json', 'method': 'POST' },
 ]
 
 
