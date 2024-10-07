@@ -8,9 +8,12 @@ from flask_cors import CORS, cross_origin
 
 from app.blueprints.cashier_report import cashier_report_bp
 from app.blueprints.transaction import transaction_bp
+from app.cas_app.blueprints.accounts_group import accounts_group_bp
+from app.cas_app.blueprints.accounts_type import accounts_type_bp
 from app.cas_app.blueprints.category import category_bp
 from app.cas_app.blueprints.inventory import inventory_bp
 from app.cas_app.blueprints.item import item_bp
+from app.cas_app.blueprints.payments import payment_bp
 from app.cas_app.blueprints.purchase_orders import purchase_order_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
@@ -109,6 +112,10 @@ app.register_blueprint(inventory_bp)
 app.register_blueprint(category_bp)
 app.register_blueprint(supplier_bp)
 app.register_blueprint(purchase_order_bp)
+app.register_blueprint(payment_bp)
+app.register_blueprint(accounts_type_bp)
+app.register_blueprint(accounts_group_bp)
+
 
 @app.before_request
 def hook():
