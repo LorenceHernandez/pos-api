@@ -16,7 +16,7 @@ class PurchaseOrder:
         item = PurchaseOrder()
         if data.get('_id') is not None:
             item._id = str(data.get('_id'))
-        item.supplierId = data.get('notes')
+        item.supplierId = data.get('supplierId')
         item.items = data.get('items')
         item.totalAmount = data.get('totalAmount')
         item.status = data.get('status')
