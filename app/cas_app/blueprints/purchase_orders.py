@@ -63,10 +63,10 @@ def create_purchase_order(user_id):
 def approve_purchase_orders(user_id):
     request_data = request.get_json()
     id = request_data['id']
-
+    request_data['approverUserID'] = user_id
     try:
         item = PurchaseOrder.fromDict(request_data)
-   
+    
    
         filter = { '_id': ObjectId(id) }
         new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }

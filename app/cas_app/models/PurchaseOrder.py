@@ -11,6 +11,7 @@ class PurchaseOrder:
     totalAmount = 0
     status = "Pending Approval"
     notes = None
+    approverUserID = None
     
     @staticmethod
     def fromDict(data: dict):
@@ -24,6 +25,7 @@ class PurchaseOrder:
         item.supplierName = data.get('supplierName')
         item.supplierEmail = data.get('supplierEmail')
         item.notes = data.get('notes')
+        item.approverUserID = data.get('approverUserID')
       
         return item
     
@@ -37,4 +39,5 @@ class PurchaseOrder:
             "supplierEmail": self.supplierEmail,
             "supplierName": self.supplierName,
             "notes": self.notes,
+            "approverUserID": self.approverUserID,
         }
