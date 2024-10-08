@@ -10,6 +10,7 @@ class PurchaseOrder:
     items = []
     totalAmount = 0
     status = "Pending Approval"
+    notes = None
     
     @staticmethod
     def fromDict(data: dict):
@@ -22,6 +23,7 @@ class PurchaseOrder:
         item.status = data.get('status')
         item.supplierName = data.get('supplierName')
         item.supplierEmail = data.get('supplierEmail')
+        item.notes = data.get('notes')
       
         return item
     
@@ -34,4 +36,5 @@ class PurchaseOrder:
             "status": self.status,
             "supplierEmail": self.supplierEmail,
             "supplierName": self.supplierName,
+            "notes": self.notes,
         }
