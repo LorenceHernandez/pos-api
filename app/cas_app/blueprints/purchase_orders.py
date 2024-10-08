@@ -58,7 +58,7 @@ def create_purchase_order(user_id):
     
 
     
-@purchase_order_bp.post(api + '/<id>/approve')
+@purchase_order_bp.post(api + '/edit')
 @authorized
 def approve_purchase_orders(user_id):
     request_data = request.get_json()
