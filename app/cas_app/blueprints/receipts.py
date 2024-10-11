@@ -28,7 +28,7 @@ def get_receipts(user_id):
 
 @receipts_bp.get(api + 's/reports')
 @authorized
-def get_receipts(user_id):
+def get_receipts_reports(user_id):
     ret = []
     try:
 
