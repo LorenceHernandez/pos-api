@@ -66,11 +66,10 @@ def create_accounts_type(user_id):
 def edit_account_type(user_id, id):
   request_data = request.get_json()
   try:
-    model = EditAccountType(**request_data)
 
     document = repository.update_one(
       { '_id': ObjectId(id) },
-      { '$set': model.model_dump() },
+      EditAccountType(**request_data)
     )
 
     return { 'message': 'Edit account type successfully.', 'data': document }

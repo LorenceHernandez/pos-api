@@ -1,4 +1,4 @@
-FROM python:3.13.0rc1-bookworm
+FROM python:3
 
 RUN pip install --upgrade pip
 

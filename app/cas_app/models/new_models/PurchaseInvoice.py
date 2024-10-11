@@ -1,17 +1,18 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
 class EditPurchaseInvoice(BaseModel):
-    issueDate = None
-    dueDate = None
-    supplierId = None
-    totalAmount = None
-    isAccountMode = None
-    accounting = []
-    items = []
-    invoiceDate = None
-    status = None
-    refInvoiceNumber = None
-    notes = None
-    series = None
+    issueDate: Optional[str]
+    dueDate: Optional[str]
+    supplierId: Optional[str]
+    totalAmount: float = None
+    isAccountMode: bool = None
+    accounting: object = []
+    items: object = []
+    invoiceDate: Optional[str]
+    status: Optional[str]
+    refInvoiceNumber: Optional[str]
+    notes: Optional[str]
+    series: Optional[str]

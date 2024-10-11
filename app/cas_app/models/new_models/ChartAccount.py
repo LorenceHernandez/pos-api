@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -11,9 +12,9 @@ class AccountType(str, Enum):
    
 
 class EditChartAccount(BaseModel):
-    accountNumber = None
+    accountNumber: int = None
     accountName: str = None
     accountType: AccountType = None
-    accountGroup = None
-    description: str = None
+    accountGroup: Optional[str] = None
+    description: Optional[str] = None
     

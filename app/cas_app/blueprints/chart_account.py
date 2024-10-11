@@ -24,20 +24,19 @@ def get_chart_of_accounts(user_id):
     ret = []
     try:
 
-        data = chart_of_accounts.find()
+        data = list(chart_of_accounts.find())
         for item in data: 
           chartaccount = ChartAccount.fromDict(item).toDict()
-          data = omit(chartaccount, 'accountType', 'accountGroup')
+          chartaccount = omit(chartaccount, 'accountType', 'accountGroup')
           if chartaccount.get('accountType') != 'none' and chartaccount.get('accountType') is not None and chartaccount.get('accountType') != "":
             _accountstype = accountstype.find_one({'_id': ObjectId(chartaccount['accountType']) }) 
-            data['accountType'] = AccountsType.fromDict(_accountstype).toDict()
+            chartaccount['accountType'] = AccountsType.fromDict(_accountstype).toDict()
             
           if chartaccount.get('accountGroup') != 'none' and chartaccount.get('accountGroup') is not None and chartaccount.get('accountGroup') != "":
             _accountsgroup = accountsgroup.find_one({'_id': ObjectId(chartaccount['accountGroup']) }) 
-            data['accountGroup'] = AccountsType.fromDict(_accountsgroup).toDict()
+            chartaccount['accountGroup'] = AccountsType.fromDict(_accountsgroup).toDict()
                 
-
-          ret.append(data)
+          ret.append(chartaccount)
             
         return {'data': ret }
 
@@ -79,12 +78,11 @@ def create_chart_of_account(user_id):
 @authorized
 def edit_chart_account(user_id, id):
   request_data = request.get_json()
+  
   try:
-    model = EditChartAccount(**request_data)
-
     document = repository.update_one(
-      { '_id': ObjectId(id) },
-      { '$set': model.model_dump() },
+      { '_id': ObjectId(id) }, 
+      EditChartAccount(**request_data)
     )
 
     return { 'message': 'Edit chart account successfully.', 'data': document }

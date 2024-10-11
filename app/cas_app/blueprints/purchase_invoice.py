@@ -67,11 +67,10 @@ def create_purchase_invoice(user_id):
 def edit_purchase_invoice(user_id, id):
   request_data = request.get_json()
   try:
-    model = EditPurchaseInvoice(**request_data)
 
     document = repository.update_one(
       { '_id': ObjectId(id) },
-      { '$set': model.model_dump() },
+      EditPurchaseInvoice(**request_data),
     )
 
     return { 'message': 'Edit purchase invoice successfully.', 'data': document }

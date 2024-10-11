@@ -66,11 +66,10 @@ def create_accounts_group(user_id):
 def edit_account_group(user_id, id):
   request_data = request.get_json()
   try:
-    model = EditAccountGroup(**request_data)
 
     document = repository.update_one(
       { '_id': ObjectId(id) },
-      { '$set': model.model_dump() },
+      EditAccountGroup(**request_data)
     )
 
     return { 'message': 'Edit account group successfully.', 'data': document }

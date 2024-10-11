@@ -1,22 +1,13 @@
-import pprint
 
 from bson import ObjectId
-from flask import Blueprint, jsonify, request
-from pydash import omit
+from flask import Blueprint
 
 from app.cas_app.models.AccountsType import AccountsType
 from app.cas_app.models.ChartAccount import ChartAccount
-from app.cas_app.models.new_models.PurchaseInvoice import PurchaseInvoice
-from app.cas_app.models.new_models.SalesInvoice import SalesInvoice
-from app.cas_app.models.Payment import Payment
-from app.cas_app.models.Receipt import Receipt
-from app.cas_app.models.JournalEntry import JournalEntry
 
 from app.database.config import (accountstype, chart_of_accounts, payments,
                                  purchase_invoices, receipts, sales_invoices, journal_entries)
-from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
-from app.utils.filter_values import filterValues
 
 api = '/api/cas/reports'
 reports_bp = Blueprint('reports', __name__)

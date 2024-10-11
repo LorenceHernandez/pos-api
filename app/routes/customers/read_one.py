@@ -29,6 +29,7 @@ def _get_customer():
             "gender": record["gender"],
             "tinNumber": record.get('tin_number'),
             "contactNumber": record.get('contact_number'),
+            "customerTypeId": record.get('customer_type_id'),
             "address": record["address"],
             "customerType": record["customer_type"],
             "birthDate": record["birthDate"],

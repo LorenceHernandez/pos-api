@@ -28,6 +28,7 @@ def _create_customer():
    gender = request_data['gender']
    address = request_data['address']
    customer_type = request_data['customerType']
+   customer_type_id = request_data.get('customerTypeId')
    contact_number = request_data['contactNumber']
    birthDate = request_data['birthDate']
    # discount = 0
@@ -60,6 +61,7 @@ def _create_customer():
       "gender": gender,
       "address": address,
       "customer_type": customer_type,
+      "customer_type_id": customer_type_id,
       # "discount": float(discount),
       # "discount_type": discount_type,
       "tin_number": tin_number,

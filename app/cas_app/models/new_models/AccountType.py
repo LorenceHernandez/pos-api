@@ -1,8 +1,9 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
 
 class EditAccountType(BaseModel):
     name: str = None
-    description = None
+    description: Optional[str] = None

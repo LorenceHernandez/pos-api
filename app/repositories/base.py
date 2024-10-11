@@ -2,6 +2,7 @@
 import abc
 
 from dotenv import load_dotenv
+from pydantic import BaseModel
 import pymongo
 from app.config import IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION
 from app.database.database import get_current_backup_database, get_current_database, remote_database, backup_database, internal_prod_database
@@ -38,9 +39,12 @@ class Repository(abc.ABC):
         except Exception as e:
             raise Exception(f"MongoDB insert_one error: {e}")
    
-    def update_one(self, query, data, *args, **kwargs):
+    def update_one(self, query, data: BaseModel, *args, **kwargs):
         try:
-            return self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+            data = data.model_dump(exclude_unset=True)
+            data = { '$set': data }
+            return_document = self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+            return self.find_one({ '_id': return_document['_id'] })
         except Exception as e:
             raise Exception(f"MongoDB update_one error: {e}")
     

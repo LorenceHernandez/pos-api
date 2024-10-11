@@ -2,8 +2,10 @@ import datetime
 import os
 from flask import Flask, request, Response
 from flask_cors import CORS
+from pydash import start_case, upper_case
 import requests
 import socket
+from pydash.strings import to_lower
 from escpos import *
 
 
@@ -45,8 +47,8 @@ def proxy(path):
         target_url = CLOUD_SERVER_URL + path
     else:
         target_url = LOCAL_SERVER_URL + path
-
-    print('Target URL: ', target_url)
+    # target_url = LOCAL_SERVER_URL + path
+    # print('Target URL: ', target_url)
 
     try:
         response = requests.request(
@@ -73,12 +75,11 @@ def check_connection():
 
 @app.post('/print')
 def print_text():
-    print('printing...')
     request_data = request.get_json()
     p = None
     try:
-        # p = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
-        p = printer.Usb(0x04B8, 0x0202)
+        p = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
+        # p = printer.Usb(0x04B8, 0x0202)
 
         if p is None:
             raise
@@ -97,77 +98,151 @@ def print_text():
     # p = escpos.printer(Usb(0x04b8, 0x0202))  # For USB connection
     # p = escpos.Network("192.168.1.100")  # For network connection
     
+    print('printing...')
+
     data = request_data['combinedData']
     branch = data['branch']
     cashier = data['cashier']
     dvote = request_data['dvoteDetails'][0]
     customer = data['customerData']
+    companyCopy = request_data.get('companyCopy')
+    companyLabel = '(COMPANY\'S COPY)' if companyCopy else ''
+
+    dt = datetime.datetime.fromisoformat(data['transactionDate'])
+
+    discount = data.get('discountApplied') or {}
+    discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
 
     try:
         p.set(align='center', bold=True)
-        p.text(branch['name'] + '\n')
-        p.text(branch['city'] + ', ' + branch['state'] + '\n')
-        p.text(branch['tin'] + '\n\n')
-        # p.set(align='center', bold=True)
-        p.text('Customer Information\n')
-        p.set(align='left')
-
-        p.text('Name: ' + customer['name'] +  '\n')
-        p.text('Address: ' + customer['address'] +  '\n')
-        p.text('TIN: ' + customer['tin'] +  '\n')
-
-        if(request_data.get('showAddress') is not None and customer['type'] == 'customer'):
-            p.text('Age: ' + customer['age'] +  '\n')
-            p.text('Birth Date: ' + customer['birthDate'] +  '\n')
-        
-        p.text('Referred By: ' + data.get('referredByName', '---') +  '\n\n')
-
-        p.set(align='center')
-        p.text('Items\n')
-        p.set(align='left', bold=False)
-        for item_x in data['items']:
-            p.set(align='left')
-            p.text(f'{item_x['name']} ({'Package' if item_x['source'] == 'package' else 'Lab Test' }) \n')
-            
-            p.set(align='right')
-            p.text(f'{item_x['qty']} x {item_x['price']} = {item_x['amount']} \n')
-
+        p.text(f'MMG-ALBAY {companyLabel}\n\n')
+        p.set(bold=False)
+        p.text(f'Operated By: \n')
+        p.set(bold=True)
+        p.text(f'MEDICAL MISSION GROUP MULTIPURPOSE COOPERATIVE-ALBAY\n')
+        p.set(bold=False)
+        p.text('NON-VAT REG TIN ' + branch['tin'] + '\n')
+        p.text(upper_case(branch['streetAddress']) + '\n\n')
 
         p.set(align='center', bold=True)
-        p.text('\nDetails\n')
+        p.text(f'INVOICE\n')
+
+        p.textln('-' * 40)
         p.set(align='left', bold=False)
-        p.text(f'Sub-Total: {data['subTotal']}\n')
-        p.text(f'Discount Applied: {data['discountApplied']['totalDiscount']}\n')
-        p.text(f'Amount Due: {data['paymentDue']}\n')
-        p.text('Tender Type: ' + request_data['tenderType'] +  '\n')
-        p.text(f'Tender Amount: {request_data['amountGiven']}\n')
-        p.text(f'Change: {request_data['change']}\n')
-        p.text(f'Number of Items: {request_data['totalQuantity']}\n\n')
 
-        p.set(align='center')
-        p.text('Invoice No.: ' + str(data['invoiceNumber']).zfill(6) +  '\n')
-        p.text('Cashier: ' + cashier['first_name'] + ' ' + cashier['last_name'] +  '\n')
+        p.textln(f'{'Invoice No.: ':<13}{str(data['invoiceNumber']).zfill(5):>27}')
+        p.textln(f'{'MIN: ':<5}{'---':>35}')
+        p.textln(f'{'SN: ':<4}{'---':>36}')
+        p.textln(f'{'Date & Time: ':<13}{dt.strftime("%m-%d-%Y %I:%M:%S%p"):>27}')
+        p.textln(f'{'Cashier: ':<14}{upper_case(cashier['first_name'] + ' ' + cashier['last_name']):>26}')
 
-        dt = datetime.datetime.fromisoformat(data['transactionDate'])
+        p.textln('-' * 40)
 
-        p.text('Date: ' + dt.strftime("%B-%d-%Y %I:%M:%S %p") +  '\n\n')
+        p.set(align='center', bold=True)
+        p.text('SOLD TO\n')
+        p.set(align='left', bold=False)
 
-        p.text('This document is not valid for income tax\n\n')
-        p.text('Signature of SC/PWD:\n\n\n\n')
-        p.text('--------------------------\n')
+        p.textln(f'{'Name: ':<6}{upper_case(to_lower(customer['name'])):>34}')
 
+        if(companyCopy):
+            p.textln(f'{'Address: ':<9}{upper_case(to_lower(customer['address'])):>31}')
+            p.textln(f'{'TIN: ':<5}{customer['tin']:>35}')
+            p.textln(f'{'Age: ':<5}{customer['age']:>35}')
+            p.textln(f'{'Birth Date: ':<12}{customer['birthDate']:>28}')
+        else:
+            p.textln(f'{'Address: ':<9}{'---':>31}')
+            p.textln(f'{'TIN: ':<5}{'---':>35}')
+            p.textln(f'{'Age: ':<5}{'---':>35}')
+            p.textln(f'{'Birth Date: ':<12}{'---':>28}')
+            
+        p.textln(f'{'Requested By: ':<14}{data.get('requestedByName', '---'):>26}')
+        # p.textln(f'{'SC/PWD/Other ID No.: ':<21}{customer.get('customerTypeId') or '---':>19}')
+
+        p.textln('-' * 40)
         p.set(bold=True)
-        p.text('Supplier\n')
-        p.text(dvote['name'] + '\n')
-        p.text(dvote['address'] + '\n')
-        p.text(dvote['tin'] + '\n\n')
-        p.text(dvote['accredNo'] + '\n')
-        p.text(dvote['dateIssued'] + '\n\n')
-        p.text('\n')
+        p.textln(f'{'ITEM DESCRIPTION':<24}| QTY |      SRP')
+        p.set(bold=False)
+        p.textln('-' * 40)
+
+        for service in data['items']:
+            is_labtest = service['source'] == 'labTest'
+
+            if(is_labtest):
+                p.textln(f'{service['name'][:23]:<24}{f'({service['qty']})':^7}{service['amount']:>9}')
+                continue
+
+            p.set(align='left', bold=True)
+            p.text(f'> {service['name']} \n')
+        
+            p.set(bold=False)
+            for test in service['labTest']:
+                indented = '    '
+                p.textln(f'{(indented + start_case(test['name']))[:23]:<24}{f'({test['qty']})':^7}{test['amount']:>9}')
+            
+            # if(service['source'] == 'promo'):
+            #     serviceDiscount = service.get('discount')
+            #     serviceDiscountAmount = service.get('totalPackagePrice', 0) - service.get('totalDiscountedPrice', 0)
+            #     p.textln(f'{(indented + 'Discount: ' + serviceDiscount['name'])[:31]:<31}{'- ' + str(serviceDiscountAmount):>9}')
+
+        p.textln('-' * 40)
+        if (data['status'] == 'Cancelled'):
+            p.set(align='center', bold=True)
+            p.text('*** VOIDED TRANSACTION ***\n\n')
+            p.set(align='left', bold=False)
+            p.textln(f'{'Reason: ':<8}{data.get('reason') or '---':>32}')
+
+        else:
+            p.set(align='left', bold=True)
+            p.textln(f'{'Total Sales: ':<20}{data['subTotal']:>20}')
+
+            p.set(bold=False)
+            # for discount in data['discounts']:
+            #     indented = '    '
+
+            #     discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
+            #     p.textln(f'{(discount.get('name', '---') + ' Discount')[:29]:<30}{f'- {discountAmount}':<10}')
+            
+            p.textln(f'{'Less: Discount(SC/PWD/NAAC/MOV/SP) ':<35}{f'({data.get('totalDiscount', 0)})':>5}')
+            p.textln(f'{'Less: Withholding Tax ':<22}{data['paymentDue']:>18}')
+            
+            p.set(bold=True)
+            p.textln(f'{'TOTAL AMOUNT DUE: ':<20}{data['paymentDue']:>20}\n')
+            
+            p.set(bold=False)
+            p.textln(f'{'Tender Amount: ':<20}{request_data['amountGiven']:>20}')
+            p.textln(f'{'Tender Type: ':<20}{upper_case(request_data['tenderType']):>20}')
+            p.textln(f'{'Change: ':<20}{request_data['change']:>20}')
+            p.textln(f'{'Number of Items: ':<20}{data.get('totalQuantity', 0):>20}')
+
+        p.textln('-' * 40)
+
+        p.set(align='center', bold=True)
+        p.text('*THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX*\n')
+        p.textln('-' * 40)
+        p.textln()
+        p.set(align='left', bold=False)
+
+        p.text(f'{'ID No. (SC/PWD/NAAC/MOV/SP): ':<29}{('_' * 8):>11}\n\n')
+        p.text(f'{'Signature (SC/PWD/NAAC/MOV/SP): ':<32}{('_' * 8):>8}\n\n')
+        p.textln()
+
+        p.set(align="center", bold=True)
+        p.text('SUPPLIER\n')
+        p.text(dvote['name'].upper() + '\n')
+        p.set(bold=False)
+        p.text('Address' + dvote['address'] + '\n')
+        p.text('Vat Reg. TIN: ' + dvote['tin'] + '\n')
+        p.text('Accred No: ' + dvote['accredNo'] + '\n')
+        p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
+        p.text('Valid Until: ' + '---' + '\n')
+        p.text('PTU No: ' + dvote.get('PTUno', '---') + '\n\n')
         p.cut()
+        p.cut()
+        p.close()
     except Exception as e: 
         p.text('\n\n')
         p.cut()
+        p.close()
         return {
             'message': 'Unable to print the request',
             'error': repr(e)

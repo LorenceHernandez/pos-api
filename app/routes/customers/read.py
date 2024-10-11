@@ -34,6 +34,7 @@ def _get_customers():
             "tinNumber": record.get('tin_number'),
             "contactNumber": record.get('contact_number'),
             "customerType": record["customer_type"],
+            "customerTypeId": record.get('customer_type_id'),
             "birthDate": record["birthDate"],
           })
    return {
