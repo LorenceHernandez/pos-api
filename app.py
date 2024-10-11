@@ -11,6 +11,7 @@ from app.blueprints.transaction import transaction_bp
 from app.cas_app.blueprints.accounts_group import accounts_group_bp
 from app.cas_app.blueprints.accounts_type import accounts_type_bp
 from app.cas_app.blueprints.category import category_bp
+from app.cas_app.blueprints.chart_account import chart_of_accounts_bp
 from app.cas_app.blueprints.inventory import inventory_bp
 from app.cas_app.blueprints.item import item_bp
 from app.cas_app.blueprints.payments import payment_bp
@@ -115,7 +116,8 @@ app.register_blueprint(purchase_order_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(accounts_type_bp)
 app.register_blueprint(accounts_group_bp)
-
+app.register_blueprint(chart_of_accounts_bp)
+chart_of_accounts_bp
 
 @app.before_request
 def hook():
