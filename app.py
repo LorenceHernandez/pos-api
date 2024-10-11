@@ -16,6 +16,7 @@ from app.cas_app.blueprints.inventory import inventory_bp
 from app.cas_app.blueprints.item import item_bp
 from app.cas_app.blueprints.payments import payment_bp
 from app.cas_app.blueprints.purchase_orders import purchase_order_bp
+from app.cas_app.blueprints.receipts import receipts_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
 from app.utils.utils import getLocalTime
@@ -117,8 +118,7 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(accounts_type_bp)
 app.register_blueprint(accounts_group_bp)
 app.register_blueprint(chart_of_accounts_bp)
-chart_of_accounts_bp
-
+app.register_blueprint(receipts_bp)
 @app.before_request
 def hook():
    
