@@ -16,6 +16,8 @@ from app.cas_app.blueprints.inventory import inventory_bp
 from app.cas_app.blueprints.item import item_bp
 from app.cas_app.blueprints.payments import payment_bp
 from app.cas_app.blueprints.purchase_orders import purchase_order_bp
+from app.cas_app.blueprints.purchaseOrderReceipt import purchase_order_receipt_bp
+
 from app.cas_app.blueprints.receipts import receipts_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
@@ -114,6 +116,7 @@ app.register_blueprint(inventory_bp)
 app.register_blueprint(category_bp)
 app.register_blueprint(supplier_bp)
 app.register_blueprint(purchase_order_bp)
+app.register_blueprint(purchase_order_receipt_bp)
 app.register_blueprint(payment_bp)
 app.register_blueprint(accounts_type_bp)
 app.register_blueprint(accounts_group_bp)

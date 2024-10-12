@@ -63,7 +63,7 @@ def create_purchase_order(user_id):
 def approve_purchase_orders(user_id):
     request_data = request.get_json()
     id = request_data['id']
-    request_data['approverUserID'] = user_id
+    request_data['approverUserID'] = request_data["approverUserID"]
     try:
         item = PurchaseOrder.fromDict(request_data)
     
