@@ -1,9 +1,11 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
-from pydash import omit
+from pydash import merge, omit
 
+from app.cas_app.models.AccountsGroup import AccountsGroup
+from app.cas_app.models.AccountsType import AccountsType
 from app.cas_app.models.ChartAccount import ChartAccount
-from app.database.config import chart_of_accounts
+from app.database.config import accountsgroup, accountstype, chart_of_accounts
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
 from app.utils.filter_values import filterValues
@@ -19,7 +21,15 @@ def get_chart_of_accounts(user_id):
 
         data = chart_of_accounts.find()
         for item in data: 
-          ret.append(ChartAccount.fromDict(item).toDict())
+          chartaccount = ChartAccount.fromDict(item).toDict()
+          _accountstype = accountstype.find_one({'_id': ObjectId(chartaccount['accountType']) }) 
+         
+          _accountsgroup = accountsgroup.find_one({'_id': ObjectId(_accountstype['accountGroup']) }) 
+
+          data = omit(chartaccount, 'accountType')
+          data['accountType'] = AccountsType.fromDict(_accountstype).toDict()
+          data['accountType']['accountGroup'] =  AccountsGroup.fromDict(_accountsgroup).toDict()
+          ret.append(data)
             
         return {'data': ret }
 
