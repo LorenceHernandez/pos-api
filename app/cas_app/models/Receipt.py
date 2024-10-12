@@ -56,17 +56,24 @@ class Receipt:
         item.totalAmountPaid = data.get('totalAmountPaid')
         item.notes = data.get('notes')
         item.isAccountMode = data.get('isAccountMode')
-        item.entries = Entry.fromDict(data.get('isAccountMode'))
-    
+        e = []
+        for entry in data.get('entries'):
+            e.append(Entry.fromDict(entry))
+        item.entries = e
         return item
-    
+        
     def toDict(self):
-        return {
+        dict = {
             "_id": self._id,
             "paymentDate": self.paymentDate,
             "paymentMethod": self.paymentMethod,
             "totalAmountPaid": self.totalAmountPaid,
-            "totalAmonotesuntPaid": self.notes,
+            "notes": self.notes,
             "isAccountMode": self.isAccountMode,
-            "entries": self.entries.toDict(),
+           
         }
+        e = []
+        for entry in self.entries:
+            e.append(entry.toDict())
+        dict['entries'] = e
+        return dict
