@@ -8,7 +8,7 @@ class Payment:
     paymentMethod = None
     notes = None
     entries = []
-    isAccountMode
+    isAccountMode = None
     @staticmethod
     def fromDict(data: dict):
         item = Payment()
