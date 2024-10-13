@@ -167,7 +167,8 @@ def get_purchase_order_receipts_approve(user_id):
 
         # Find purchase orders that are not in the list of purchaseOrderIDs
         purchase_orders_without_receipts = purchase_orders.find({
-            "_id": {"$nin": receipt_ids}  # Exclude purchaseOrderIDs present in receipts
+            "_id": {"$nin": receipt_ids},
+            "status": "Approved"    # Exclude purchaseOrderIDs present in receipts
         }) 
         
         # Convert cursor to a list to see the actual documents
