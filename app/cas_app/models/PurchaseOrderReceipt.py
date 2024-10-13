@@ -12,6 +12,7 @@ class PurchaseOrderReceipt:
         self.createdBy = None  # Reference to the user schema (ObjectId)
         self.createdAt = datetime.now()
         self.updatedAt = datetime.now()
+        self.status = None
         self.notes = None
 
     @staticmethod
@@ -21,6 +22,7 @@ class PurchaseOrderReceipt:
         item.quantity = data.get('quantity', 0)
         item.price = data.get('price', 0.0)
         item.notes =  data.get("notes")
+        item.status = data.get("status")
         item.purchaseOrderItemID = ObjectId(data.get('purchaseOrderItemID'))
         item.officialReceipt = data.get('officialReceipt')
         item.userReceiverID = ObjectId(data.get('userReceiverID'))  # Should be an ObjectId referencing users
@@ -35,6 +37,7 @@ class PurchaseOrderReceipt:
             "quantity": self.quantity,
             "price": self.price,
             "notes":self.notes,
+            "status": self.status,
             "purchaseOrderItemID": self.purchaseOrderItemID,
             "officialReceipt": self.officialReceipt,
             "userReceiverID": self.userReceiverID if self.userReceiverID is not None else None,
