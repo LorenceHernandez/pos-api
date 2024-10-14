@@ -23,7 +23,7 @@ def get_chart_of_accounts(user_id):
         for item in data: 
           chartaccount = ChartAccount.fromDict(item).toDict()
           data = omit(chartaccount, 'accountType')
-          if chartaccount.get('accountType') != 'none' or chartaccount.get('accountType') is not None or  chartaccount.get('accountType') != "":
+          if chartaccount.get('accountType') != 'none' and chartaccount.get('accountType') is not None and chartaccount.get('accountType') != "":
             _accountstype = accountstype.find_one({'_id': ObjectId(chartaccount['accountType']) }) 
             _accountsgroup = accountsgroup.find_one({'_id': ObjectId(_accountstype['accountGroup']) }) 
             data['accountType'] = AccountsType.fromDict(_accountstype).toDict()
