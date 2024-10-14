@@ -78,12 +78,12 @@ def receive_purchase_order(user_id):
                 lambda i: { 
                     **i.model_dump(), 
                     'purchaseOrderId': receipt.purchaseOrderId,
-                    'receiptId': str(document['_id'])
+                    'receiptId': document['_id']
                 }, 
                 receipt.items
             )
         )
-        document = repository.find_one({ '_id': document['_id'] })
+        document = repository.find_one({ '_id': ObjectId(document['_id']) })
 
         return { 'message': 'Purchase order received successfully.', 'data': document }
     except ValidationError as e:
