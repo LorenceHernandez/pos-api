@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 from pydash import omit
 
-from app.cas_app.models.GoodsReceipt import CompletePurchaseOrder, InspectPurchaseOrder, InventoryPurchaseOrder, PurchaseOrderTransactionStatus, ReceivePurchaseOrder
+from app.cas_app.models.GoodsReceipt import CompletePurchaseOrder, InspectPurchaseOrder, InventoryPurchaseOrder, PurchaseOrderTransactionStatus, ReceiveMultiplePurchaseOrder, ReceivePurchaseOrder
 from app.cas_app.models.new_models.PurchaseOrder import PurchaseOrderAction, PurchaseOrderDiscrepancyType
 from app.database.config import purchase_orders, items, inventories, goods_receipt_items
 from app.middlewares.authorized_attribute import authorized
@@ -57,6 +57,45 @@ def get_goods_receipt(user_id, id):
         return { 'data': purchase_order }
     except Exception as e:
         return jsonify({'message': 'Unable to get receipt', 'error': repr(e)}), 500
+
+@goods_receipt_bp.post(api + '/receive-multiple')
+@authorized
+def receive_multiple_purchase_order(user_id):
+    request_data = request.get_json()
+    try:
+        model = ReceiveMultiplePurchaseOrder(
+            **request_data,
+            receiverId=user_id,
+        )
+        
+        receipts = []
+        for receipt in model.receipts:
+            purchase_order = purchase_orders.find_one({ '_id': receipt.purchaseOrderObjectId })
+            if purchase_order is None:
+                return { '_id': receipt.purchaseOrderId, 'message': 'Purchase order not found' }, 404
+        
+            document = repository.insert_one({ 
+                **receipt.model_dump(exclude={'items'}),
+                **model.model_dump(exclude={'receipts'})
+            })
+            goods_receipt_items.insert_many(
+                map(
+                    lambda i: { 
+                        **i.model_dump(), 
+                        'purchaseOrderId': receipt.purchaseOrderId,
+                        'receiptId': document['_id']
+                    }, 
+                    receipt.items
+                )
+            )
+            document = repository.find_one({ '_id': ObjectId(document['_id']) })
+            receipts.append(document)
+
+        return { 'message': 'Multiple purchase order received successfully.', 'data': receipts }
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
+    except Exception as e:
+        return jsonify({'message': 'Unable to receive purchase order', 'error': repr(e)}), 500
 
 @goods_receipt_bp.post(api + '/receive')
 @authorized

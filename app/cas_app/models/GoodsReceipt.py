@@ -29,11 +29,13 @@ class ReceivePurchaseOrderItem(BaseActionItem):
     inventoryStatus: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.RECEIVED
 
 class ReceivePurchaseOrder(BaseAction):
+    items: list[ReceivePurchaseOrderItem] = Field(min_items=1)
+
+class ReceiveMultiplePurchaseOrder(BaseModel):
+    receipts: list[ReceivePurchaseOrder] = Field(min_length=1)
     dateReceived: str = Field(default_factory=getLocalTimeStr)
     receiverId: str = None
     status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.PENDING_INSPECTION
-    items: list[ReceivePurchaseOrderItem] = Field(min_items=1)
-
 
 class InspectPurchaseOrderItem(BaseActionItem):
     itemId: str

@@ -13,6 +13,7 @@ class GoodsReceiptRepository(Repository):
                 {
                     '$addFields': {
                         '_id': {'$toString': '$_id' },
+                        'purchaseOrderId': {'$toObjectId': '$purchaseOrderId' },
                     }
                 },
                 { 
@@ -23,8 +24,28 @@ class GoodsReceiptRepository(Repository):
                         'as': 'items'
                     }, 
                 },
+                {
+                    '$lookup': {
+                        'from': 'purchase_orders',
+                        'localField': 'purchaseOrderId',
+                        'foreignField': '_id',
+                        'as': 'purchaseOrder'
+                    }
+                },
+                { "$unwind": "$purchaseOrder" },
                 { '$sort': {"_id":-1} },
                 *args,
+                {
+                    '$addFields': {
+                        'purchaseOrderId': {'$toString': '$purchaseOrderId' },
+                        'purchaseOrder._id': {'$toString': '$purchaseOrder._id' },
+                    }
+                },
+                {
+                    '$project': {
+                        'purchaseOrderId': 0
+                    }
+                }
             ]))
             items = []
             for order in data:
