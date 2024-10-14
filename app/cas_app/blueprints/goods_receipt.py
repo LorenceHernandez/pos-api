@@ -83,7 +83,7 @@ def receive_purchase_order(user_id):
                 receipt.items
             )
         )
-        document = repository.find_one({ '_id': receipt['_id'] })
+        document = repository.find_one({ '_id': document['_id'] })
 
         return { 'message': 'Purchase order received successfully.', 'data': document }
     except ValidationError as e:
