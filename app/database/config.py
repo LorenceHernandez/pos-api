@@ -56,3 +56,4 @@ accountstype = database.accountstype
 payments = database.payments
 chart_of_accounts = database.chart_of_accounts
 receipts = database.receipts
+sales_invoices = database.sales_invoices

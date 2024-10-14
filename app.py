@@ -17,6 +17,7 @@ from app.cas_app.blueprints.item import item_bp
 from app.cas_app.blueprints.payments import payment_bp
 from app.cas_app.blueprints.purchase_orders import purchase_order_bp
 from app.cas_app.blueprints.purchaseOrderReceipt import purchase_order_receipt_bp
+from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 
 from app.cas_app.blueprints.receipts import receipts_bp
 from app.cas_app.blueprints.goods_receipt import goods_receipt_bp
@@ -123,6 +124,8 @@ app.register_blueprint(accounts_type_bp)
 app.register_blueprint(accounts_group_bp)
 app.register_blueprint(chart_of_accounts_bp)
 app.register_blueprint(receipts_bp)
+app.register_blueprint(sales_invoice_bp)
+
 @app.before_request
 def hook():
    
