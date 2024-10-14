@@ -17,12 +17,7 @@ repository = GoodsReceiptRepository()
 @goods_receipt_bp.get('/api/cas/goods-items')
 @authorized
 def get_all_goods_items(user_id):
-    
-    query = {}
-    try:
-        query = request.get_json()
-    except Exception as e:
-        pass
+    query = request.args.to_dict()
 
     try:
         goods_items = GoodsItemRepository().find(query)
@@ -33,12 +28,7 @@ def get_all_goods_items(user_id):
 @goods_receipt_bp.get(api)
 @authorized
 def get_all_goods_receipts(user_id):
-    
-    query = {}
-    try:
-        query = request.get_json()
-    except Exception as e:
-        pass
+    query = request.args.to_dict()
 
     try:
         receipts = repository.find(query)
