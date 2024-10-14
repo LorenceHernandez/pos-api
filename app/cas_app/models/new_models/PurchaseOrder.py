@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import BaseModel, Field, computed_field
 
-from app.cas_app.models.new_models.Supplier import Supplier
+# from app.cas_app.models.new_models.Supplier import Supplier
 from app.utils.utils import getLocalTimeStr
 
 
@@ -52,7 +52,7 @@ class PurchaseOrderItem(BaseModel):
 class CreatePurchaseOrder(BaseModel):
     # id: str = Field(alias="_id", default=None)
     userId: str
-    supplier: Supplier = None
+    # supplier: Supplier = None
     status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.PENDING_APPROVAL
     items: list[PurchaseOrderItem] = Field(min_items=1)
     action: PurchaseOrderAction = None

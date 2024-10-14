@@ -1,11 +1,8 @@
-from enum import Enum, IntEnum
-from typing import List
 
 from bson import ObjectId
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 
 from app.cas_app.models.new_models.PurchaseOrder import PurchaseOrderAction, PurchaseOrderItemCondition, PurchaseOrderTransactionStatus
-from app.cas_app.models.new_models.Supplier import Supplier
 from app.utils.utils import getLocalTimeStr
 
 
@@ -58,8 +55,8 @@ class CompletePurchaseOrder(BaseAction):
     actionReason: str = None
     completorId: str
 
-class InventoryPurchaseOrder(BaseAction):
+class InventoryPurchaseOrder(BaseModel):
     status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.STOCKED
     dateInventoried: str = Field(default_factory=getLocalTimeStr)
     inventoriedId: str
-    items: list[object] = Field(min_items=1)
+    addedItems: list[object] = []

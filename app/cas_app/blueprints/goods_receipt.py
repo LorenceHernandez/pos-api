@@ -1,6 +1,7 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
+from pydash import omit
 
 from app.cas_app.models.GoodsReceipt import CompletePurchaseOrder, InspectPurchaseOrder, InventoryPurchaseOrder, PurchaseOrderTransactionStatus, ReceivePurchaseOrder
 from app.cas_app.models.new_models.PurchaseOrder import PurchaseOrderAction, PurchaseOrderDiscrepancyType
@@ -150,7 +151,7 @@ def match_purchase_order(user_id, id):
     except Exception as e:
         return jsonify({'message': 'Unable to complete purchase order', 'error': repr(e)}), 500
 
-@goods_receipt_bp.get(api + '/<id>/add-inventory')
+@goods_receipt_bp.post(api + '/<id>/update-inventory')
 @authorized
 def invent_purchase_order(user_id, id):
     try:
@@ -162,7 +163,7 @@ def invent_purchase_order(user_id, id):
             return { 'data': None, 'message': 'Purchase order not found' }, 404
         
         if receipt['status'] != PurchaseOrderTransactionStatus.COMPLETED:
-            return { 'data': receipt, 'message': 'Goods is not ready for adding in inventory' }, 404
+            return { 'data': receipt, 'message': 'Goods is applicable for adding in inventory' }, 404
         
         if receipt['action'] != PurchaseOrderAction.ACCEPTED:
             return { 'data': receipt, 'message': 'Goods should be accepted first before adding it on inventory' }, 404
@@ -180,7 +181,7 @@ def invent_purchase_order(user_id, id):
             if order_item['quantity'] > (received_item['quantityReceived'] or 0):
                 continue
 
-            if(received_item['inspection'] == PurchaseOrderAction.REJECTED):
+            if(received_item.get('inspection') == PurchaseOrderAction.REJECTED):
                 continue
             
             order_items.append({ **order_item, **received_item, 'inventoryStatus': PurchaseOrderTransactionStatus.STOCKED  })
@@ -194,19 +195,22 @@ def invent_purchase_order(user_id, id):
             )
         
         for item in order_items: 
-            goods_receipt_items.update_one({
-                'itemId': item['itemId'],
-                'inventoryStatus': PurchaseOrderTransactionStatus.STOCKED 
-            })
-
-        if len(order_items) > 0:
-            inventory = InventoryPurchaseOrder(inventoriedId=user_id, items=order_items)
-            repository.update_one(
-                { 'purchaseOrderId': id },
-                {  '$set': inventory.model_dump()}
+            goods_receipt_items.update_one(
+                { 'itemId': item['itemId'], },
+                { '$set': { 'inventoryStatus': PurchaseOrderTransactionStatus.STOCKED  } }
             )
 
-        return { 'data': receipt }
+        inventory = InventoryPurchaseOrder(inventoriedId=user_id, addedItems=order_items)
+        repository.update_one(
+            { 'purchaseOrderId': id },
+            {  '$set': inventory.model_dump()}
+        )
+
+        receipt = repository.find_one({ 'purchaseOrderId': id })
+
+        return { 'data': omit(receipt, 'items'), 'addedItems': order_items }
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
     except Exception as e:
         return jsonify({'message': 'Unable to invetory purchase order', 'error': repr(e)}), 500
 
