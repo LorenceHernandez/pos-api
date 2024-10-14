@@ -37,3 +37,7 @@ class GoodsReceiptRepository(Repository):
     def insert_one(self, data):
         result = super().insert_one(data)
         return self.find_one({ "_id": result.inserted_id })
+    
+    def update_one(self, query, data, *args, **kwargs):
+        result = super().update_one(query, data, *args, **kwargs)
+        return self.find_one({ "_id": result['_id'] })

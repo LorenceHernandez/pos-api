@@ -2,6 +2,7 @@
 import abc
 
 from dotenv import load_dotenv
+import pymongo
 from app.config import IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION
 from app.database.database import get_current_backup_database, get_current_database, remote_database, backup_database, internal_prod_database
 
@@ -39,7 +40,7 @@ class Repository(abc.ABC):
    
     def update_one(self, query, data, *args, **kwargs):
         try:
-            return self._db[self._collection].update_one(query, data, *args, **kwargs)
+            return self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
         except Exception as e:
             raise Exception(f"MongoDB update_one error: {e}")
     
