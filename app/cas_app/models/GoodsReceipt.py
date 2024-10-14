@@ -19,7 +19,7 @@ class BaseActionItem(BaseModel):
     @property  
     def itemObjectId(self) -> float:
         return ObjectId(self.itemId)
-
+    
 class ReceivePurchaseOrderItem(BaseActionItem):
     itemId: str
     itemName: str
@@ -27,7 +27,6 @@ class ReceivePurchaseOrderItem(BaseActionItem):
     condition: PurchaseOrderItemCondition
     quantityReceived: float
     inventoryStatus: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.RECEIVED
-
 
 class ReceivePurchaseOrder(BaseAction):
     dateReceived: str = Field(default_factory=getLocalTimeStr)
@@ -41,14 +40,14 @@ class InspectPurchaseOrderItem(BaseActionItem):
     inspection: PurchaseOrderAction
     inspectionReason: str = None
 
-class InspectPurchaseOrder(BaseAction):
+class InspectPurchaseOrder(BaseModel):
     dateInspected: str = Field(default_factory=getLocalTimeStr)
     inspectorId: str = None
     items: list[InspectPurchaseOrderItem] = Field(min_items=1)
     status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.PENDING_ACTION
 
 
-class CompletePurchaseOrder(BaseAction):
+class CompletePurchaseOrder(BaseModel):
     dateCompleted: str = Field(default_factory=getLocalTimeStr)
     status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.COMPLETED
     action: PurchaseOrderAction

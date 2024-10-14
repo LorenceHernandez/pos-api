@@ -3,8 +3,8 @@ from pydash import omit
 from app.repositories.base import Repository
 
 
-class GoodsReceiptRepository(Repository):
-    _collection = 'goods_receipt'
+class GoodsItemRepository(Repository):
+    _collection = 'goods_receipt_items'
 
     def find(self, query={}, *args):
         try: 
@@ -15,22 +15,10 @@ class GoodsReceiptRepository(Repository):
                         '_id': {'$toString': '$_id' },
                     }
                 },
-                { 
-                    '$lookup': {
-                        'from': 'goods_receipt_items',
-                        'localField': '_id',
-                        'foreignField': 'receiptId',
-                        'as': 'items'
-                    }, 
-                },
                 { '$sort': {"_id":-1} },
                 *args,
             ]))
-            items = []
-            for order in data:
-                order['items'] = list(map(lambda i: { **omit(i, '_id') }, order['items']))
-                items.append(order)
-            return items
+            return data
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")
 
