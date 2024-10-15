@@ -50,6 +50,7 @@ class SalesInvoice:
     notes = None
     termsAndConditions = None
     isAccountMode = None
+    accounting = []
     
     @staticmethod
     def fromDict(data: dict):
@@ -64,6 +65,7 @@ class SalesInvoice:
         item.notes = data.get('notes')
         item.termsAndConditions = data.get('termsAndConditions')
         item.isAccountMode = data.get('isAccountMode')
+        item.accounting = data.get('accounting')
         e = []
         for _item in data.get('items'):
             e.append(Item.fromDict(_item))
@@ -82,6 +84,7 @@ class SalesInvoice:
             "notes": self.notes,
             "termsAndConditions": self.termsAndConditions,
             "isAccountMode": self.isAccountMode,
+            "accounting": self.accounting,
         }
         e = []
         for item in self.items:
