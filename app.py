@@ -125,6 +125,7 @@ app.register_blueprint(accounts_group_bp)
 app.register_blueprint(chart_of_accounts_bp)
 app.register_blueprint(receipts_bp)
 app.register_blueprint(sales_invoice_bp)
+app.register_blueprint(purchase_order_receipt_bp)
 
 @app.before_request
 def hook():
