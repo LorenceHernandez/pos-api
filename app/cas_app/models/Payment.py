@@ -9,6 +9,8 @@ class Payment:
     notes = None
     entries = []
     isAccountMode = None
+    totalAmountPaid = None
+    contactName = None
     @staticmethod
     def fromDict(data: dict):
         item = Payment()
@@ -19,6 +21,8 @@ class Payment:
         item.notes = data.get('notes')
         item.entries = data.get('entries')
         item.isAccountMode = data.get('isAccountMode')
+        item.totalAmountPaid = data.get('totalAmountPaid')
+        item.contactName = data.get('contactName')
     
         return item
     

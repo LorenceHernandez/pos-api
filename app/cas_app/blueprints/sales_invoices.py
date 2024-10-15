@@ -26,7 +26,19 @@ def get_sales_invoices(user_id):
     except Exception as e:
         return {'message': repr(e) }, 500
 
+@sales_invoice_bp.get(api + '/<id>')
+@authorized
+def get_sale_invoice(user_id, id):
 
+    try:
+        data = sales_invoices.find_one({ '_id': ObjectId(id) })
+        if data is not None: 
+           
+            return {'data': SalesInvoice.fromDict(data).toDict() }
+        return {'message': 'Unable to find supplier.'}
+    except Exception as e:
+        return {'message': repr(e) }, 500
+    
 @sales_invoice_bp.post(api + '/create')
 @authorized
 def create_accounts_group(user_id):
@@ -41,4 +53,27 @@ def create_accounts_group(user_id):
     except Exception as e:
         return {'message': repr(e)}, 500
     
+
+@sales_invoice_bp.post(api + '/edit')
+@authorized
+def edit_sales_invoice(user_id):
+    request_data = request.get_json()
+    id = request_data['id']
+
+    try:
+      item = SalesInvoice.fromDict(request_data)
+   
+   
+      filter = { '_id': ObjectId(id) }
+      new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }
+
+      res = sales_invoices.update_one(filter, new_val)
+
+      if res.modified_count > 0:
+        return { 'message': 'Sales Invoice successfully updated.' }
+      else:
+        return { 'message': 'Unable to update Sales Invoice.' }, 400
+    except Exception as e:
+      print (e)
+      return { 'message': 'data format is invalid' }
 

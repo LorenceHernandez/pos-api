@@ -44,7 +44,7 @@ class SalesInvoice:
     invoiceDate = None
     dueDate = None
     contactId = None
-    items = None
+    items = []
     subtotal = None
     total = None
     notes = None
@@ -65,13 +65,13 @@ class SalesInvoice:
         item.termsAndConditions = data.get('termsAndConditions')
         item.isAccountMode = data.get('isAccountMode')
         e = []
-        for item in data.get('items'):
-            e.append(Item.fromDict(item))
+        for _item in data.get('items'):
+            e.append(Item.fromDict(_item))
         item.items = e
         return item
     
     def toDict(self):
-        dict = {
+        ret = {
             "_id": self._id,
             "invoiceDate": self.invoiceDate,
             "dueDate": self.dueDate,
@@ -86,5 +86,5 @@ class SalesInvoice:
         e = []
         for item in self.items:
             e.append(item.toDict())
-        dict['items'] = e
-        return dict
+        ret['items'] = e
+        return ret
