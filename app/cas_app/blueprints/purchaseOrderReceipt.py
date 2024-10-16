@@ -1,17 +1,14 @@
 from bson import ObjectId
 from flask import Blueprint, request
-import json
 
-from collections import defaultdict
-from datetime import datetime
-from app.cas_app.models.PurchaseOrderReceipt import PurchaseOrderReceipt
-from app.database.config import purchase_order_receipt
+
+
 from app.database.config import purchase_orders
 from app.database.config import goods_receipt_items
-from app.database.store import insert_one
+
 from app.middlewares.authorized_attribute import authorized
-from app.utils.filter_values import filterValues
-from app.utils.utils import convert_objectid_to_str
+from app.cas_app.models.GoodsReceipt import  PurchaseOrderTransactionStatus
+
 # def objectid_to_str(data):
 #     if isinstance(data, dict):
 #         return {k: objectid_to_str(v) for k, v in data.items()}
@@ -309,7 +306,8 @@ def get_purchase_order_received(user_id):
             purchase_id = str(order['_id'])            
             good_receipts = list(goods_receipt_items.find({
                 "itemId": item_id,
-                "purchaseOrderId": purchase_id
+                "purchaseOrderId": purchase_id, 
+               "inspection": {"$ne": PurchaseOrderTransactionStatus.REJECTED}
             }))
            
             quantity_received = sum(gr['quantityReceived'] for gr in good_receipts)
