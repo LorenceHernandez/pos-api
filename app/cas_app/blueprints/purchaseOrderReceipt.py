@@ -1,13 +1,16 @@
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 
 
 
 from app.database.config import purchase_orders
 from app.database.config import goods_receipt_items
-
+from app.database.config import goods_receipt
+from app.database.config import inventories
 from app.middlewares.authorized_attribute import authorized
-from app.cas_app.models.GoodsReceipt import  PurchaseOrderTransactionStatus
+from app.cas_app.models.GoodsReceipt import  PurchaseOrderTransactionStatus, CompletePurchaseOrder
+from app.repositories.goods_receipt import GoodsReceiptRepository
+repository = GoodsReceiptRepository()
 
 # def objectid_to_str(data):
 #     if isinstance(data, dict):
@@ -135,165 +138,6 @@ purchase_order_receipt_bp = Blueprint('purchase_order_receipt', __name__)
     
 #     return result
 
-# @purchase_order_receipt_bp.get(api + 's')
-# @authorized
-# def get_purchase_order_receipt(user_id):
-   
-#     try:
-#         data = list(purchase_order_receipt.aggregate(pipeline)) 
-#         data = convert_objectid_to_str(data)
-#         grouped_data = defaultdict(list)
-#         for item in data:
-#             purchase_order_item_id = item['purchaseOrderID']
-#             grouped_data[purchase_order_item_id].append(item)
-#         grouped_data = dict(grouped_data)
-#         result = process_grouped_data(grouped_data)               
-#         return {'data': result}  # Return the populated documents as an object
-
-#     except Exception as e:
-#         return {'message': str(e)}, 400
-    
-# @purchase_order_receipt_bp.get(api + '/approved')
-# @authorized
-# def get_purchase_order_receipts_approve(user_id):
-   
-#     try:
-
-#         # find purchase_orders that is not on list of  purchase_order_receipt and key is purchaseOrderID
-#         receipt_ids = purchase_order_receipt.distinct("purchaseOrderID")
-        
-#         # Print the list of receipt IDs for debugging
-#         print(receipt_ids)
-
-#         # Find purchase orders that are not in the list of purchaseOrderIDs
-#         purchase_orders_without_receipts = purchase_orders.find({
-#             "_id": {"$nin": receipt_ids},
-#             "status": "Approved"    # Exclude purchaseOrderIDs present in receipts
-#         }) 
-        
-#         # Convert cursor to a list to see the actual documents
-#         result = list(purchase_orders_without_receipts)
-#         result = objectid_to_str(result)
-
-#         return {'data': result}  # Return the populated documents as an object
-
-#     except Exception as e:
-#         return {'message': str(e)}, 500
-
-
-# @purchase_order_receipt_bp.get(api + '/pending')
-# @authorized
-# def get_purchase_order_receipts_pending(user_id):
-   
-#     try:
-#         newPipeline = list(pipeline)
-#         newPipeline.append( {'$match': {'status': 'pending'}})
-#         data = list(purchase_order_receipt.aggregate(newPipeline)) 
-#         data = convert_objectid_to_str(data)
-#         grouped_data = defaultdict(list)
-#         for item in data:
-#             purchase_order_item_id = item['purchaseOrderID']
-#             grouped_data[purchase_order_item_id].append(item)
-#         grouped_data = dict(grouped_data)
-#         result = process_grouped_data(grouped_data)               
-#         return {'data': result}
-#     except Exception as e:
-#         return {'message': str(e)}, 500
-
-
-# @purchase_order_receipt_bp.get(api + '/completed')
-# @authorized
-# def get_purchase_order_receipts_completed(user_id):
-   
-#     try:
-#         newPipeline = list(pipeline)
-#         newPipeline.append( {'$match': {'status': 'completed'}})
-#         print(newPipeline)
-#         data = list(purchase_order_receipt.aggregate(newPipeline)) 
-#         data = convert_objectid_to_str(data)
-#         grouped_data = defaultdict(list)
-#         for item in data:
-#             purchase_order_item_id = item['purchaseOrderID']
-#             grouped_data[purchase_order_item_id].append(item)
-#         grouped_data = dict(grouped_data)
-#         result = process_grouped_data(grouped_data)               
-#         return {'data': result}
-#     except Exception as e:
-#         return {'message': str(e)}, 500
-       
-# @purchase_order_receipt_bp.post(api)
-# @authorized
-# def create_purchase_order_receipt(user_id):
-#     request_data = request.get_json()
-    
-#     try:
-#         request_data["purchaseOrderID"] = ObjectId(request_data["purchaseOrderID"])
-#         request_data["userReceiverID"] = ObjectId(request_data["userReceiverID"])
-#         request_data["purchaseOrderItemID"] = ObjectId(request_data["purchaseOrderItemID"])
-#         request_data["createdBy"] = ObjectId(user_id) 
-#         request_data["createdAt"] = datetime.now()
-#         request_data["updatedAt"] = datetime.now() 
-        
-#         purchase_order = purchase_orders.find_one({"_id": request_data["purchaseOrderID"]}) 
-#         if not purchase_order:
-#             return {'message': 'Purchase order does not exist.'}, 404
-#         pipeline = [
-#             {
-#                 "$match": {
-#                     "purchaseOrderItemID": request_data["purchaseOrderItemID"],
-#                     "purchaseOrderID": request_data["purchaseOrderID"]   # Use ObjectId directly
-#                 }
-#             },
-#             {
-#                 "$group": {
-#                     "_id": None,
-#                     "totalQuantity": {
-#                         "$sum": "$quantity"
-#                     }
-#                 }
-#             }
-#         ]
-#         purchaseOrderReceipts = purchase_order_receipt.aggregate(pipeline)
-#         total_quantity = next(purchaseOrderReceipts, {}).get('totalQuantity', 0)
-#         item_quantity = next(
-#             (item['quantity'] for item in purchase_order['items'] if item['itemId'] == str(request_data["purchaseOrderItemID"])), 
-#             0
-#         )
-#         if total_quantity >= item_quantity:
-#             return {'message': 'Purchase Receipt is already completed check the amount in purchase order item'}, 400
-
-#         total_quantity += request_data["quantity"]
-
-#         # Determine the status based on total quantity and item quantity
-#         if total_quantity >= item_quantity:
-#             request_data["status"] = "completed"
-#         else:
-#             request_data["status"] = "pending"
-
-#         update_data = {
-#             "$set": {
-#                 "status": request_data.get("status"),  # Assuming you want to update the status
-#                 "updatedAt": datetime.now()            # Update the timestamp
-#             }
-#         }  
-#         purchase_order_receipt.update_many(
-#             {"purchaseOrderID": request_data["purchaseOrderID"],
-#              "purchaseOrderItemID": request_data["purchaseOrderItemID"]
-#              },  # Match condition
-#             update_data                                # Update operation
-#         )
-#         receipt = PurchaseOrderReceipt.fromDict(request_data).toDict()
-#         doc = insert_one('purchase_order_receipt', filterValues(receipt))
-        
-#         if doc and doc.inserted_id:
-#             receipt["_id"] = str(doc.inserted_id)
-#             receipt = convert_objectid_to_str(receipt)
-#             return {"data": receipt }
-#         else:
-#             return {'message': 'Unable to create purchase order receipt.'}, 400
-#     except Exception as e:
-#         return {'message': str(e)}, 500
-    
 
 @purchase_order_receipt_bp.get(api)
 @authorized
@@ -336,3 +180,57 @@ def get_purchase_order_received(user_id):
                 }
                 results.append(result_item)
     return {"data": results } 
+
+@purchase_order_receipt_bp.post(api + "/complete-purchase-order-items")
+@authorized
+def update_good_receipts_and_inventory(user_id):
+    
+    request_data = request.get_json()
+    quantity = request_data["quantity"]
+    itemID = request_data["itemID"]
+    complete = CompletePurchaseOrder(**request_data, completorId=user_id)
+    update_data = complete.model_dump()  # Assuming complete.model_dump() returns a dictionary
+    # Perform the update
+    update_result = goods_receipt.update_many(
+        { '_id': { '$in': [ObjectId(id) for id in request_data["receiptIds"]] } },
+        { '$set': update_data }
+    )   
+
+    # Check if any receipts were updated
+    if update_result.modified_count > 0:
+        # Find the item with the smallest quantity or nearest expiration date
+        item = inventories.find_one(
+            {
+                "itemId": itemID
+            },
+            sort=[("quantityOnHand", 1), ("expirationDate", 1)]
+        )
+
+        if item:
+            # Update the quantity for the identified item
+            inventory_update_result = inventories.update_one(
+                {"_id": item["_id"]},
+              {"$inc": {"quantityOnHand": quantity}} 
+            )
+
+            if inventory_update_result.modified_count > 0:
+                return jsonify({"message": f"Successfully updated inventory for item {itemID} to quantity {quantity}."}), 200
+            else:
+                return jsonify({"message": f"No changes made to the inventory for item {itemID}."}), 400
+        else:
+                       # Create a new inventory item if it doesn't exist
+            new_inventory_item = {
+                "itemId": itemID,
+                "quantityOnHand": quantity,
+                "reorderPoint": "",  # Empty string
+                "expirationDate": "",  # Empty string
+                "expirationWarningDays": 30,  # Set to 30 days
+                "expirationStatus": "",  # Empty string
+                "lotNumber": 0  # Set to zero
+            }
+            
+            inventory_result  = inventories.insert_one(new_inventory_item)  # Insert new inventory item
+
+            return jsonify({"message": f"New Inventory Created Successfully", "updateInventory": True, "inventoryID": str(inventory_result.inserted_id) }), 200
+    else:
+        return jsonify({"message": "No receipts were updated. Inventory update skipped."}), 400
