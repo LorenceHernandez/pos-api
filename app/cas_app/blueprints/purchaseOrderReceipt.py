@@ -23,162 +23,92 @@ repository = GoodsReceiptRepository()
 api = '/api/cas/purchase-to-received'
 purchase_order_receipt_bp = Blueprint('purchase_order_receipt', __name__)
 
-# # to do for populating the data 
-# pipeline = [
-#     {
-#         "$lookup": {
-#             "from": "purchase_orders",
-#             "localField": "purchaseOrderID",
-#             "foreignField": "_id",
-#             "as": "purchaseOrderDetails"
-#         }
-#     },
-#     {
-#         "$lookup": {
-#             "from": "items",
-#             "localField": "purchaseOrderItemID",
-#             "foreignField": "_id",
-#             "as": "purchaseOrderItemDetails"
-#         }
-#     },
-#     {
-#         "$lookup": {
-#             "from": "users",
-#             "localField": "userReceiverID",
-#             "foreignField": "_id",
-#             "as": "userReceiverDetails"
-#         }
-#     },
-#     {
-#         "$lookup": {
-#             "from": "users",
-#             "localField": "createdBy",
-#             "foreignField": "_id",
-#             "as": "createdByDetails"
-#         }
-#     },
-#     {
-#         "$unwind": {
-#             "path": "$purchaseOrderDetails"
-#         }
-#     },
-#     {
-#         "$unwind": {
-#             "path": "$userReceiverDetails"
-#         }
-#     },
-#     {
-#         "$unwind": {
-#             "path": "$createdByDetails"
-#         }
-#     },
-#      {
-#         "$unwind": {
-#             "path": "$purchaseOrderItemDetails"
-#         }
-#     },
-#     # {
-#     #     "$addFields": {
-#     #         "supplierIdObj": {
-#     #             "$toObjectId": "$purchaseOrderDetails.supplierId"
-#     #         },
-           
-#     #     }
-#     # },
-    
-# ]
-# def process_grouped_data(grouped_data):
-#     result = []
 
-#     for purchase_order_id, items in grouped_data.items():
-#         grouped_items = {}
-        
-#         # Group items by purchaseOrderItemID
-#         for item in items:
-#             item_id = item["purchaseOrderItemID"]
-#             if item_id not in grouped_items:
-#                 grouped_items[item_id] = []
-            
-#             # Append item details to the grouped items
-#             grouped_items[item_id].append({
-#                 "_id": item["_id"],
-#                 "createdAt": item["createdAt"],
-#                 "createdBy": item["createdBy"],
-#                 "createdByDetails": item["createdByDetails"],
-#                 "officialReceipt": item["officialReceipt"],
-#                 "price": item["price"],
-#                 "quantity": item["quantity"],
-#                 "updatedAt": item["updatedAt"],
-#                 "userReceiverDetails": item["userReceiverDetails"],
-#                 "purchaseOrderItemDetails": item["purchaseOrderItemDetails"]
-#             })
-
-#         purchaseOrderReceipt = []
-        
-#         # Create a receipt for each grouped item
-#         for purchaseOrderReceiptID, receipt in grouped_items.items():
-#             # Remove purchaseOrderItemDetails from the receipt objects
-#             removePurchaseOrderItemDetails = [
-#                 {k: v for k, v in obj.items() if k != "purchaseOrderItemDetails"} for obj in receipt
-#             ]
-            
-#             purchaseOrderReceipt.append({
-#                 "itemID": purchaseOrderReceiptID,
-#                 "purchaseOrderReceipt": removePurchaseOrderItemDetails,
-#                 "purchaseOrderItemDetails": grouped_items[purchaseOrderReceiptID][0]["purchaseOrderItemDetails"],
-#                 "totalQuantity": sum(item["quantity"] for item in receipt),  # Correctly sum quantities
-#                 "status": ""  # Placeholder for status
-#             })
-        
-#         result.append({
-#             "purchaseOrderDetails": grouped_data[purchase_order_id][0]["purchaseOrderDetails"],
-#             "purchaseOrderStatus": "",  # Placeholder for purchase order status
-#             "purchaseItems": purchaseOrderReceipt
-#         })
-    
-#     return result
-
+pipeline = [
+    {
+        "$match": {"status": "Approved"}
+    },
+    {
+        "$unwind": "$items"
+    },
+    {
+        "$lookup": {
+            "from": "goods_receipt_items",
+            "let": {
+                "itemId": "$items.itemId",
+                "purchaseOrderId": "$_id"
+            },
+            "pipeline": [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                {"$eq": ["$itemId", "$$itemId"]},
+                                {"$eq": ["$purchaseOrderId", "$$purchaseOrderId"]},
+                                {"$ne": ["$inspection", PurchaseOrderTransactionStatus.REJECTED]}
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": None,
+                        "quantityReceived": {"$sum": "$quantityReceived"},
+                        "count": {"$sum": 1}
+                    }
+                }
+            ],
+            "as": "good_receipts"
+        }
+    },
+    {
+        "$addFields": {
+            "quantityReceived": {
+                "$ifNull": [{"$arrayElemAt": ["$good_receipts.quantityReceived", 0]}, 0]
+            },
+            "good_receipts_count": {
+                "$ifNull": [{"$arrayElemAt": ["$good_receipts.count", 0]}, 0]
+            }
+        }
+    },
+    {
+        "$match": {
+            "$expr": {
+                "$or": [
+                    {"$lt": ["$quantityReceived", "$items.quantity"]},
+                    {"$lt": ["$good_receipts_count", 1]}
+                ]
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": {"$toString": "$_id"},  # Convert _id to string
+            "supplierId": "$supplierId",
+            "totalAmount": "$totalAmount",
+            "status": "$status",
+            "supplierEmail": "$supplierEmail",
+            "supplierName": "$supplierName",
+            "approverUserID": "$approverUserID",
+            "notes": "$notes",
+            "item": {
+                "itemId": "$items.itemId",
+                "itemName": "$items.itemName",
+                "quantity": "$items.quantity",
+                "unitPrice": "$items.unitPrice",
+                "totalPrice": "$items.totalPrice",
+                "quantityReceived": "$quantityReceived",
+                "requiredQuantity": {"$subtract": ["$items.quantity", "$quantityReceived"]}
+            }
+        }
+    }
+]
 
 @purchase_order_receipt_bp.get(api)
 @authorized
 def get_purchase_order_received(user_id):
-    approved_orders = purchase_orders.find({"status": "Approved"})
-    results = []
-    for order in approved_orders:
-        for item in order['items']:
-            item_id = item['itemId']
-            purchase_id = str(order['_id'])            
-            good_receipts = list(goods_receipt_items.find({
-                "itemId": item_id,
-                "purchaseOrderId": purchase_id, 
-               "inspection": {"$ne": PurchaseOrderTransactionStatus.REJECTED}
-            }))
-           
-            quantity_received = sum(gr['quantityReceived'] for gr in good_receipts)
-            good_receipts_count = len(good_receipts)
-            required_quantity = item['quantity'] - quantity_received
-
-            if quantity_received < item['quantity'] or good_receipts_count < 1:
-                result_item = {
-                    "_id": purchase_id,
-                    "supplierId": order["supplierId"],
-                    "totalAmount": order["totalAmount"],
-                    "status": order["status"],
-                    "supplierEmail": order["supplierEmail"],
-                    "supplierName": order["supplierName"],
-                    "approverUserID": order["approverUserID"],
-                    "notes": order["notes"],
-                    "item": {
-                        "itemId": item_id,
-                        "itemName": item['itemName'],
-                        "quantity": item['quantity'],
-                        "unitPrice": item['unitPrice'],
-                        "totalPrice": item['totalPrice'],
-                        "quantityReceived": quantity_received,
-                        "requiredQuantity": required_quantity
-                    }
-                }
-                results.append(result_item)
+    # approved_orders = purchase_orders.find({"status": "Approved"})
+    results =  list(purchase_orders.aggregate(pipeline))
     return {"data": results } 
 
 @purchase_order_receipt_bp.post(api + "/complete-purchase-order-items")
