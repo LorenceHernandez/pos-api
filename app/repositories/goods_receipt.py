@@ -14,6 +14,8 @@ class GoodsReceiptRepository(Repository):
                     '$addFields': {
                         '_id': {'$toString': '$_id' },
                         'purchaseOrderId': {'$toObjectId': '$purchaseOrderId' },
+                        'receiverId': {'$toObjectId': '$receiverId' },
+                        'inspectorId': {'$toObjectId': '$inspectorId' },
                     }
                 },
                 { 
@@ -32,24 +34,62 @@ class GoodsReceiptRepository(Repository):
                         'as': 'purchaseOrder'
                     }
                 },
+                {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'receiverId',
+                        'foreignField': '_id',
+                        'as': 'receiver'
+                    }
+                },
+                {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'inspectorId',
+                        'foreignField': '_id',
+                        'as': 'inspector'
+                    }
+                },
                 { "$unwind": "$purchaseOrder" },
+                { 
+                    "$unwind": {
+                        'path': "$receiver",
+                        'preserveNullAndEmptyArrays': True    
+                    }
+                },
+                { 
+                    "$unwind": {
+                        'path': "$inspector",
+                        'preserveNullAndEmptyArrays': True    
+                    }
+                },
                 { '$sort': {"_id":-1} },
                 *args,
                 {
                     '$addFields': {
                         'purchaseOrderId': {'$toString': '$purchaseOrderId' },
                         'purchaseOrder._id': {'$toString': '$purchaseOrder._id' },
+                        'receiver._id': {'$toString': '$receiver._id' },
+                        'inspector._id': {'$toString': '$inspector._id' },
                     }
                 },
                 {
                     '$project': {
-                        'purchaseOrderId': 0
+                        'purchaseOrderId': 0,
+                        'inspectorId': 0,
+                        'receiverId': 0,
+                        'inspector': { 'password': 0 },
+                        'receiver': { 'password': 0 },
                     }
                 }
             ]))
             items = []
             for order in data:
                 order['items'] = list(map(lambda i: { **omit(i, '_id') }, order['items']))
+                if order.get('inspector') is None or order.get('inspector').get('_id') is None:
+                    order['inspector'] = None
+                if order.get('receiver') is None or order.get('receiver').get('_id') is None:
+                    order['receiver'] = None
                 items.append(order)
             return items
         except Exception as e:

@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 from pydash import omit
 
-from app.cas_app.models.GoodsReceipt import CompletePurchaseOrder, InspectPurchaseOrder, InventoryPurchaseOrder, PurchaseOrderTransactionStatus, ReceiveMultiplePurchaseOrder, ReceivePurchaseOrder
+from app.cas_app.models.GoodsReceipt import CompletePurchaseOrder, InspectPurchaseOrder, InventoryPurchaseOrder, PurchaseOrderTransactionStatus, ReceiveMultiplePurchaseOrder, Receipt, ReceivePurchaseOrder
 from app.cas_app.models.new_models.PurchaseOrder import PurchaseOrderAction, PurchaseOrderDiscrepancyType
 from app.database.config import purchase_orders, items, inventories, goods_receipt_items
 from app.middlewares.authorized_attribute import authorized
@@ -112,7 +112,7 @@ def receive_purchase_order(user_id):
                 receipt.items
             )
         )
-
+        document = repository.find_one({ '_id': ObjectId(document['_id']) })
         return { 'message': 'Purchase order received successfully.', 'data': document }
     except ValidationError as e:
         return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
@@ -137,9 +137,10 @@ def inspect_purchase_order(user_id, id):
         if receipt['status'] != PurchaseOrderTransactionStatus.PENDING_INSPECTION:
             return { 'data': None, 'message': 'Goods is not applicable for inspection' }, 404
 
+        print(inspect.model_dump_json())
         for item in inspect.items:
             goods_receipt_items.update_one(
-                { '_id': item.itemObjectId },
+                { 'itemId': item.itemId, 'receiptId': id },
                 { '$set': item.model_dump() }
             )
         

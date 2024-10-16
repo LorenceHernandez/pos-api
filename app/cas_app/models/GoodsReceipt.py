@@ -30,9 +30,15 @@ class ReceivePurchaseOrderItem(BaseActionItem):
 
 class ReceivePurchaseOrder(BaseAction):
     items: list[ReceivePurchaseOrderItem] = Field(min_items=1)
+    dateReceived: str = Field(default_factory=getLocalTimeStr)
+    receiverId: str = None
+    status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.PENDING_INSPECTION
+
+class Receipt(BaseAction):
+    items: list[ReceivePurchaseOrderItem] = Field(min_items=1)
 
 class ReceiveMultiplePurchaseOrder(BaseModel):
-    receipts: list[ReceivePurchaseOrder] = Field(min_length=1)
+    receipts: list[Receipt] = Field(min_length=1)
     dateReceived: str = Field(default_factory=getLocalTimeStr)
     receiverId: str = None
     status: PurchaseOrderTransactionStatus = PurchaseOrderTransactionStatus.PENDING_INSPECTION
