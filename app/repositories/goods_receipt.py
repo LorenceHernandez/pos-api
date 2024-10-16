@@ -63,6 +63,25 @@ class GoodsReceiptRepository(Repository):
                         'preserveNullAndEmptyArrays': True    
                     }
                 },
+                {
+                    '$addFields': {
+                        'purchaseOrder.approverUserID': {'$toObjectId': '$purchaseOrder.approverUserID' },
+                    }
+                },
+                {
+                    '$lookup': {
+                        'from': 'users',
+                        'localField': 'purchaseOrder.approverUserID',
+                        'foreignField': '_id',
+                        'as': 'purchaseOrder.approver'
+                    }
+                },
+                { 
+                    "$unwind": {
+                        'path': "$purchaseOrder.approver",
+                        'preserveNullAndEmptyArrays': True    
+                    }
+                },
                 { '$sort': {"_id":-1} },
                 *args,
                 {
@@ -71,25 +90,37 @@ class GoodsReceiptRepository(Repository):
                         'purchaseOrder._id': {'$toString': '$purchaseOrder._id' },
                         'receiver._id': {'$toString': '$receiver._id' },
                         'inspector._id': {'$toString': '$inspector._id' },
+                        'purchaseOrder.approver._id': {'$toString': '$purchaseOrder.approver._id' },
                     }
                 },
                 {
                     '$project': {
                         'purchaseOrderId': 0,
+                        'purchaseOrder.approverUserID': 0,
+                        'purchaseOrder.approver': {
+                            '_id': 0,
+                            'password': 0,
+                        },
                         'inspectorId': 0,
                         'receiverId': 0,
-                        'inspector': { 'password': 0 },
-                        'receiver': { 'password': 0 },
+                        'inspector': {
+                            '_id': 0,
+                            'password': 0,
+                        },
+                        'receiver': {
+                            '_id': 0,
+                            'password': 0,
+                        },
                     }
                 }
             ]))
             items = []
             for order in data:
                 order['items'] = list(map(lambda i: { **omit(i, '_id') }, order['items']))
-                if order.get('inspector') is None or order.get('inspector').get('_id') is None:
-                    order['inspector'] = None
-                if order.get('receiver') is None or order.get('receiver').get('_id') is None:
-                    order['receiver'] = None
+                # if order.get('inspector') is None or order.get('inspector').get('_id') is None:
+                #     order['inspector'] = None
+                # if order.get('receiver') is None or order.get('receiver').get('_id') is None:
+                #     order['receiver'] = None
                 items.append(order)
             return items
         except Exception as e:
