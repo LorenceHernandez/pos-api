@@ -6,7 +6,6 @@ class AccountsType:
     _id = None
     name = None
     description = None
-    accountGroup = None
     @staticmethod
     def fromDict(data: dict):
         item = AccountsType()
@@ -14,7 +13,6 @@ class AccountsType:
             item._id = str(data.get('_id'))
         item.name = data.get('name')
         item.description = data.get('description')
-        item.accountGroup = data.get('accountGroup')
     
         return item
     
@@ -23,5 +21,4 @@ class AccountsType:
             "_id": self._id,
             "name": self.name,
             "description": self.description,
-            "accountGroup": self.accountGroup,
         }
