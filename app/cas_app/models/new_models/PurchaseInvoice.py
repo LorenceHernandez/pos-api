@@ -11,6 +11,10 @@ class PurchaseInvoice:
     isAccountMode = None
     accounting = []
     items = []
+    invoiceDate = None
+    status = None
+    refInvoiceNumber = None
+    notes = None
     
     @staticmethod
     def fromDict(data: dict):
@@ -23,7 +27,10 @@ class PurchaseInvoice:
         item.totalAmount = data.get('totalAmount')
         item.isAccountMode = data.get('isAccountMode')
         item.accounting = data.get('accounting')
-        item.items = data.get('items')
+        item.invoiceDate = data.get('invoiceDate')
+        item.status = data.get('status')
+        item.refInvoiceNumber = data.get('refInvoiceNumber')
+        item.notes = data.get('notes')
         return item
     
     def toDict(self):
@@ -35,6 +42,10 @@ class PurchaseInvoice:
             "totalAmount": self.totalAmount,
             "isAccountMode": self.isAccountMode,
             "accounting": self.accounting,
-            "items": self.items
+            "items": self.items,
+            "invoiceDate": self.invoiceDate,
+            "status": self.status,
+            "refInvoiceNumber": self.refInvoiceNumber,
+            "notes": self.notes
         }
         return ret
