@@ -21,6 +21,7 @@ from app.cas_app.blueprints.purchase_orders import purchase_order_bp
 from app.cas_app.blueprints.purchaseOrderReceipt import \
     purchase_order_receipt_bp
 from app.cas_app.blueprints.receipts import receipts_bp
+from app.cas_app.blueprints.reports import reports_bp
 from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
@@ -128,6 +129,7 @@ app.register_blueprint(receipts_bp)
 app.register_blueprint(sales_invoice_bp)
 app.register_blueprint(purchase_order_receipt_bp)
 app.register_blueprint(purchase_invoice_bp)
+app.register_blueprint(reports_bp)
 
 @app.before_request
 def hook():

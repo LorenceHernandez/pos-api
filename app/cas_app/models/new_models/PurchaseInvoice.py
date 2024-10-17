@@ -15,6 +15,7 @@ class PurchaseInvoice:
     status = None
     refInvoiceNumber = None
     notes = None
+    series = None
     
     @staticmethod
     def fromDict(data: dict):

@@ -13,6 +13,8 @@ class Payment:
     contactName = None
     accounting = []
     refInvoiceNumber = None
+    series = None
+    
     @staticmethod
     def fromDict(data: dict):
         item = Payment()

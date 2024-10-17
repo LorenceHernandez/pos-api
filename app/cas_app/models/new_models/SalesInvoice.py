@@ -52,6 +52,7 @@ class SalesInvoice:
     isAccountMode = None
     refInvoiceNumber = None
     accounting = []
+    series = None
     
     @staticmethod
     def fromDict(data: dict):
