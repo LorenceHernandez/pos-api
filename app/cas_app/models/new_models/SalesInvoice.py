@@ -87,7 +87,7 @@ class SalesInvoice:
             "accounting": self.accounting,
         }
         e = []
-        for item in self.items:
-            e.append(item.toDict())
+        for _item in self.items:
+            e.append(_item.toDict())
         ret['items'] = e
         return ret

@@ -12,15 +12,16 @@ from app.cas_app.blueprints.accounts_group import accounts_group_bp
 from app.cas_app.blueprints.accounts_type import accounts_type_bp
 from app.cas_app.blueprints.category import category_bp
 from app.cas_app.blueprints.chart_account import chart_of_accounts_bp
+from app.cas_app.blueprints.goods_receipt import goods_receipt_bp
 from app.cas_app.blueprints.inventory import inventory_bp
 from app.cas_app.blueprints.item import item_bp
 from app.cas_app.blueprints.payments import payment_bp
+from app.cas_app.blueprints.purchase_invoice import purchase_invoice_bp
 from app.cas_app.blueprints.purchase_orders import purchase_order_bp
-from app.cas_app.blueprints.purchaseOrderReceipt import purchase_order_receipt_bp
-from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
-
+from app.cas_app.blueprints.purchaseOrderReceipt import \
+    purchase_order_receipt_bp
 from app.cas_app.blueprints.receipts import receipts_bp
-from app.cas_app.blueprints.goods_receipt import goods_receipt_bp
+from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
 from app.utils.utils import getLocalTime
@@ -126,6 +127,7 @@ app.register_blueprint(chart_of_accounts_bp)
 app.register_blueprint(receipts_bp)
 app.register_blueprint(sales_invoice_bp)
 app.register_blueprint(purchase_order_receipt_bp)
+app.register_blueprint(purchase_invoice_bp)
 
 @app.before_request
 def hook():
