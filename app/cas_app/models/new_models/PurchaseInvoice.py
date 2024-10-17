@@ -8,7 +8,6 @@ class PurchaseInvoice:
     dueDate = None
     supplierId = None
     totalAmount = None
-    refInvoiceNumber = None
     isAccountMode = None
     accounting = []
     items = []
@@ -22,7 +21,6 @@ class PurchaseInvoice:
         item.dueDate = data.get('dueDate')
         item.supplierId = data.get('supplierId')
         item.totalAmount = data.get('totalAmount')
-        item.refInvoiceNumber = data.get('refInvoiceNumber')
         item.isAccountMode = data.get('isAccountMode')
         item.accounting = data.get('accounting')
         item.items = data.get('items')
@@ -35,7 +33,6 @@ class PurchaseInvoice:
             "dueDate": self.dueDate,
             "supplierId": self.supplierId,
             "totalAmount": self.totalAmount,
-            "refInvoiceNumber": self.refInvoiceNumber,
             "isAccountMode": self.isAccountMode,
             "accounting": self.accounting,
             "items": self.items

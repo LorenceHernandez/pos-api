@@ -47,6 +47,7 @@ class Receipt:
     isAccountMode = None
     entries = None
     accounting = None
+    refInvoiceNumber = None
     @staticmethod
     def fromDict(data: dict):
         item = Receipt()
@@ -58,6 +59,7 @@ class Receipt:
         item.notes = data.get('notes')
         item.isAccountMode = data.get('isAccountMode')
         item.accounting = data.get('accounting')
+        item.accounting = data.get('refInvoiceNumber')
         e = []
         for entry in data.get('entries'):
             e.append(Entry.fromDict(entry))
@@ -73,6 +75,7 @@ class Receipt:
             "notes": self.notes,
             "isAccountMode": self.isAccountMode,
             "accounting": self.accounting,
+            "refInvoiceNumber": self.refInvoiceNumber,
            
         }
         e = []

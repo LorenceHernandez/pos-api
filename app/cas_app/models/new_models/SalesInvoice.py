@@ -50,6 +50,7 @@ class SalesInvoice:
     notes = None
     termsAndConditions = None
     isAccountMode = None
+    refInvoiceNumber = None
     accounting = []
     
     @staticmethod
@@ -66,6 +67,7 @@ class SalesInvoice:
         item.termsAndConditions = data.get('termsAndConditions')
         item.isAccountMode = data.get('isAccountMode')
         item.accounting = data.get('accounting')
+        item.refInvoiceNumber = data.get('refInvoiceNumber')
         e = []
         for _item in data.get('items'):
             e.append(Item.fromDict(_item))
@@ -85,6 +87,7 @@ class SalesInvoice:
             "termsAndConditions": self.termsAndConditions,
             "isAccountMode": self.isAccountMode,
             "accounting": self.accounting,
+            "refInvoiceNumber": self.refInvoiceNumber,
         }
         e = []
         for _item in self.items:
