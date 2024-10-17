@@ -1,16 +1,14 @@
 from bson import ObjectId
 from flask import Blueprint, request, jsonify
+from collections import Counter
 
 
 
 from app.database.config import purchase_orders
-from app.database.config import goods_receipt_items
 from app.database.config import goods_receipt
 from app.database.config import inventories
 from app.middlewares.authorized_attribute import authorized
-from app.cas_app.models.GoodsReceipt import  PurchaseOrderTransactionStatus, CompletePurchaseOrder
-from app.repositories.goods_receipt import GoodsReceiptRepository
-repository = GoodsReceiptRepository()
+from app.cas_app.models.GoodsReceipt import  CompletePurchaseOrder
 
 # def objectid_to_str(data):
 #     if isinstance(data, dict):
@@ -106,58 +104,48 @@ pipeline = [
     }
 ]
 
+def validate_purchase_order(request_data):
+    items = request_data["items"]
+    purchaseOrderId = request_data["purchaseOrderId"]
+
+    # Fetch the purchase order from the database
+    purchase_order = purchase_orders.find_one({"_id": ObjectId(purchaseOrderId)})
+
+    if not purchase_order:
+        return False  # Purchase order not found
+
+    # Create a dictionary for easy quantity lookup
+    order_items = {item['itemId']: item['quantity'] for item in purchase_order['items']}
+
+    # Create a counter for items from the request
+    requested_items_counter = Counter((item['itemID'], item['quantity']) for item in items)
+
+    # Create a counter for order items
+    order_items_counter = Counter((item['itemId'], item['quantity']) for item in purchase_order['items'])
+
+    # Check if the two counters match
+    return requested_items_counter == order_items_counter
+
 
 @purchase_order_receipt_bp.get(api)
 @authorized
 def get_purchase_order_received(user_id):
-    # approved_orders = purchase_orders.find({"status": "Approved"})
     results = list(purchase_orders.aggregate(pipeline))
-    # for order in approved_orders:
-    #     for item in order['items']:
-    #         item_id = item['itemId']
-    #         purchase_id = str(order['_id'])            
-    #         good_receipts = list(goods_receipt_items.find({
-    #             "itemId": item_id,
-    #             "purchaseOrderId": purchase_id, 
-    #            "inspection": {"$ne": PurchaseOrderTransactionStatus.REJECTED}
-    #         }))
-           
-    #         quantity_received = sum(gr['quantityReceived'] for gr in good_receipts)
-    #         good_receipts_count = len(good_receipts)
-    #         required_quantity = item['quantity'] - quantity_received
-
-    #         if quantity_received < item['quantity'] or good_receipts_count < 1:
-    #             result_item = {
-    #                 "_id": purchase_id,
-    #                 "supplierId": order["supplierId"],
-    #                 "totalAmount": order["totalAmount"],
-    #                 "status": order["status"],
-    #                 "supplierEmail": order["supplierEmail"],
-    #                 "supplierName": order["supplierName"],
-    #                 "approverUserID": order["approverUserID"],
-    #                 "notes": order["notes"],
-    #                 "item": {
-    #                     "itemId": item_id,
-    #                     "itemName": item['itemName'],
-    #                     "quantity": item['quantity'],
-    #                     "unitPrice": item['unitPrice'],
-    #                     "totalPrice": item['totalPrice'],
-    #                     "quantityReceived": quantity_received,
-    #                     "requiredQuantity": required_quantity
-    #                 }
-    #             }
-    #             results.append(result_item)
     return {"data": results } 
+
 
 @purchase_order_receipt_bp.post(api + "/complete-purchase-order-items")
 @authorized
 def update_good_receipts_and_inventory(user_id):
+    request_data = request.get_json() 
+    items = request_data["items"]
+    purchaseOrderId = request_data["purchaseOrderId"]
+    matchPurchase = validate_purchase_order(request_data)
+    if not matchPurchase:
+        return jsonify({"message": "Purchase order mismatch."}), 400
     
-    request_data = request.get_json()
-    quantity = request_data["quantity"]
-    itemID = request_data["itemID"]
     complete = CompletePurchaseOrder(**request_data, completorId=user_id)
-    update_data = complete.model_dump()  # Assuming complete.model_dump() returns a dictionary
+    update_data = complete.model_dump()
     # Perform the update
     update_result = goods_receipt.update_many(
         { '_id': { '$in': [ObjectId(id) for id in request_data["receiptIds"]] } },
@@ -166,39 +154,57 @@ def update_good_receipts_and_inventory(user_id):
 
     # Check if any receipts were updated
     if update_result.modified_count > 0:
-        # Find the item with the smallest quantity or nearest expiration date
-        item = inventories.find_one(
-            {
-                "itemId": itemID
-            },
-            sort=[("quantityOnHand", 1), ("expirationDate", 1)]
-        )
+           
+        for item in items:
+            itemID = item['itemID']
+            quantity = item['quantity']
 
-        if item:
-            # Update the quantity for the identified item
-            inventory_update_result = inventories.update_one(
-                {"_id": item["_id"]},
-              {"$inc": {"quantityOnHand": quantity}} 
+            # Find the existing inventory item
+            inventory_item = inventories.find_one(
+                {"itemId": itemID},
+                sort=[("quantityOnHand", 1), ("expirationDate", 1)]
             )
 
-            if inventory_update_result.modified_count > 0:
-                return jsonify({"message": f"Successfully updated inventory for item {itemID} to quantity {quantity}."}), 200
-            else:
-                return jsonify({"message": f"No changes made to the inventory for item {itemID}."}), 400
-        else:
-                       # Create a new inventory item if it doesn't exist
-            new_inventory_item = {
-                "itemId": itemID,
-                "quantityOnHand": quantity,
-                "reorderPoint": "",  # Empty string
-                "expirationDate": "",  # Empty string
-                "expirationWarningDays": 30,  # Set to 30 days
-                "expirationStatus": "",  # Empty string
-                "lotNumber": 0  # Set to zero
-            }
-            
-            inventory_result  = inventories.insert_one(new_inventory_item)  # Insert new inventory item
+            if inventory_item:
+                # Update the quantity for the identified item
+                current_quantity = int(inventory_item["quantityOnHand"])  # or float() if needed
+                new_quantity = current_quantity + quantity
 
-            return jsonify({"message": f"New Inventory Created Successfully", "updateInventory": True, "inventoryID": str(inventory_result.inserted_id) }), 200
+                inventory_update_result = inventories.update_one(
+                    {"_id": inventory_item["_id"]},
+                    {"$set": {"quantityOnHand": new_quantity}}
+                )
+
+
+                if inventory_update_result.modified_count > 0:
+                    message = f"Successfully updated inventory for item {itemID} to quantity {current_quantity + quantity}."
+                else:
+                    message = f"No changes made to the inventory for item {itemID}."
+            else:
+                # Create a new inventory item if it doesn't exist
+                new_inventory_item = {
+                    "itemId": itemID,
+                    "quantityOnHand": quantity,
+                    "reorderPoint": "",
+                    "expirationDate": "",
+                    "expirationWarningDays": 30,
+                    "expirationStatus": "",
+                    "lotNumber": 0
+                }
+
+                inventories.insert_one(new_inventory_item)  # Insert new inventory item
+                message = f"New Inventory Created Successfully for item {itemID}."
+            
+
+
+        update_result = purchase_orders.update_one(
+                {"_id": ObjectId(purchaseOrderId)},
+                {
+                    "$set": {"isOrderCompleted": True},  # Update to true
+                }
+        )
+               
+        print(update_result)
+        return jsonify({"message": "Purchase order marked as completed."}), 200
     else:
         return jsonify({"message": "No receipts were updated. Inventory update skipped."}), 400

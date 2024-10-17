@@ -12,7 +12,7 @@ class PurchaseOrder:
     status = "Pending Approval"
     notes = None
     approverUserID = None
-    
+    isOrderCompleted = None
     @staticmethod
     def fromDict(data: dict):
         item = PurchaseOrder()
@@ -26,12 +26,14 @@ class PurchaseOrder:
         item.supplierEmail = data.get('supplierEmail')
         item.notes = data.get('notes')
         item.approverUserID = data.get('approverUserID')
-      
+        if data.get('isOrderCompleted') is not None:
+            item.isOrderCompleted = data.get('isOrderCompleted')
         return item
     
     def toDict(self):
         return {
             "_id": self._id,
+            "isOrderCompleted": self.isOrderCompleted,
             "supplierId": self.supplierId,
             "items": self.items,
             "totalAmount": self.totalAmount,
