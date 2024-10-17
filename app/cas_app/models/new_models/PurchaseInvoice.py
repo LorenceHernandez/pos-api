@@ -31,6 +31,7 @@ class PurchaseInvoice:
         item.status = data.get('status')
         item.refInvoiceNumber = data.get('refInvoiceNumber')
         item.notes = data.get('notes')
+        item.items = data.get('items')
         return item
     
     def toDict(self):
