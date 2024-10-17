@@ -8,7 +8,7 @@ from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
 from app.utils.filter_values import filterValues
 
-api = '/api/cas/purchase_invoice'
+api = '/api/cas/purchase-invoice'
 purchase_invoice_bp = Blueprint('purchase_invoices', __name__)
 
 @purchase_invoice_bp.get(api + 's')
@@ -29,7 +29,7 @@ def get_purchase_invoices(user_id):
 
 @purchase_invoice_bp.get(api + 's-invoice/history')
 @authorized
-def get_purchase_invoices(user_id):
+def get_purchase_invoice_history(user_id):
     ret = []
     try:
 
