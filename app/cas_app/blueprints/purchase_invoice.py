@@ -27,7 +27,7 @@ def get_purchase_invoices(user_id):
         return {'message': repr(e) }, 500
 
 
-@purchase_invoice_bp.get(api + 's-invoice/history')
+@purchase_invoice_bp.get(api + '/history')
 @authorized
 def get_purchase_invoice_history(user_id):
     ret = []
