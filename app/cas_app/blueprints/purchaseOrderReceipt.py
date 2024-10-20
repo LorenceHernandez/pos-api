@@ -162,41 +162,21 @@ def update_good_receipts_and_inventory(user_id):
             # Find the existing inventory item
             inventory_item = inventories.find_one(
                 {"itemId": itemID},
-                sort=[("quantityOnHand", 1), ("expirationDate", 1)]
             )
 
-            if inventory_item:
-                # Update the quantity for the identified item
-                current_quantity = int(inventory_item["quantityOnHand"])  # or float() if needed
-                new_quantity = current_quantity + quantity
-
-                inventory_update_result = inventories.update_one(
-                    {"_id": inventory_item["_id"]},
-                    {"$set": {"quantityOnHand": new_quantity}}
-                )
-
-
-                if inventory_update_result.modified_count > 0:
-                    message = f"Successfully updated inventory for item {itemID} to quantity {current_quantity + quantity}."
-                else:
-                    message = f"No changes made to the inventory for item {itemID}."
-            else:
                 # Create a new inventory item if it doesn't exist
-                new_inventory_item = {
-                    "itemId": itemID,
-                    "quantityOnHand": quantity,
-                    "reorderPoint": "",
-                    "expirationDate": "",
-                    "expirationWarningDays": 30,
-                    "expirationStatus": "",
-                    "lotNumber": 0
-                }
+            new_inventory_item = {
+                "itemId": itemID,
+                "quantityOnHand": quantity,
+                "reorderPoint": inventory_item['reorderPoint'] if inventory_item and 'reorderPoint' in inventory_item else "",
+                "expirationDate": inventory_item['expirationDate'] if inventory_item and 'expirationDate' in inventory_item else "",
+                "expirationWarningDays": inventory_item['expirationWarningDays'] if inventory_item and 'expirationWarningDays' in inventory_item else 30,
+                "expirationStatus": inventory_item['expirationStatus'] if inventory_item and 'expirationStatus' in inventory_item else "",
+                "lotNumber": inventory_item['lotNumber'] if inventory_item and 'lotNumber' in inventory_item else 0,
+                "purchaseId": purchaseOrderId
+            }
 
-                inventories.insert_one(new_inventory_item)  # Insert new inventory item
-                message = f"New Inventory Created Successfully for item {itemID}."
-            
-
-
+        inventories.insert_one(new_inventory_item)  # Insert new inventory item            
         update_result = purchase_orders.update_one(
                 {"_id": ObjectId(purchaseOrderId)},
                 {
