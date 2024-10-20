@@ -14,7 +14,7 @@ class Payment:
     accounting = []
     refInvoiceNumber = None
     series = None
-    
+    status = None
     @staticmethod
     def fromDict(data: dict):
         item = Payment()
@@ -29,7 +29,7 @@ class Payment:
         item.contactName = data.get('contactName')
         item.accounting = data.get('accounting')
         item.refInvoiceNumber = data.get('refInvoiceNumber')
-    
+        item.status = data.get('status')
         return item
     
     def toDict(self):
@@ -42,4 +42,7 @@ class Payment:
             "isAccountMode": self.isAccountMode,
             "accounting": self.accounting,
             "refInvoiceNumber": self.refInvoiceNumber,
+            "status": self.status, 
+            "contactName": self.contactName,
+            "totalAmountPaid": self.totalAmountPaid
         }
