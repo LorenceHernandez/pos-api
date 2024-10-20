@@ -80,3 +80,54 @@ def approve_purchase_orders(user_id):
     except Exception as e:
       print (e)
       return { 'message': 'data format is invalid' }
+
+
+@purchase_order_bp.get(api + '/completed')
+@authorized
+def purchaseOrderCompleted(user_id):
+  
+    try:
+        pipeline = [
+        {
+            '$match': {
+                'isOrderCompleted': True  # Filter for completed purchase orders
+            }
+        },
+        {
+            '$addFields': {
+                'orderNumber': {'$toString': '$_id'}  # Convert _id to string and add as orderNumber
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'purchase_invoices',
+                'localField': 'orderNumber',  # Match the newly created orderNumber
+                'foreignField': 'refInvoiceNumber',  # Match with refInvoiceNumber in purchase_invoices
+                'as': 'invoices'
+            }
+        },
+        {
+            '$match': {
+                'invoices': {'$eq': []}  # Only keep purchase orders with no matching invoices
+            }
+        },
+        {
+        '$project': {
+            '_id': {'$toString': '$_id'},  # Convert _id to string in the output
+            'supplierId': 1,
+            'items': 1,
+            'totalAmount': 1,
+            'status': 1,
+            'supplierEmail': 1,
+            'supplierName': 1,
+            'approverUserID': 1,
+            'notes': 1,
+            "isOrderCompleted": 1
+            }
+    }
+         ]
+        result = list(purchase_orders.aggregate(pipeline))
+        return {"data":result }, 200
+    except Exception as e:
+      print (e)
+      return { 'message': 'data format is invalid' }
