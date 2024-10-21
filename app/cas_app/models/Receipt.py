@@ -55,7 +55,8 @@ class Receipt:
             "accounting": self.accounting,
             "refInvoiceNumber": self.refInvoiceNumber,
             "contactName": self.contactName,
-            "refInvoiceNumber": self.refInvoiceNumber
+            "refInvoiceNumber": self.refInvoiceNumber,
+            "status": self.status
         }   
         e = []
         for entry in self.entries:
