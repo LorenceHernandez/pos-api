@@ -30,6 +30,6 @@ class JournalEntry:
             "description": self.description,
             "entries": self.entries,
             "status": self.status, 
-            "total": self.total
+            "total": self.total,
             "accounting": self.accounting
         }
