@@ -10,8 +10,10 @@ from app.cas_app.models.new_models.PurchaseInvoice import PurchaseInvoice
 from app.cas_app.models.new_models.SalesInvoice import SalesInvoice
 from app.cas_app.models.Payment import Payment
 from app.cas_app.models.Receipt import Receipt
+from app.cas_app.models.JournalEntry import JournalEntry
+
 from app.database.config import (accountstype, chart_of_accounts, payments,
-                                 purchase_invoices, receipts, sales_invoices)
+                                 purchase_invoices, receipts, sales_invoices, journal_entries)
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
 from app.utils.filter_values import filterValues
@@ -53,7 +55,7 @@ def get_trial_balance(user_id):
             })
         
 
-        merged_sources = toArray(receipts.find(), 'totalAmountPaid') + toArray(payments.find(), 'totalAmountPaid')  + toArray(sales_invoices.find(), 'total')  + toArray(purchase_invoices.find(), 'totalAmount') 
+        merged_sources = toArray(receipts.find(), 'totalAmountPaid') + toArray(payments.find(), 'totalAmountPaid')  + toArray(sales_invoices.find(), 'total')  + toArray(purchase_invoices.find(), 'totalAmount') + toArray(journal_entries.find(), 'total')
         
         for data in merged_sources:
             accounting = data['accounting']
@@ -100,7 +102,7 @@ def get_balance_sheet(user_id):
                         'credit': 0
                     })
         
-        merged_sources = toArray(receipts.find(), 'totalAmountPaid') + toArray(payments.find(), 'totalAmountPaid')  + toArray(sales_invoices.find(), 'total')  + toArray(purchase_invoices.find(), 'totalAmount') 
+        merged_sources = toArray(receipts.find(), 'totalAmountPaid') + toArray(payments.find(), 'totalAmountPaid')  + toArray(sales_invoices.find(), 'total')  + toArray(purchase_invoices.find(), 'totalAmount') + toArray(journal_entries.find(), 'total')
         
         for data in merged_sources:
             accounting = data['accounting']
@@ -148,7 +150,7 @@ def get_profit_loss(user_id):
                         'credit': 0
                     })
         
-        merged_sources = toArray(receipts.find(), 'totalAmountPaid') + toArray(payments.find(), 'totalAmountPaid')  + toArray(sales_invoices.find(), 'total')  + toArray(purchase_invoices.find(), 'totalAmount') 
+        merged_sources = toArray(receipts.find(), 'totalAmountPaid') + toArray(payments.find(), 'totalAmountPaid')  + toArray(sales_invoices.find(), 'total')  + toArray(purchase_invoices.find(), 'totalAmount') + toArray(journal_entries.find(), 'total')
         
         for data in merged_sources:
             accounting = data['accounting']

@@ -9,6 +9,7 @@ class JournalEntry:
     entries = []
     total = None
     status = None
+    accounting = []
     @staticmethod
     def fromDict(data: dict):
         item = JournalEntry()
@@ -19,6 +20,7 @@ class JournalEntry:
         item.entries = data.get('entries')
         item.status = data.get("status")
         item.total = data.get("total")
+        item.accounting = data.get("accounting")
         return item
     
     def toDict(self):
@@ -29,4 +31,5 @@ class JournalEntry:
             "entries": self.entries,
             "status": self.status, 
             "total": self.total
+            "accounting": self.accounting
         }
