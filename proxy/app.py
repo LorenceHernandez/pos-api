@@ -65,6 +65,11 @@ def proxy(path):
         return resp
     except requests.exceptions.RequestException as e:
         return f"Error proxying request: {e}", 500
+    
+@app.route('/check-connection', methods=['GET'])
+def check_connection():
+    connection = is_internet_connected()
+    return { 'is_connected': connection }
 
 @app.post('/print')
 def print_text():
