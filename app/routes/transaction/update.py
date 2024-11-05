@@ -1,15 +1,18 @@
 
 
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 from pydash import omit
 
 from app.database.config import (doctors, product_categories, products, transactions)
 from app.database.store import insert_one
 from app.models.Transaction import Transaction
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 from app.utils.filter_values import filterValues
 from app.utils.utils import ToStringId, getLocalDateStr, getLocalTimeStr
 
+logger = AuditLogRepository()
 update_transaction = Blueprint("/transaction/edit", __name__)
 
 @update_transaction.route('/transaction/edit', methods=['POST'])
@@ -105,18 +108,31 @@ def _update_transaction():
             'date': getLocalDateStr(),
             'created_at': getLocalTimeStr(),
          })   
+         
          if sale.inserted_id is None:
+            logger.insert_one(AuditLog(action=AuditCode.TRANSACTION_CREATE_ERR_SALES, userId=g.user_id, data=update_transaction, error='Unable to create sale'))
+
             return {
                'message': 'Unable to create sale',
                'code': 16
             }, 500
          
+         logger.insert_one(AuditLog(action=AuditCode.TRANSACTION_CREATE, userId=g.user_id, data=update_transaction))
       return {
          'message': 'Transaction update success',
          'code': 18,
          'data': ToStringId(updated_trans)
       }, 200
    else:
+
+      logger.insert_one(
+         AuditLog(
+            action=AuditCode.TRANSACTION_CREATE_ERR, 
+            userId=g.user_id,
+            data=update_transaction,
+            error='Unable to update transaction'
+         )
+      )
       return {
          'message': 'Unable to update transaction',
          'code': 16

@@ -81,7 +81,7 @@ class BackupRepository(Repository):
                     return result
                 except Exception as e:
                     session.abort_transaction()
-                    raise Exception(f"MongoDB insert_one error: {e}")
+                    raise Exception(e)
                 
 
     def backup_one(self, data):

@@ -10,8 +10,10 @@ from pydash import omit
 from app.config import JWT_SECRET_KEY
 from app.database.config import roles, users, branches
 from app.models.Branch import Branch
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 
-
+logger = AuditLogRepository()
 login = Blueprint("login", __name__)
 
 @login.route('/login', methods=['POST'])
@@ -51,7 +53,9 @@ def _authenticate():
     for branch_id in user[0]['branches']:
       branch = branches.find_one({"_id": ObjectId(branch_id) })
       branch_list.append({ **omit(branch, '_id'), "id": str(branch["_id"]) })
-            
+
+    logger.insert_one(AuditLog(action=AuditCode.USER_LOGIN, userId=str(user[0]['_id'])))
+
     return {
       'token': token,
       'data': {
@@ -64,11 +68,27 @@ def _authenticate():
       }
     }, 200
    else: 
+
+    logger.insert_one(
+      AuditLog(
+        action=AuditCode.USER_LOGIN_ERR_INCORRECT_CRED,  
+        userId=str(user[0]['_id']),
+        message='Wrong entered password'
+      )
+    )
     return {
       'message': 'wrong username or password',
       'code': 11
     }, 200
  else: 
+    logger.insert_one(
+      AuditLog(
+        action=AuditCode.USER_LOGIN_ERR_NOT_EXIST, 
+        ipaddress=request.remote_addr, 
+        userId='',
+        message="User not found"
+      )
+    )
     return {
       'message': 'wrong username or password',
       'code': 11

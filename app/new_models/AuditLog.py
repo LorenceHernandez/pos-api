@@ -1,0 +1,36 @@
+from enum import IntEnum
+
+from pydantic import BaseModel, Field
+
+from app.utils.utils import getLocalTimeStr
+
+
+class AuditCode(IntEnum):
+    USER_LOGIN = 1001
+    USER_LOGOUT = 1002
+    USER_CREATE = 1003
+    USER_UPDATE = 1004
+    USER_UPDATE_ERR = 1104
+    USER_LOGIN_ERR_NOT_EXIST = 1101
+    USER_LOGIN_ERR_INCORRECT_CRED = 1201
+    ROLE_CREATE = 2001
+    ROLE_CREATE_ERR = 2101
+    ROLE_UPDATE = 2002
+    ROLE_UPDATE_ERR = 2102
+    TRANSACTION_CREATE = 3001
+    TRANSACTION_CREATE_ERR = 3101
+    TRANSACTION_CREATE_ERR_SALES = 3201
+    CASHIER_REPORT_TIME_IN = 4001
+    CASHIER_REPORT_TIME_IN_ERR = 4101
+    CASHIER_REPORT_TIME_OUT = 5001
+    CASHIER_REPORT_TIME_OUT_ERR = 5101
+    
+
+class AuditLog(BaseModel):
+    action: AuditCode
+    data: object = None
+    message: str = None
+    error: str = None
+    userId: str
+    ipaddress: str = None
+    datetime: str = Field(default_factory=getLocalTimeStr)

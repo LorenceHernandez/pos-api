@@ -2,17 +2,21 @@
 
 
 from bson import ObjectId
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request,g 
 
 from app.filters.date_filter import DateFilter
 from app.middlewares.authorized_attribute import authorized
+from app.new_models.AuditLog import AuditCode, AuditLog
 from app.new_models.CashierReport import TimeInCashierReport, TimeOutCashierReport
+from app.repositories.audit_log import AuditLogRepository
 from app.repositories.cashier_report import CashierReportRepository
 from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 api = '/v2/cashier-reports'
 cashier_report_bp = Blueprint('cashier-reports', __name__)
 repository = CashierReportRepository()
+logger = AuditLogRepository()
+
 
 @cashier_report_bp.route(api)
 @authorized
@@ -61,8 +65,10 @@ def time_in_report(user_id):
     result = repository.insert_one(report.model_dump())
 
     if result is not None:
+        logger.insert_one(AuditLog(action=AuditCode.CASHIER_REPORT_TIME_IN, userId=g.user_id, data=report.model_dump()))
         return jsonify({'message': 'Report created successfully'})
     else:
+        logger.insert_one(AuditLog(action=AuditCode.CASHIER_REPORT_TIME_IN_ERR, userId=g.user_id, error='Unable to time in report'))
         return jsonify({'error': 'Unable to create report'}), 500
 
 @cashier_report_bp.post(api + '/time-out')
@@ -82,8 +88,12 @@ def time_out_report(_):
     updated_value = repository.find_one(query)
 
     if result is not None:
+        logger.insert_one(AuditLog(action=AuditCode.CASHIER_REPORT_TIME_OUT, userId=g.user_id, data=report.model_dump()))
+
         return jsonify({'message': 'Report updated successfully', 'data': updated_value })
     else:
+        logger.insert_one(AuditLog(action=AuditCode.CASHIER_REPORT_TIME_OUT_ERR, userId=g.user_id, data=report.model_dump(), error='Unable to time out report'))
+
         return jsonify({'error': 'Unable to update report'}), 500
     
 

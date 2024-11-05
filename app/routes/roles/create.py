@@ -9,9 +9,12 @@ from flask import Blueprint, g, request
 
 from app.database.config import roles
 from app.database.store import insert_one
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 from app.utils.utils import getLocalTime
 
 create_role = Blueprint("/role/create", __name__)
+logger = AuditLogRepository()
 
 
 @create_role.route('/role/create', methods=['POST'])
@@ -30,13 +33,18 @@ def _create_role():
    })
    
    if doc.inserted_id:
+      logger.insert_one(AuditLog(action=AuditCode.ROLE_CREATE, userId=g.user_id))
+
       return {
          'message': 'Role successfully created',
          'code': 15,
       }, 200
    else:
+      message = 'Unable to add role'
+      logger.insert_one(AuditLog(action=AuditCode.ROLE_CREATE_ERR, userId=g.user_id, error=message))
+
       return {
-         'message': 'Unable to add role.',
+         'message': message,
          'code': 30,
       }, 200
 

@@ -1,10 +1,14 @@
 
 from bson.objectid import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from app.database.config import users
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 
 update_user = Blueprint("/user/edit", __name__)
+logger = AuditLogRepository()
+
 
 @update_user.route('/user/edit', methods=['POST'])
 def _update_user():
@@ -42,13 +46,18 @@ def _update_user():
 
    res = users.update_one(filter, new_val)
    if res.modified_count > 0:
+      logger.insert_one(AuditLog(action=AuditCode.USER_UPDATE, userId=g.user_id, data={**update_val, 'id': id}))
+
       return {
          'message': 'user update success',
          'code': 6
       }, 200
    else:
+      message = 'Unable to update user'
+      logger.insert_one(AuditLog(action=AuditCode.USER_UPDATE_ERR, userId=g.user_id, error=message, data={**update_val, 'id': id}))
+      
       return {
-         'message': 'unable to update user',
+         'message': message,
          'code': 16
       }
 
