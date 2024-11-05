@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
+from app.blueprints.audit_log import audit_log_bp
 from app.blueprints.cashier_report import cashier_report_bp
 from app.blueprints.transaction import transaction_bp
 from app.cas_app.blueprints.accounts_group import accounts_group_bp
@@ -120,6 +121,7 @@ app.register_blueprint(item_bp)
 app.register_blueprint(inventory_bp)
 app.register_blueprint(category_bp)
 app.register_blueprint(supplier_bp)
+app.register_blueprint(audit_log_bp)
 app.register_blueprint(purchase_order_bp)
 app.register_blueprint(goods_receipt_bp)
 app.register_blueprint(payment_bp)
