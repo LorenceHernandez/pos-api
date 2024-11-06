@@ -5,12 +5,16 @@ from datetime import datetime
 import bcrypt
 import jwt
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from app.database.config import packages
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 from app.utils.utils import getLocalTime
 
 update_package = Blueprint("/package/edit", __name__)
+logger = AuditLogRepository()
+
 
 @update_package.route('/package/edit', methods=['POST'])
 def _update_package():
@@ -61,6 +65,8 @@ def _update_package():
    print(new_val)
    res = packages.update_one(filter, new_val)
    if res.modified_count > 0:
+      logger.insert_one(AuditLog(action=AuditCode.PACKAGE_UPDATE, userId=g.user_id, data=request_data))
+
       return {
          'message': 'Package update success',
          'code': 18

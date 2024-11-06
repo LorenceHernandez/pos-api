@@ -10,9 +10,13 @@ from flask import Blueprint, g, request
 
 from app.database.config import customers
 from app.database.store import insert_one
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 from app.utils.utils import getLocalTime
 
 create_customer = Blueprint("/customer/create", __name__)
+logger = AuditLogRepository()
+
 
 @create_customer.route('/customer/create', methods=['POST'])
 def _create_customer():
@@ -66,6 +70,8 @@ def _create_customer():
    })
    
    if doc.inserted_id:
+      logger.insert_one(AuditLog(action=AuditCode.CUSTOMER_CREATE, userId=g.user_id, data=request_data))
+
       return {
          'message': 'Customer successfully created',
          'code': 15,

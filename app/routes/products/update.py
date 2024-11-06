@@ -5,11 +5,15 @@ from datetime import datetime
 import bcrypt
 import jwt
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from app.database.config import products
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 
 update_product = Blueprint("/product/edit", __name__)
+logger = AuditLogRepository()
+
 
 @update_product.route('/product/edit', methods=['POST'])
 def _update_product():
@@ -54,6 +58,8 @@ def _update_product():
    print(new_val)
    res = products.update_one(filter, new_val)
    if res.modified_count > 0:
+      logger.insert_one(AuditLog(action=AuditCode.LABTEST_UPDATE, userId=g.user_id, data=request_data))
+
       return {
          'message': 'product update success',
          'code': 18

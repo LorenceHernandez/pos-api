@@ -5,11 +5,15 @@ from datetime import datetime
 import bcrypt
 import jwt
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from app.database.config import customers
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 
 update_customer = Blueprint("/customer/edit", __name__)
+logger = AuditLogRepository()
+
 
 @update_customer.route('/customer/edit', methods=['POST'])
 def _update_customer():
@@ -62,6 +66,8 @@ def _update_customer():
    print(new_val)
    res = customers.update_one(filter, new_val)
    if res.modified_count > 0:
+      logger.insert_one(AuditLog(action=AuditCode.CUSTOMER_UPDATE, userId=g.user_id, data=request_data))
+
       return {
          'message': 'Customer update success',
          'code': 18

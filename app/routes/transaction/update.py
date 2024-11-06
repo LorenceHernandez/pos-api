@@ -69,29 +69,29 @@ def _update_transaction():
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
          name = []
 
-         for service in services: 
-            if service['source'] == "package": 
-               for item in service['labTest']:
-                  name.append(item['name'])
-                  product_filter = { '_id': ObjectId(item['_id'])  }
-                  product_new_val = { "$inc": { 'transaction_count': 1 } }
-                  res = products.update_one(product_filter, product_new_val)
-            else:
-               name.append(service['name'])  
-               product_filter = { '_id': ObjectId(service['_id'])  }
-               product_new_val = { "$inc": { 'transaction_count': 1 } }
-               res = products.update_one(product_filter, product_new_val)
+         # for service in services: 
+         #    if service['source'] == "package": 
+         #       for item in service['labTest']:
+         #          name.append(item['name'])
+         #          product_filter = { '_id': ObjectId(item['_id'])  }
+         #          product_new_val = { "$inc": { 'transaction_count': 1 } }
+         #          res = products.update_one(product_filter, product_new_val)
+         #    else:
+         #       name.append(service['name'])  
+         #       product_filter = { '_id': ObjectId(service['_id'])  }
+         #       product_new_val = { "$inc": { 'transaction_count': 1 } }
+         #       res = products.update_one(product_filter, product_new_val)
 
-         for service in services:
-            if service['source'] == "package":  
-                  for category in _categories:  
-                     if category['name'].lower() == 'package':
-                        for item in service['items']:
-                           category['price'] +=  item['amount']
-            else:
-                  for category in _categories:
-                     if category['id'] == service['category']['id']:
-                        category['price'] += service['amount']
+         # for service in services:
+         #    if service['source'] == "package":  
+         #          for category in _categories:  
+         #             if category['name'].lower() == 'package':
+         #                for item in service['items']:
+         #                   category['price'] +=  item['amount']
+         #    else:
+         #          for category in _categories:
+         #             if category['id'] == service['category']['id']:
+         #                category['price'] += service['amount']
 
          sale = insert_one('sales', {
             'customerData': updated_trans.get('customerData'),
@@ -110,14 +110,14 @@ def _update_transaction():
          })   
          
          if sale.inserted_id is None:
-            logger.insert_one(AuditLog(action=AuditCode.TRANSACTION_CREATE_ERR_SALES, userId=g.user_id, data=update_transaction, error='Unable to create sale'))
+            logger.insert_one(AuditLog(action=AuditCode.TRANSACTION_CREATE_ERR_SALES, userId=g.user_id, data=updated_trans, error='Unable to create sale'))
 
             return {
                'message': 'Unable to create sale',
                'code': 16
             }, 500
          
-         logger.insert_one(AuditLog(action=AuditCode.TRANSACTION_CREATE, userId=g.user_id, data=update_transaction))
+         logger.insert_one(AuditLog(action=AuditCode.TRANSACTION_CREATE, userId=g.user_id, data=updated_trans))
       return {
          'message': 'Transaction update success',
          'code': 18,
@@ -129,7 +129,6 @@ def _update_transaction():
          AuditLog(
             action=AuditCode.TRANSACTION_CREATE_ERR, 
             userId=g.user_id,
-            data=update_transaction,
             error='Unable to update transaction'
          )
       )

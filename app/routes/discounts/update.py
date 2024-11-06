@@ -5,11 +5,15 @@ from datetime import datetime
 import bcrypt
 import jwt
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from app.database.config import discounts
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 
 update_discount = Blueprint("/discount/edit", __name__)
+logger = AuditLogRepository()
+
 
 @update_discount.route('/discount/edit', methods=['POST'])
 def _update_discount():
@@ -47,6 +51,8 @@ def _update_discount():
    print(new_val)
    res = discounts.update_one(filter, new_val)
    if res.modified_count > 0:
+      logger.insert_one(AuditLog(action=AuditCode.DISCOUNT_UPDATE, userId=g.user_id, data=request_data))
+
       return {
          'message': 'Discount update success',
          'code': 18

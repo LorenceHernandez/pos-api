@@ -5,11 +5,15 @@ from datetime import datetime
 import bcrypt
 import jwt
 from bson import ObjectId
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
 from app.database.config import doctors
+from app.new_models.AuditLog import AuditCode, AuditLog
+from app.repositories.audit_log import AuditLogRepository
 
 update_doctor = Blueprint("/doctor/edit", __name__)
+logger = AuditLogRepository()
+
 
 @update_doctor.route('/doctor/edit', methods=['POST'])
 def _update_doctor():
@@ -53,6 +57,8 @@ def _update_doctor():
    print(new_val)
    res = doctors.update_one(filter, new_val)
    if res.modified_count > 0:
+      logger.insert_one(AuditLog(action=AuditCode.DOCTOR_UPDATE, userId=g.user_id, data=request_data))
+
       return {
          'message': 'Doctor update success',
          'code': 18
