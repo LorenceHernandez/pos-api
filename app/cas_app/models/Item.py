@@ -12,7 +12,8 @@ class Item:
     criticalLevel = None
     supplierId = None
     purchasePrice = None
-    
+    chartAccountId = None
+    chartAccountName = None
     @staticmethod
     def fromDict(data: dict):
         item = Item()
@@ -26,7 +27,8 @@ class Item:
         item.criticalLevel = data.get('criticalLevel')
         item.supplierId = data.get('supplierId')
         item.purchasePrice = data.get('purchasePrice')
-    
+        item.chartAccountId = data.get('chartAccountId') or None
+        item.chartAccountName = data.get('chartAccountName') or None
         return item
     
     def toDict(self):
@@ -40,4 +42,6 @@ class Item:
             "criticalLevel": self.criticalLevel,
             "supplierId": self.supplierId,
             "purchasePrice": self.purchasePrice,
+            "chartAccountId": self.chartAccountId or None,
+            "chartAccountName": self.chartAccountName or None
         }
