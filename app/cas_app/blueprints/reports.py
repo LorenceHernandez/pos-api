@@ -72,6 +72,7 @@ def get_trial_balance(user_id):
         return {'data': ret }
 
     except Exception as e:
+        print(e)
         return {'message': repr(e) }, 500
 
 
