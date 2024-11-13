@@ -71,9 +71,11 @@ def get_trial_balance(user_id):
                             if chart_of_account_data['_id'] == code_debit:
                                 chart_of_account_data['debit'] += totalAmountPaid
                         except: 
+                            print('source of error', data)
                             print('test', chart_of_account_data)
                             
                 except:
+                    print('source of error', data)
                     print('except', accounting_item)
 
         return {'data': ret }
