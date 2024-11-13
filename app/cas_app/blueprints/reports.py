@@ -61,14 +61,20 @@ def get_trial_balance(user_id):
             accounting = data['accounting']
             totalAmountPaid = data['totalAmountPaid']
             for accounting_item in accounting:
-                print(accounting_item)
-                code_credit = accounting_item[account_code_credit]
-                code_debit = accounting_item[account_code_debit]
-                for chart_of_account_data in ret:
-                    if chart_of_account_data['_id'] == code_credit:
-                        chart_of_account_data['credit'] += totalAmountPaid
-                    if chart_of_account_data['_id'] == code_debit:
-                        chart_of_account_data['debit'] += totalAmountPaid
+                try:
+                    code_credit = accounting_item[account_code_credit]
+                    code_debit = accounting_item[account_code_debit]
+                    for chart_of_account_data in ret:
+                        try:
+                            if chart_of_account_data['_id'] == code_credit:
+                                chart_of_account_data['credit'] += totalAmountPaid
+                            if chart_of_account_data['_id'] == code_debit:
+                                chart_of_account_data['debit'] += totalAmountPaid
+                        except: 
+                            print('test', chart_of_account_data)
+                            
+                except:
+                    print('except', accounting_item)
 
         return {'data': ret }
 
