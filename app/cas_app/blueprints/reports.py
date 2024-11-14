@@ -61,6 +61,7 @@ def get_trial_balance(user_id):
             accounting = data['accounting']
             totalAmountPaid = data['totalAmountPaid']
             for accounting_item in accounting:
+                print(accounting_item)
                 try:
                     code_credit = accounting_item[account_code_credit]
                     code_debit = accounting_item[account_code_debit]
