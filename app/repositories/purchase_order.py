@@ -13,22 +13,46 @@ class PurchaseOrderRepository(Repository):
                 {
                     '$addFields': {
                         '_id': {'$toString': '$_id' },
+                        'new_items': {
+                            "$map": {
+                                "input": "$items",
+                                "as": "item",
+                                "in": {
+                                    "$lookup": {
+                                        "from": "goods_receipt_items",
+                                        "let": {
+                                            "itemId": "$item.itemId",
+                                            "purchaseOrderId": "$item.purchaseOrderId",
+                                        },
+                                        "as": "receipts"
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
-                { 
+                {
                     '$lookup': {
-                        'from': 'purchase_order_items',
+                        'from': 'goods_receipt',
                         'localField': '_id',
                         'foreignField': 'purchaseOrderId',
-                        'as': 'items'
+                        'as': 'goods_receipt_logs',
+                        'pipeline': [
+                            {
+                                '$addFields': {
+                                    '_id': {'$toString': '$_id' },
+                                }
+                            },
+                        ]
                     }, 
                 },
                 { '$sort': {"_id":-1} },
                 *args,
             ]))
+            print(data)
             items = []
             for order in data:
-                order['items'] = list(map(lambda i: { **i, '_id': str(i['_id']) }, order['items']))
+                # order['items'] = list(map(lambda i: { **i, '_id': str(i['_id']) }, order['items']))
                 items.append(order)
             return items
         except Exception as e:

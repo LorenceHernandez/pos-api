@@ -1,17 +1,22 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+from pydantic import ValidationError
 from pydash import merge, omit
+from pymongo import ReturnDocument
 
 from app.cas_app.models.AccountsGroup import AccountsGroup
 from app.cas_app.models.AccountsType import AccountsType
 from app.cas_app.models.ChartAccount import ChartAccount
+from app.cas_app.models.new_models.ChartAccount import EditChartAccount
 from app.database.config import accountsgroup, accountstype, chart_of_accounts
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
+from app.repositories.chart_account import ChartAccountRepository
 from app.utils.filter_values import filterValues
 
 api = '/api/cas/chart-of-account'
 chart_of_accounts_bp = Blueprint('chart_of_accounts', __name__)
+repository = ChartAccountRepository()
 
 @chart_of_accounts_bp.get(api + 's')
 @authorized
@@ -70,7 +75,24 @@ def create_chart_of_account(user_id):
         return {'message': repr(e)}, 500
     
 
-    
+@chart_of_accounts_bp.post(api + '/<id>/edit')
+@authorized
+def edit_chart_account(user_id, id):
+  request_data = request.get_json()
+  try:
+    model = EditChartAccount(**request_data)
+
+    document = repository.update_one(
+      { '_id': ObjectId(id) },
+      { '$set': model.model_dump() },
+    )
+
+    return { 'message': 'Edit chart account successfully.', 'data': document }
+  except ValidationError as e:
+      return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
+  except Exception as e:
+      return jsonify({'message': 'Unable to edit chart account', 'error': repr(e)}), 500
+
 # @accounts_type_bp.post(api + '/edit')
 # @authorized
 # def edit_category(user_id):

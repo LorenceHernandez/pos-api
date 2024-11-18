@@ -2,7 +2,7 @@ from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from pydash import omit
 
-from app.cas_app.models.new_models.SalesInvoice import SalesInvoice
+from app.cas_app.models.SalesInvoice import SalesInvoice
 from app.database.config import sales_invoices
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized

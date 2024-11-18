@@ -1,15 +1,19 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+from pydantic import ValidationError
 from pydash import omit
 
 from app.cas_app.models.AccountsGroup import AccountsGroup
+from app.cas_app.models.new_models.AccountGroup import EditAccountGroup
 from app.database.config import accountsgroup
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
+from app.repositories.account_group import AccountGroupRepository
 from app.utils.filter_values import filterValues
 
 api = '/api/cas/accountsgroup'
 accounts_group_bp = Blueprint('accountsgroup', __name__)
+repository = AccountGroupRepository()
 
 @accounts_group_bp.get(api + 's')
 @authorized
@@ -57,6 +61,24 @@ def create_accounts_group(user_id):
         return {'message': repr(e)}, 500
     
 
+@accounts_group_bp.post(api + '/<id>/edit')
+@authorized
+def edit_account_group(user_id, id):
+  request_data = request.get_json()
+  try:
+    model = EditAccountGroup(**request_data)
+
+    document = repository.update_one(
+      { '_id': ObjectId(id) },
+      { '$set': model.model_dump() },
+    )
+
+    return { 'message': 'Edit account group successfully.', 'data': document }
+  except ValidationError as e:
+      return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
+  except Exception as e:
+      return jsonify({'message': 'Unable to edit account group', 'error': repr(e)}), 500
+    
     
 # @accounts_group_bp.post(api + '/edit')
 # @authorized

@@ -1,15 +1,19 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+from pydantic import ValidationError
 from pydash import omit
 
 from app.cas_app.models.AccountsType import AccountsType
+from app.cas_app.models.new_models.AccountType import EditAccountType
 from app.database.config import accountstype
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
+from app.repositories.account_type import AccountTypeRepository
 from app.utils.filter_values import filterValues
 
 api = '/api/cas/accountstype'
 accounts_type_bp = Blueprint('accountstype', __name__)
+repository = AccountTypeRepository()
 
 @accounts_type_bp.get(api + 's')
 @authorized
@@ -57,6 +61,23 @@ def create_accounts_type(user_id):
         return {'message': repr(e)}, 500
     
 
+@accounts_type_bp.post(api + '/<id>/edit')
+@authorized
+def edit_account_type(user_id, id):
+  request_data = request.get_json()
+  try:
+    model = EditAccountType(**request_data)
+
+    document = repository.update_one(
+      { '_id': ObjectId(id) },
+      { '$set': model.model_dump() },
+    )
+
+    return { 'message': 'Edit account type successfully.', 'data': document }
+  except ValidationError as e:
+      return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
+  except Exception as e:
+      return jsonify({'message': 'Unable to edit account type', 'error': repr(e)}), 500
     
 # @accounts_type_bp.post(api + '/edit')
 # @authorized
