@@ -21,27 +21,33 @@ repository = ChartAccountRepository()
 @chart_of_accounts_bp.get(api + 's')
 @authorized
 def get_chart_of_accounts(user_id):
-    ret = []
+    query = request.args.to_dict()
+    
     try:
-
-        data = list(chart_of_accounts.find())
-        for item in data: 
-          chartaccount = ChartAccount.fromDict(item).toDict()
-          chartaccount = omit(chartaccount, 'accountType', 'accountGroup')
-          if chartaccount.get('accountType') != 'none' and chartaccount.get('accountType') is not None and chartaccount.get('accountType') != "":
-            _accountstype = accountstype.find_one({'_id': ObjectId(chartaccount['accountType']) }) 
-            chartaccount['accountType'] = AccountsType.fromDict(_accountstype).toDict()
-            
-          if chartaccount.get('accountGroup') != 'none' and chartaccount.get('accountGroup') is not None and chartaccount.get('accountGroup') != "":
-            _accountsgroup = accountsgroup.find_one({'_id': ObjectId(chartaccount['accountGroup']) }) 
-            chartaccount['accountGroup'] = AccountsType.fromDict(_accountsgroup).toDict()
-                
-          ret.append(chartaccount)
-            
-        return {'data': ret }
-
+      items = repository.find(query)
+      return { 'data': items }
     except Exception as e:
-        return {'message': repr(e) }, 500
+        return jsonify({'message': 'Unable to get all coas', 'error': repr(e)}), 500
+    # try:
+
+    #     data = list(chart_of_accounts.find())
+    #     for item in data: 
+    #       chartaccount = ChartAccount.fromDict(item).toDict()
+    #       # chartaccount = omit(chartaccount, 'accountType', 'accountGroup')
+    #       # if chartaccount.get('accountType') != 'none' and chartaccount.get('accountType') is not None and chartaccount.get('accountType') != "":
+    #       #   _accountstype = accountstype.find_one({'_id': ObjectId(chartaccount['accountType']) }) 
+    #       #   chartaccount['accountType'] = AccountsType.fromDict(_accountstype).toDict()
+            
+    #       # if chartaccount.get('accountGroup') != 'none' and chartaccount.get('accountGroup') is not None and chartaccount.get('accountGroup') != "":
+    #       #   _accountsgroup = accountsgroup.find_one({'_id': ObjectId(chartaccount['accountGroup']) }) 
+    #       #   chartaccount['accountGroup'] = AccountsType.fromDict(_accountsgroup).toDict()
+                
+    #       ret.append(chartaccount)
+            
+    #     return {'data': ret }
+
+    # except Exception as e:
+    #     return {'message': repr(e) }, 500
 
     
 # @accounts_type_bp.get(api + '/<id>')
