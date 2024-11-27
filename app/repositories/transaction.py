@@ -2,6 +2,7 @@
 
 
 from bson import ObjectId
+from app.new_models.Transaction import CreateTransaction, Transaction
 from app.repositories.base import BackupRepository
 from app.utils.invoice_setting import generate_invoice_str
 from app.database.config import counters
@@ -9,7 +10,7 @@ from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 
 class TransactionRepository(BackupRepository):
-    _collection = 'transactions'
+    _collection = 'new_transactions'
 
     def find(self, query={}, *args):
         try: 
@@ -18,9 +19,10 @@ class TransactionRepository(BackupRepository):
                 {
                     '$addFields': {
                         'cashierId': {'$toObjectId': '$cashierId' },
+                        'customerId': {'$toObjectId': '$customerId' },
                         'branchId': {'$toObjectId': '$branchId' },
-                        'referredBy': {'$toObjectId': '$referredBy' },
-                        'requestedBy': {'$toObjectId': '$requestedBy' },
+                        'referredById': {'$toObjectId': '$referredById' },
+                        'requestedById': {'$toObjectId': '$requestedById' },
                     }
                 },
                 { 
@@ -29,6 +31,14 @@ class TransactionRepository(BackupRepository):
                         'localField': 'cashierId',
                         'foreignField': '_id',
                         'as': 'cashier'
+                    }, 
+                },
+                { 
+                    '$lookup': {
+                        'from': 'customers',
+                        'localField': 'customerId',
+                        'foreignField': '_id',
+                        'as': 'customer'
                     }, 
                 },
                 { 
@@ -42,7 +52,7 @@ class TransactionRepository(BackupRepository):
                 { 
                     '$lookup': {
                         'from': 'doctors',
-                        'localField': 'referredBy',
+                        'localField': 'referredById',
                         'foreignField': '_id',
                         'as': 'referredBy'
                     }, 
@@ -50,12 +60,13 @@ class TransactionRepository(BackupRepository):
                 { 
                     '$lookup': {
                         'from': 'doctors',
-                        'localField': 'requestedBy',
+                        'localField': 'requestedById',
                         'foreignField': '_id',
                         'as': 'requestedBy'
                     }, 
                 },
                 { "$unwind": "$cashier" },
+                { "$unwind": "$customer" },
                 { "$unwind": "$branch" },
                 { "$unwind": {
                     'path': "$referredBy",
@@ -71,6 +82,7 @@ class TransactionRepository(BackupRepository):
                     '$addFields': {
                         '_id': {'$toString': '$_id' },
                         "cashier._id": { "$toString": "$cashier._id" },
+                        "customer._id": { "$toString": "$customer._id" },
                         "branch._id": { "$toString": "$branch._id" },
                         'referredBy._id': {'$toString': '$referredBy._id' },
                         'requestedBy._id': {'$toString': '$requestedBy._id' },
@@ -80,6 +92,9 @@ class TransactionRepository(BackupRepository):
                     '$project': {
                         'cashierId': 0,
                         'branchId': 0,
+                        'referredById': 0,
+                        'requestedById': 0,
+                        'customerId': 0,
                         'cashier': {
                             'password': 0,
                         }
@@ -94,8 +109,7 @@ class TransactionRepository(BackupRepository):
                 
                 if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
                     item['requestedBy'] = None
-
-                transactions.append(item)
+                transactions.append(Transaction(**item).model_dump(by_alias=True))
             return transactions
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")
@@ -108,8 +122,10 @@ class TransactionRepository(BackupRepository):
            "date": getLocalDateStr(),
         })
 
-    def insert_one(self, data):
-        data['invoiceNumber'] = self._get_next_sequence('invoice')
+    def insert_one(self, data: CreateTransaction):
+        data.invoiceNumber = self._get_next_sequence('invoice')
+        data = data.model_dump(by_alias=True)
         result = super().insert_one(data)
-
-        return self.find_one({ "_id": result.inserted_id })
+        result = self.find_one({ "_id": result.inserted_id })
+        return result
+        # return Transaction(**data).model_dump(by_alias=True)

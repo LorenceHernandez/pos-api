@@ -5,8 +5,10 @@ from pydantic import ValidationError
 
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.middlewares.authorized_attribute import authorized
-from app.new_models.Transaction import CreateTransaction
+# from app.new_models.Transaction import CreateTransaction
+from app.new_models.Transaction import CreateTransaction, Transaction
 from app.repositories.transaction import TransactionRepository
+from app.services.Transaction import TransactionService
 from app.utils.utils import getTimeZone
 
 api = '/v2/transactions'
@@ -89,4 +91,29 @@ def get_active_transaction(user_id):
     except Exception as e:
         return jsonify({'message': 'Unable to get active transaction', 'error': repr(e)}), 500
 
-   
+@transaction_bp.get(api + '/<id>/print')
+@authorized
+def print_transaction(user_id, id):
+    service = TransactionService()
+
+    try:
+        data = repository.find_one({ '_id': ObjectId(id) })
+        service.print(data)
+        return jsonify({'message': 'Transaction printed successfully'})
+    except Exception as e:
+        return jsonify({'message': 'Unable to get transaction', 'error': repr(e)}), 500
+
+
+@transaction_bp.post('/v3/transactions')
+@authorized
+def v3_create_transaction(user_id):
+    try:
+        request_data = request.get_json()
+        # return Transaction(**request_data).model_dump(by_alias=True)
+        result = repository.insert_one(CreateTransaction(**request_data, cashierId=user_id))
+        return jsonify({'message': 'Transaction created successfully', 'data': result })
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
+    except Exception as e:
+        return jsonify({'message': 'Unable to create transaction', 'error': repr(e)}), 500
+

@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class PackageType(str, Enum):
-    PACKAGE = "PACKAGE"
-    PROMO = "PROMO"
+    PACKAGE = "package"
+    PROMO = "promo"
 
 
 class Package(BaseModel):
@@ -14,4 +14,3 @@ class Package(BaseModel):
     name: str
     description: str = None
     type: PackageType = PackageType.PACKAGE
-    forMemberType: str = None

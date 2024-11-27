@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from enum import Enum
 from itertools import groupby
 from typing import List, Optional
@@ -11,14 +12,14 @@ from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 
 class TransactionPackage(Package):
-    discount: TransactionDiscount = None
+    discount: Optional[TransactionDiscount] = None
 
 class TenderType(str, Enum):
-    CASH = "CASH"
-    CHEQUE = "CHEQUE"
+    CASH = "cash"
+    CHEQUE = "cheque"
 
 class TransactionItem(Labtest):
-    package: TransactionPackage = None
+    package: Optional[TransactionPackage] = None
 
     # @computed_field
     # @property
@@ -31,8 +32,8 @@ class CreateTransaction(BaseModel):
     branchId: str
     customerId: str
     cashierId: str
-    referredById: str = None
-    requestedById: str = None
+    referredById: Optional[str] = None
+    requestedById: Optional[str] = None
     date: str = Field(default_factory=getLocalDateStr)
     transactionDate: str = Field(default_factory=getLocalTimeStr)
     transactionNo: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -42,7 +43,20 @@ class CreateTransaction(BaseModel):
     tenderAmount: float
     invoiceNumber: int = None
 
-class Transaction(CreateTransaction):
+class Transaction(BaseModel):
+    branch: Optional[object]
+    customer: Optional[object]
+    cashier: Optional[object]
+    referredBy: Optional[object]
+    requestedBy: Optional[object]
+    date: str
+    transactionDate: str
+    transactionNo: str
+    transactionItems: List[TransactionItem]
+    discounts: List[TransactionDiscount] = None
+    tenderType: TenderType
+    tenderAmount: float
+    invoiceNumber: int
     # branchId: str
     # customerId: str
     # referredById: str = None
@@ -58,13 +72,13 @@ class Transaction(CreateTransaction):
     @computed_field
     @property
     def totalGrossSales(self) -> float:
-        return self.sum(self.getItemPrices(self.transactionItems))
+        return self._sum(self._getItemPrices(self.transactionItems))
 
     @computed_field
     @property
     def totalNetSales(self) -> float:
-        totalSales = self.computeTotalSales()
-        totalDiscount = self.computeTotalMemberDiscount(totalSales)
+        totalSales = self._computeTotalSales()
+        totalDiscount = self._computeTotalMemberDiscount(totalSales)
         totalNetSales = totalSales - totalDiscount
         return totalNetSales    
 
@@ -76,8 +90,8 @@ class Transaction(CreateTransaction):
     @computed_field
     @property
     def totalMemberDiscount(self) -> float:
-        totalSales = self.computeTotalSales()
-        totalDiscount = self.computeTotalMemberDiscount(totalSales)
+        totalSales = self._computeTotalSales()
+        totalDiscount = self._computeTotalMemberDiscount(totalSales)
         return totalDiscount
 
     @computed_field
@@ -85,73 +99,77 @@ class Transaction(CreateTransaction):
     def change(self) -> float:
         return self.tenderAmount - self.totalNetSales
     
-    def computeTotalMemberDiscount(self, totalSales) -> float:
-        discounts = self.filterDiscounts(lambda i: i.customerDiscountType == CustomerDiscountType.GOVERNMENT_BENEFICIARY)
-        totalDiscount = self.sumTotalDiscount(discounts, totalSales)
+    @property
+    def transactionDateObject(self) -> datetime:
+        return datetime.fromisoformat(self.transactionDate)
+    
+    def _computeTotalMemberDiscount(self, totalSales) -> float:
+        discounts = self._filterDiscounts(lambda i: i.customerDiscountType == CustomerDiscountType.GOVERNMENT_BENEFICIARY)
+        totalDiscount = self._sumTotalDiscount(discounts, totalSales)
         return totalDiscount
 
-    def computeTotalSales(self) -> float:
-        packageSales = self.computeTotalPackageSales()
-        promoSales = self.computeTotalPromoSales()
+    def _computeTotalSales(self) -> float:
+        packageSales = self._computeTotalPackageSales()
+        promoSales = self._computeTotalPromoSales()
         totalSales = packageSales + promoSales
         return totalSales
 
-    def computeTotalPackageSales(self) -> float:
-        items = self.filterItemsByNotType(PackageType.PROMO)
-        totalPrice =  self.sum(self.getItemPrices(items))
+    def _computeTotalPackageSales(self) -> float:
+        items = self._filterItemsByNotType(PackageType.PROMO)
+        totalPrice =  self._sum(self._getItemPrices(items))
 
-        discounts = self.filterDiscounts(lambda i: i.packageType != PackageType.PROMO and i.customerDiscountType != CustomerDiscountType.GOVERNMENT_BENEFICIARY)
-        totalDiscount = self.sumTotalDiscount(discounts, totalPrice)
+        discounts = self._filterDiscounts(lambda i: i.packageType != PackageType.PROMO and i.customerDiscountType != CustomerDiscountType.GOVERNMENT_BENEFICIARY)
+        totalDiscount = self._sumTotalDiscount(discounts, totalPrice)
         return totalPrice - totalDiscount
     
-    def computeTotalPromoSales(self) -> float:
+    def _computeTotalPromoSales(self) -> float:
         totalPromoPrice: float = 0.0
 
-        items = self.filterItems(lambda i: i.package.type == PackageType.PROMO)
+        items = self._filterItems(lambda i: i.package is not None and i.package.type == PackageType.PROMO)
         items = groupby(items, lambda i: i.package.id)
 
         for _, groupItems in items:
             groupItems = list(groupItems)
             discount = groupItems[0].package.discount
 
-            prices = self.getItemPrices(groupItems)
-            totalPrice = self.sum(prices)
+            prices = self._getItemPrices(groupItems)
+            totalPrice = self._sum(prices)
             totalPrice -= discount.calculateTotalDiscount(totalPrice)
 
             totalPromoPrice += totalPrice
             
         return totalPromoPrice
    
-    def filterItems(self, func) -> List[TransactionItem]:
+    def _filterItems(self, func) -> List[TransactionItem]:
         return list(filter(func, self.transactionItems))
 
-    def filterItemsByNotType(self, type: PackageType) -> List[TransactionItem]:
+    def _filterItemsByNotType(self, type: PackageType) -> List[TransactionItem]:
         #Filter all items that exactly unmatch with type even if item package is none
-        return self.filterItems(lambda i: i.package.type != type)
+        return self._filterItems(lambda i: i.package.type != type)
     
-    def filterItemsByPackage(self, packageId: str, type: PackageType) -> List[TransactionItem]:
+    def _filterItemsByPackage(self, packageId: str, type: PackageType) -> List[TransactionItem]:
         #Short circuit - filter all items that package is not none and match with id and type
-        return self.filterItems(lambda i: i.package != None and (i.package.id == packageId and i.package.type == type))
+        return self._filterItems(lambda i: i.package != None and (i.package.id == packageId and i.package.type == type))
 
-    def filterDiscounts(self, func) -> List[TransactionDiscount]:
+    def _filterDiscounts(self, func) -> List[TransactionDiscount]:
         if(self.discounts == None):
             return []
         return list(filter(func, self.discounts))
     
-    def getItemPrices(self, items: List[TransactionItem]):
+    def _getItemPrices(self, items: List[TransactionItem]):
         return list(map(lambda i: i.price, items))
     
-    def getDiscountValues(self, discounts: List[TransactionDiscount], sales: float):
+    def _getDiscountValues(self, discounts: List[TransactionDiscount], sales: float):
         values: List[float] = []
         for discount in discounts:
             values.append(discount.calculateTotalDiscount(sales))
         return values
     
-    def sumTotalDiscount(self, discounts: List[TransactionDiscount], sales: float):
-        discounts = self.getDiscountValues(discounts, sales)
-        return self.sum(discounts)
+    def _sumTotalDiscount(self, discounts: List[TransactionDiscount], sales: float):
+        discounts = self._getDiscountValues(discounts, sales)
+        return self._sum(discounts)
     
-    def sum(self, items):
+    def _sum(self, items):
         sum: float = 0
         for item in items:
             sum += item

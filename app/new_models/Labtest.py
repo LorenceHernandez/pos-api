@@ -9,4 +9,5 @@ class Labtest(BaseModel):
     name: str
     description: str = None
     price: float = Field(gt=1)
-    categoryId: str = None
+    quantity: int = Field(ge=1, default=1)
+    # categoryId: str = None
