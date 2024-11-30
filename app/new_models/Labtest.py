@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class Labtest(BaseModel):
     id: str = Field(alias="_id")
     name: str
-    description: str = None
+    description: Optional[str] = None
     price: float = Field(gt=1)
     quantity: int = Field(ge=1, default=1)
     # categoryId: str = None

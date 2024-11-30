@@ -111,9 +111,8 @@ class TransactionRepository(BackupRepository):
                     item['requestedBy'] = None
                 transactions.append(Transaction(**item).model_dump(by_alias=True))
             return transactions
-        except Exception as e:
-            raise Exception(f"MongoDB find error: {e}")
-
+        except:
+            raise
     def find_active(self, user_id):
         
         return self.find_one({
@@ -126,6 +125,4 @@ class TransactionRepository(BackupRepository):
         data.invoiceNumber = self._get_next_sequence('invoice')
         data = data.model_dump(by_alias=True)
         result = super().insert_one(data)
-        result = self.find_one({ "_id": result.inserted_id })
-        return result
-        # return Transaction(**data).model_dump(by_alias=True)
+        return self.find_one({ '_id': ObjectId(result.inserted_id) })

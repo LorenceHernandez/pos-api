@@ -8,6 +8,7 @@ from app.new_models.Package import PackageType
 class CustomerDiscountType(str, Enum):
     # MEMBER = "MEMBER"
     # NON_MEMBER = "NON_MEMBER"
+    ALL = "all"
     GOVERNMENT_BENEFICIARY = "seniorcitizenpwd"
 
 class DiscountType(str, Enum):

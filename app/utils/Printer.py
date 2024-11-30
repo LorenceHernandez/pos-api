@@ -3,17 +3,17 @@ from escpos import printer
 
 from abc import ABC, abstractmethod
 
-class Exporter(ABC):
+# class Exporter(ABC):
 
-    @abstractmethod
-    def set(self, *kwargs, **args):
-        pass
+#     @abstractmethod
+#     def set(self, *kwargs, **args):
+#         pass
     
-    @abstractmethod
-    def set(self, *kwargs, **args):
-        pass
+#     @abstractmethod
+#     def set(self, *kwargs, **args):
+#         pass
 
-class Printer(Exporter):
+class Printer:
     printer = None
     def __init__(self):
         try:

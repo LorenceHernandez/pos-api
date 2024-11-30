@@ -12,5 +12,5 @@ class PackageType(str, Enum):
 class Package(BaseModel):
     id: str = Field(alias="_id")
     name: str
-    description: str = None
-    type: PackageType = PackageType.PACKAGE
+    description: Optional[str] = None
+    type: PackageType = Field(default=PackageType.PACKAGE)

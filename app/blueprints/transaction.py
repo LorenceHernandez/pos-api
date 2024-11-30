@@ -41,8 +41,11 @@ def get_transactions(user_id):
         ]
 
         return jsonify({'data': filtered_transaction})
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to get transactions', 'error': e.errors(include_input=False)}), 500
     except Exception as e:
         return jsonify({'message': 'Unable to get transactions', 'error': repr(e)}), 500
+    
 
 @transaction_bp.post(api)
 @authorized
@@ -109,8 +112,8 @@ def print_transaction(user_id, id):
 def v3_create_transaction(user_id):
     try:
         request_data = request.get_json()
-        # return Transaction(**request_data).model_dump(by_alias=True)
-        result = repository.insert_one(CreateTransaction(**request_data, cashierId=user_id))
+        model = CreateTransaction(**request_data, cashierId=user_id)
+        result = repository.insert_one(model)
         return jsonify({'message': 'Transaction created successfully', 'data': result })
     except ValidationError as e:
         return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500

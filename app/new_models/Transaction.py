@@ -57,17 +57,6 @@ class Transaction(BaseModel):
     tenderType: TenderType
     tenderAmount: float
     invoiceNumber: int
-    # branchId: str
-    # customerId: str
-    # referredById: str = None
-    # requestedById: str = None
-    # date: str = Field(default_factory=getLocalDateStr)
-    # transactionDate: str = Field(default_factory=getLocalTimeStr)
-    # transactionNo: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    # transactionItems: List[TransactionItem] = Field(min_length=1)
-    # discounts: List[TransactionDiscount] = None
-    # tenderType: TenderType
-    # tenderAmount: float
 
     @computed_field
     @property
@@ -77,10 +66,16 @@ class Transaction(BaseModel):
     @computed_field
     @property
     def totalNetSales(self) -> float:
-        totalSales = self._computeTotalSales()
-        totalDiscount = self._computeTotalMemberDiscount(totalSales)
-        totalNetSales = totalSales - totalDiscount
-        return totalNetSales    
+        packageNetSales = self._computeTotalPackageNetSales()
+        promoNetSales = self._computeTotalPromoNetSales()
+        return packageNetSales + promoNetSales
+    
+    @computed_field
+    @property
+    def totalSalesWithoutMemberDiscount(self) -> float:
+        packageSales = self._computeTotalPackageSales()
+        promoNetSales = self._computeTotalPromoNetSales()
+        return packageSales + promoNetSales
 
     @computed_field
     @property
@@ -90,10 +85,10 @@ class Transaction(BaseModel):
     @computed_field
     @property
     def totalMemberDiscount(self) -> float:
-        totalSales = self._computeTotalSales()
-        totalDiscount = self._computeTotalMemberDiscount(totalSales)
+        packageSales = self._computeTotalPackageSales()
+        totalDiscount = self._computeTotalMemberDiscount(packageSales)
         return totalDiscount
-
+    
     @computed_field
     @property
     def change(self) -> float:
@@ -107,12 +102,11 @@ class Transaction(BaseModel):
         discounts = self._filterDiscounts(lambda i: i.customerDiscountType == CustomerDiscountType.GOVERNMENT_BENEFICIARY)
         totalDiscount = self._sumTotalDiscount(discounts, totalSales)
         return totalDiscount
-
-    def _computeTotalSales(self) -> float:
+    
+    def _computeTotalPackageNetSales(self) -> float:
         packageSales = self._computeTotalPackageSales()
-        promoSales = self._computeTotalPromoSales()
-        totalSales = packageSales + promoSales
-        return totalSales
+        totalDiscount = self._computeTotalMemberDiscount(packageSales)
+        return packageSales - totalDiscount
 
     def _computeTotalPackageSales(self) -> float:
         items = self._filterItemsByNotType(PackageType.PROMO)
@@ -122,7 +116,7 @@ class Transaction(BaseModel):
         totalDiscount = self._sumTotalDiscount(discounts, totalPrice)
         return totalPrice - totalDiscount
     
-    def _computeTotalPromoSales(self) -> float:
+    def _computeTotalPromoNetSales(self) -> float:
         totalPromoPrice: float = 0.0
 
         items = self._filterItems(lambda i: i.package is not None and i.package.type == PackageType.PROMO)
@@ -145,11 +139,11 @@ class Transaction(BaseModel):
 
     def _filterItemsByNotType(self, type: PackageType) -> List[TransactionItem]:
         #Filter all items that exactly unmatch with type even if item package is none
-        return self._filterItems(lambda i: i.package.type != type)
+        return self._filterItems(lambda i: i.package is None or i.package.type != type)
     
     def _filterItemsByPackage(self, packageId: str, type: PackageType) -> List[TransactionItem]:
         #Short circuit - filter all items that package is not none and match with id and type
-        return self._filterItems(lambda i: i.package != None and (i.package.id == packageId and i.package.type == type))
+        return self._filterItems(lambda i: i.package is not None and (i.package.id == packageId and i.package.type == type))
 
     def _filterDiscounts(self, func) -> List[TransactionDiscount]:
         if(self.discounts == None):
