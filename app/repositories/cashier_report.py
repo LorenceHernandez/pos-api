@@ -13,6 +13,14 @@ class CashierReportRepository(BackupRepository):
         try:
             data = list(self._db[self._collection].aggregate([
                 { '$match': query },
+                { 
+                    '$lookup': {
+                        'from': 'transactions',
+                        'localField': 'cashierId',
+                        'foreignField': 'cashierId',
+                        'as': 'transactions'
+                    }, 
+                },
                 {
                     "$addFields": {
                         "cashierId": {"$toObjectId": "$cashierId"},
@@ -124,12 +132,10 @@ class CashierReportRepository(BackupRepository):
                     }
                 }
             ]))
-
             reports = []
             for item in data:
-
                 report = CashierReport.model_construct(**item)
-                reports.append(report.model_dump())
+                reports.append(report.model_dump(exclude={'transactions'}))
             return reports
         except Exception as e:
             raise Exception(f"MongoDB find error: {e}")

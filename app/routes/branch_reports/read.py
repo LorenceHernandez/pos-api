@@ -69,20 +69,19 @@ def _get_branch_reports():
           for report in reports:
                date = report['date']
                
-               if(dateFilter != DateFilter.ALL):
+               # if(dateFilter != DateFilter.ALL):
 
-                    if(dateFilter == DateFilter.CUSTOM_DATE and not compare_date_year_month(date, filters.get('customDate'))):
-                         continue
-                    if(dateFilter == DateFilter.CUSTOM_FILTER and not compare_date_range(date, filters.get('startDate'),  filters.get('endDate'))):
-                         continue
-                    if(dateFilter < 9 and not compare_date_today(dateFilter, date)):
-                         continue
+               #      if(dateFilter == DateFilter.CUSTOM_DATE and not compare_date_year_month(date, filters.get('customDate'))):
+               #           continue
+               #      if(dateFilter == DateFilter.CUSTOM_FILTER and not compare_date_range(date, filters.get('startDate'),  filters.get('endDate'))):
+               #           continue
+               #      if(dateFilter < 9 and not compare_date_today(dateFilter, date)):
+               #           continue
                
                report['branch'] = ToStringId(report['branch'])
                report['cashier'] = ToStringId(report['cashier'])
                report = ToStringId(report)
                report_list.append(report)
-
           return { 'data': report_list, }, 200
      except Exception as e:
       return {

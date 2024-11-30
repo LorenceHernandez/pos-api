@@ -11,8 +11,8 @@ class CustomerDiscountType(str, Enum):
     GOVERNMENT_BENEFICIARY = "GOVERNMENT_BENEFICIARY"
 
 class DiscountType(str, Enum):
-    FIXED = "FIXED"
-    PERCENTAGE = "PERCENTAGE"
+    FIXED = "fixed"
+    PERCENTAGE = "percentage"
 
 class Discount(BaseModel):
     id: Optional[str] = Field(alias="_id")

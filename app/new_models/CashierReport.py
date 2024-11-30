@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field, computed_field
+from pydash import omit
 
 from app.new_models.CashCount import CashCount
 
@@ -31,6 +32,29 @@ class CashierReport(BaseModel):
     timeIn: str
     timeOut: str
     date: str
+    transactions: list[object]
+
+    # @computed_field
+    # def transacs(self) -> list[object]:
+    #     ret: list = []
+    #     for transaction in self.transactions:
+    #         ret.append(omit(transaction, '_id'))
+    #     return ret
+
+    @computed_field
+    def discounts(self) -> list[object]:
+        ret = []
+        for transaction in self.transactions:
+            for service in transaction.get('services', []):
+                    discount = service.get('discount')
+                    if(discount == None):
+                        continue
+                    # exists = list(filter(lambda i: i['_id'] == discount['_id'], ret))
+                    # if(exists is None or len(exists) > 0):
+                    #     continue
+
+                    ret.append(omit(discount, '_id'))
+        return ret
 
     # @computed_field
     def difference(self) -> float:

@@ -53,7 +53,7 @@ def generate_branch_report(branchId, date):
                          },
                          {
                               "$group": {
-                                   "_id": "$branch",
+                                   "_id": "$branchId",
                                    "totalGrossSales": { "$sum": "$paymentDetails.subTotal" },
                                    "totalNetSales": { "$sum": "$paymentDetails.paymentDue" },
                                    "totalDiscount": { "$sum": { "$subtract": ["$paymentDetails.subTotal", "$paymentDetails.paymentDue"] } },

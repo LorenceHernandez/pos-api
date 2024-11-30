@@ -2,18 +2,22 @@
 
 from bson import ObjectId
 from flask import Blueprint, request, g
+from pydantic import ValidationError
 from pydash import omit
 
 from app.database.config import (doctors, product_categories, products, transactions)
 from app.database.store import insert_one
 from app.models.Transaction import Transaction
 from app.new_models.AuditLog import AuditCode, AuditLog
+from app.new_models.Discount import Discount
 from app.repositories.audit_log import AuditLogRepository
+from app.repositories.transaction import TransactionRepository
 from app.utils.filter_values import filterValues
 from app.utils.utils import ToStringId, getLocalDateStr, getLocalTimeStr
 
 logger = AuditLogRepository()
 update_transaction = Blueprint("/transaction/edit", __name__)
+repository = TransactionRepository()
 
 @update_transaction.route('/transaction/edit', methods=['POST'])
 def _update_transaction():
@@ -30,17 +34,35 @@ def _update_transaction():
    }, 200
    transaction_dict = transaction.toDict()
    
+   totalMemberDiscount = 0.0
+   packages = list(filter(
+      lambda i: i['source'] == 'package' and i['packageForMemberType'] == 'seniorcitizenpwd', 
+      transaction.services
+   ))
+   memberPackage = next(packages) if len(packages) > 0 else None
+
+   #TODO make sure that the package discount or package should be 0 or 1 only   
+   if(memberPackage != None):
+      try:
+         memberDiscount = Discount(**memberPackage['discount'])
+         totalMemberDiscount = memberDiscount.calculateTotalDiscount(memberPackage['totalPackagePrice'])
+      except Exception as e:
+         # print(f'Error {e}')
+         totalMemberDiscount = 0.0
    
-   filter = { '_id': ObjectId(id) }
+   transaction_dict['totalMemberDiscount'] = totalMemberDiscount
+   transaction_dict['invoiceNumber'] = repository._get_next_sequence()
+   
+   query = { '_id': ObjectId(id) }
    new_val = { "$set": filterValues(omit(transaction_dict, 'id')) }
 
-   res = transactions.update_one(filter, new_val)
+   res = transactions.update_one(query, new_val)
    if res.modified_count > 0:
       updated_trans = transactions.find_one({"_id": ObjectId(id)})
       # FOR REFACTORING
       if transaction_dict['status'].lower() == 'completed':
          categories = product_categories.find()
-         services = updated_trans.get('services')
+         services = updated_trans.get('services') or []
          invoiceNumber = updated_trans.get('invoiceNumber')
          paymentDetails = updated_trans.get('paymentDetails')
          amount = paymentDetails.get('paymentDue')
@@ -68,6 +90,7 @@ def _update_transaction():
             if doctor:
                doctor_full_name = doctor["firstName"] + " " + doctor["middleName"] + " " + doctor["lastName"]
          name = []
+
 
          # for service in services: 
          #    if service['source'] == "package": 
@@ -103,7 +126,7 @@ def _update_transaction():
             'discount': discount,
             'referrer': doctor_full_name,
             'branch': branch,
-            'cashierId': updated_trans['cashierId'],
+            # 'cashierId': updated_trans['cashierId'],
             'transactionId': str(updated_trans['_id']),
             'date': getLocalDateStr(),
             'created_at': getLocalTimeStr(),
