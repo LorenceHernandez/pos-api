@@ -23,6 +23,7 @@ class TransactionRepository(BackupRepository):
                         'branchId': {'$toObjectId': '$branchId' },
                         'referredById': {'$toObjectId': '$referredById' },
                         'requestedById': {'$toObjectId': '$requestedById' },
+                        '_id': {'$toString': '$_id' },
                     }
                 },
                 { 
@@ -65,6 +66,14 @@ class TransactionRepository(BackupRepository):
                         'as': 'requestedBy'
                     }, 
                 },
+                { 
+                    '$lookup': {
+                        'from': 'transaction_discount',
+                        'localField': '_id',
+                        'foreignField': 'transactionId',
+                        'as': 'discounts'
+                    }, 
+                },
                 { "$unwind": "$cashier" },
                 { "$unwind": "$customer" },
                 { "$unwind": "$branch" },
@@ -80,7 +89,8 @@ class TransactionRepository(BackupRepository):
                 *args,
                 {
                     '$addFields': {
-                        '_id': {'$toString': '$_id' },
+                        # '_id': {'$toString': '$_id' },
+                        # "discounts._id": { "$toString": "$discounts._id" },
                         "cashier._id": { "$toString": "$cashier._id" },
                         "customer._id": { "$toString": "$customer._id" },
                         "branch._id": { "$toString": "$branch._id" },
@@ -109,10 +119,12 @@ class TransactionRepository(BackupRepository):
                 
                 if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
                     item['requestedBy'] = None
+                
+                item['discounts'] = list(map(lambda i: { **i, '_id': str(i['_id']) }, item['discounts']))
                 transactions.append(item)
             return transactions
-        except:
-            raise
+        except Exception as e:
+            raise e
     def find_active(self, user_id):
         
         return self.find_one({
@@ -123,6 +135,6 @@ class TransactionRepository(BackupRepository):
 
     def insert_one(self, data: CreateTransaction):
         data.invoiceNumber = self._get_next_sequence('invoice')
-        data = data.model_dump(by_alias=True)
+        data = data.model_dump(by_alias=True, exclude={'discounts'})
         result = super().insert_one(data)
         return self.find_one({ '_id': ObjectId(result.inserted_id) })

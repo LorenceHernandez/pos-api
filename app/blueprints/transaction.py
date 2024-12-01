@@ -8,12 +8,14 @@ from app.middlewares.authorized_attribute import authorized
 # from app.new_models.Transaction import CreateTransaction
 from app.new_models.Transaction import CreateTransaction, Transaction
 from app.repositories.transaction import TransactionRepository
+from app.repositories.transaction_discount import TransactionDiscountRepository
 from app.services.Transaction import TransactionService
 from app.utils.utils import getTimeZone
 
 api = '/v2/transactions'
 transaction_bp = Blueprint('transactions', __name__)
-repository = TransactionRepository()
+transactionRepository = TransactionRepository()
+discountRepository = TransactionDiscountRepository()
 
 @transaction_bp.get(api)
 @authorized
@@ -27,7 +29,7 @@ def get_transactions(user_id):
     try:
         query = {} if cashierId is None else { 'cashierId': cashierId }
 
-        transaction = repository.find(query)
+        transaction = transactionRepository.find(query)
 
         filtered_transaction = [
             transaction for transaction in transaction 
@@ -52,7 +54,7 @@ def get_transactions(user_id):
 def create_transaction(user_id):
     try:
         request_data = request.get_json()
-        active_transaction = repository.find_active(user_id)
+        active_transaction = transactionRepository.find_active(user_id)
 
         if active_transaction is not None:
             return { 
@@ -65,7 +67,7 @@ def create_transaction(user_id):
             cashierId=user_id,
         )
 
-        result = repository.insert_one(transaction.model_dump())
+        result = transactionRepository.insert_one(transaction.model_dump())
         if result is None:
             raise Exception()
         
@@ -80,7 +82,7 @@ def create_transaction(user_id):
 @authorized
 def get_transaction(user_id, id):
     try:
-        data = repository.find_one({ '_id': ObjectId(id) })
+        data = transactionRepository.find_one({ '_id': ObjectId(id) })
         return jsonify({'data': data})
     except Exception as e:
         return jsonify({'message': 'Unable to get transaction', 'error': repr(e)}), 500
@@ -89,7 +91,7 @@ def get_transaction(user_id, id):
 @authorized
 def get_active_transaction(user_id):
     try:
-        data = repository.find_active(user_id)
+        data = transactionRepository.find_active(user_id)
         return jsonify({'data': data})
     except Exception as e:
         return jsonify({'message': 'Unable to get active transaction', 'error': repr(e)}), 500
@@ -100,7 +102,7 @@ def print_transaction(user_id, id):
     service = TransactionService()
 
     try:
-        data = repository.find_one({ '_id': ObjectId(id) })
+        data = transactionRepository.find_one({ '_id': ObjectId(id) })
         service.print(data)
         return jsonify({'message': 'Transaction printed successfully'})
     except Exception as e:
@@ -113,7 +115,26 @@ def v3_create_transaction(user_id):
     try:
         request_data = request.get_json()
         model = CreateTransaction(**request_data, cashierId=user_id)
-        result = repository.insert_one(model)
+        result = transactionRepository.insert_one(model)
+
+        discounts = map(
+            lambda i: { 
+                **i.model_dump(exclude='id'),
+                'discountId': i.id, 
+                'transactionId': result['_id'],
+                **model.model_dump(
+                    include={
+                        'cashierId', 
+                        'branchId', 
+                        'date',
+                        'status'
+                    }
+                )
+            }, 
+            model.discounts
+        )
+        discountRepository.insert_many(discounts)
+
         return jsonify({'message': 'Transaction created successfully', 'data': result })
     except ValidationError as e:
         return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500

@@ -23,21 +23,27 @@ class Repository(abc.ABC):
         try:
             data = list(self._db[self._collection].find(query))
             return data
-        except Exception as e:
-            raise Exception(f"MongoDB find error: {e}")
+        except:
+            raise
         
     def find_one(self, query):
         try:
             data = self.find(query)
             return data[0] if data else None
-        except Exception as e:
-            raise Exception(f"MongoDB find error: {e}")
+        except:
+            raise
         
     def insert_one(self, data):
         try:
             return self._db[self._collection].insert_one(data)
-        except Exception as e:
-            raise Exception(f"MongoDB insert_one error: {e}")
+        except:
+            raise
+    
+    def insert_many(self, data):
+        try:
+            return self._db[self._collection].insert_many(data)
+        except:
+            raise
    
     def update_one(self, query, data: BaseModel, *args, **kwargs):
         try:
@@ -45,8 +51,8 @@ class Repository(abc.ABC):
             data = { '$set': data }
             return_document = self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
             return self.find_one({ '_id': return_document['_id'] })
-        except Exception as e:
-            raise Exception(f"MongoDB update_one error: {e}")
+        except:
+            raise
     
     def _get_next_sequence(self, name):
         counter = self._db['counters'].find_one_and_update(
@@ -83,7 +89,7 @@ class BackupRepository(Repository):
                     result = self._db[self._collection].insert_one(data)
                     session.commit_transaction()
                     return result
-                except Exception as e:
+                except:
                     session.abort_transaction()
                     raise Exception(e)
                 

@@ -65,14 +65,14 @@ class CashierReportRepository(BackupRepository):
                         "pipeline": [
                             {
                                 "$match": {
-                                        "$expr": {
-                                            "$and": [
-                                                { "$eq": ["$branchId", "$$branchId"] },
-                                                { "$eq": ["$cashierId", "$$cashierId"] },
-                                                { "$eq": ["$date", "$$date"] },
-                                                { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
-                                            ]
-                                        }
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$cashierId", "$$cashierId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                            { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
+                                        ]
+                                    }
                                 }
                             },
                             { 
@@ -90,6 +90,31 @@ class CashierReportRepository(BackupRepository):
                             },
                         ],
                         "as": "sales"
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": 'transaction_discount',
+                        "let": {
+                            "branchId": "$branchId",
+                            "cashierId": "$cashierId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$cashierId", "$$cashierId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                            { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
+                                        ]
+                                    }
+                                }
+                            },
+                        ],
+                        "as": "discounts"
                     }
                 },
                 { "$unwind": {
@@ -135,7 +160,7 @@ class CashierReportRepository(BackupRepository):
                 reports.append(report.model_dump(exclude={'transactions'}))
             return reports
         except Exception as e:
-            raise
+            raise e
         
     def find_by_date_and(self, date_filter: DateFilter, start_date=None, end_date=None, custom_date=None, query={}):
         reports = self.find(query)
