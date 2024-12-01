@@ -123,7 +123,6 @@ class CashierReportRepository(BackupRepository):
                 }},
                 {
                     "$addFields": {
-                       
                         "cashier.name": {
                             "$concat": [
                                 "$cashier.first_name",

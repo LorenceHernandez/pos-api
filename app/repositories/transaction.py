@@ -89,8 +89,20 @@ class TransactionRepository(BackupRepository):
                 *args,
                 {
                     '$addFields': {
-                        # '_id': {'$toString': '$_id' },
-                        # "discounts._id": { "$toString": "$discounts._id" },
+                        "cashier.name": {
+                            "$concat": [
+                                "$cashier.first_name",
+                                " ",
+                                "$cashier.last_name"
+                            ]
+                        },
+                        "customer.name": {
+                            "$concat": [
+                                "$customer.first_name",
+                                " ",
+                                "$customer.last_name"
+                            ]
+                        },
                         "cashier._id": { "$toString": "$cashier._id" },
                         "customer._id": { "$toString": "$customer._id" },
                         "branch._id": { "$toString": "$branch._id" },
