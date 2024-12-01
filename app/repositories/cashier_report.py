@@ -3,11 +3,14 @@
 
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.new_models.CashierReport import CashierReport
+from app.new_models.Transaction import TransactionStatus
 from app.repositories.base import BackupRepository
+from app.repositories.transaction import TransactionRepository
 
 
 class CashierReportRepository(BackupRepository):
     _collection = 'cashier_reports'
+    _transaction_collection = TransactionRepository()._collection
 
     def find(self, query={}, *args):
         try:
@@ -53,7 +56,7 @@ class CashierReportRepository(BackupRepository):
                 },
                 {
                     "$lookup": {
-                        "from": "sales",
+                        "from": self._transaction_collection,
                         "let": {
                             "branchId": "$branchId",
                             "cashierId": "$cashierId",
@@ -64,38 +67,38 @@ class CashierReportRepository(BackupRepository):
                                 "$match": {
                                         "$expr": {
                                             "$and": [
-                                                { "$eq": ["$branch", "$$branchId"] },
+                                                { "$eq": ["$branchId", "$$branchId"] },
                                                 { "$eq": ["$cashierId", "$$cashierId"] },
-                                                { "$eq": ["$date", "$$date"] }
+                                                { "$eq": ["$date", "$$date"] },
+                                                { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                             ]
                                         }
                                 }
                             },
-                            {
-                                "$group": {
-                                    "_id": "$cashierId",
-                                    "totalGrossSales": { "$sum": "$paymentDetails.subTotal" },
-                                    "totalNetSales": { "$sum": "$paymentDetails.paymentDue" },
-                                    "totalDiscount": { "$sum": { "$subtract": ["$paymentDetails.subTotal", "$paymentDetails.paymentDue"] } },
+                            { 
+                                '$group': {
+                                    "_id": None,
+                                    "totalGrossSales": { "$sum": "$totalGrossSales" },
+                                    "totalNetSales": { "$sum": "$totalNetSales" },
+                                    "totalDiscount": { "$sum": '$totalDiscount' } ,
+                                    "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
+                                    "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
                                     "invoiceStartNumber": { '$min': "$invoiceNumber" },
-                                    "invoiceEndNumber": { '$max': "$invoiceNumber" }
+                                    "invoiceEndNumber": { '$max': "$invoiceNumber" },
+                                    # "discounts": { '$push': "$discounts" },
                                 }
                             },
                         ],
                         "as": "sales"
                     }
                 },
+                { "$unwind": {
+                    'path': "$sales",
+                    'preserveNullAndEmptyArrays': True    
+                }},
                 {
                     "$addFields": {
-                        "cashSales": { 
-                            "$cond": [
-                                { "$gt": [ { "$size": "$sales" }, 0 ] },
-                                { "$arrayElemAt": ["$sales", 0] },
-                                None
-                            ]
-                        },
-                        "invoiceStartNumber": "$cashSales.invoiceStartNumber",
-                        "invoiceEndNumber": "$cashSales.invoiceEndNumber",
+                       
                         "cashier.name": {
                             "$concat": [
                                 "$cashier.first_name",
@@ -105,17 +108,11 @@ class CashierReportRepository(BackupRepository):
                         }
                     }
                 },
-                {
-                    "$addFields": {
-                        "invoiceStartNumber": "$cashSales.invoiceStartNumber",
-                        "invoiceEndNumber": "$cashSales.invoiceEndNumber",
-                    }
-                },
+                
                 {
                     '$project': {
                         'cashierId': 0,
                         'branchId': 0,
-                        'sales': 0,
                         'cashier': {
                             'password': 0,
                             'branches': 0
@@ -138,7 +135,7 @@ class CashierReportRepository(BackupRepository):
                 reports.append(report.model_dump(exclude={'transactions'}))
             return reports
         except Exception as e:
-            raise Exception(f"MongoDB find error: {e}")
+            raise
         
     def find_by_date_and(self, date_filter: DateFilter, start_date=None, end_date=None, custom_date=None, query={}):
         reports = self.find(query)

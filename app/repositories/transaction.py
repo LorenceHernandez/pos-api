@@ -109,7 +109,7 @@ class TransactionRepository(BackupRepository):
                 
                 if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
                     item['requestedBy'] = None
-                transactions.append(Transaction(**item).model_dump(by_alias=True))
+                transactions.append(item)
             return transactions
         except:
             raise
