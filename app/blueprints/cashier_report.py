@@ -2,7 +2,8 @@
 
 
 from bson import ObjectId
-from flask import Blueprint, jsonify, request,g 
+from flask import Blueprint, jsonify, request,g
+from pydantic import ValidationError 
 
 from app.filters.date_filter import DateFilter
 from app.middlewares.authorized_attribute import authorized
@@ -27,19 +28,24 @@ def get_reports(user_id):
     end_date = request.args.get('endDate')
     cashierId = request.args.get('cashierId')
 
-    previous_report = repository.find_one({ 
-        'cashierId': user_id, 
-    })
+    try:
+        previous_report = repository.find_one({ 
+            'cashierId': user_id, 
+        })
 
-    query = {} if cashierId is None else { 'cashierId': cashierId }
-    reports = repository.find_by_date_and(date_filter, start_date, end_date, custom_date, query)
+        query = {} if cashierId is None else { 'cashierId': cashierId }
+        reports = repository.find_by_date_and(date_filter, start_date, end_date, custom_date, query)
 
-    return jsonify({
-        'data': {
-            'previousReports': previous_report,
-            'reports': reports
-        }
-    })
+        return jsonify({
+            'data': {
+                'previousReports': previous_report,
+                'reports': reports
+            }
+        })
+    # except ValidationError as e:
+    #     return jsonify({'message': 'Unable to get reports', 'error': e.errors(include_input=False)}), 500
+    except Exception as e:
+        return jsonify({'message': 'Unable to get reports', 'error': repr(e)}), 500
 
 @cashier_report_bp.post(api + '/time-in')
 @authorized

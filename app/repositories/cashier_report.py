@@ -111,7 +111,7 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     }
-                                }
+                                },
                             },
                         ],
                         "as": "discounts"
@@ -121,6 +121,10 @@ class CashierReportRepository(BackupRepository):
                     'path': "$sales",
                     'preserveNullAndEmptyArrays': True    
                 }},
+                # { "$unwind": {
+                #     'path': "$discounts",
+                #     'preserveNullAndEmptyArrays': True    
+                # }},
                 {
                     "$addFields": {
                         "cashier.name": {
@@ -135,6 +139,8 @@ class CashierReportRepository(BackupRepository):
                 
                 {
                     '$project': {
+                        "discounts._id": 0,
+                        "sales._id": 0,
                         'cashierId': 0,
                         'branchId': 0,
                         'cashier': {

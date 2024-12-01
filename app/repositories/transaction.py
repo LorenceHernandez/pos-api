@@ -117,6 +117,7 @@ class TransactionRepository(BackupRepository):
                         'referredById': 0,
                         'requestedById': 0,
                         'customerId': 0,
+                        "discounts._id": 0,
                         'cashier': {
                             'password': 0,
                         }
@@ -132,7 +133,9 @@ class TransactionRepository(BackupRepository):
                 if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
                     item['requestedBy'] = None
                 
-                item['discounts'] = list(map(lambda i: { **i, '_id': str(i['_id']) }, item['discounts']))
+                discounts = item.get('discounts') or []
+
+                # item['discounts'] = list(map(lambda i: { **i, '_id': str(i['_id']) }, discounts))
                 transactions.append(item)
             return transactions
         except Exception as e:
