@@ -160,6 +160,13 @@ class CreateTransaction(BaseModel):
             sum += item
         return sum
 
+class CreateVoidTransaction(CreateTransaction):
+    reason: Optional[str] = None
+    
+class CreateRefundTransaction(CreateTransaction):
+    reason: Optional[str] = None
+    refundedInvoiceNumber: int
+
 class Transaction(BaseModel):
     branch: object
     customer: object

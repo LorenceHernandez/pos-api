@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.middlewares.authorized_attribute import authorized
 # from app.new_models.Transaction import CreateTransaction
-from app.new_models.Transaction import CreateTransaction, Transaction
+from app.new_models.Transaction import CreateRefundTransaction, CreateTransaction, CreateVoidTransaction, Transaction, TransactionStatus
 from app.repositories.transaction import TransactionRepository
 from app.repositories.transaction_discount import TransactionDiscountRepository
 from app.services.Transaction import TransactionService
@@ -114,7 +114,14 @@ def print_transaction(user_id, id):
 def v3_create_transaction(user_id):
     try:
         request_data = request.get_json()
-        model = CreateTransaction(**request_data, cashierId=user_id)
+
+        if(request_data['status'] == TransactionStatus.CANCELLED):
+            model = CreateVoidTransaction(**request_data, cashierId=user_id)
+        if(request_data['status'] == TransactionStatus.REFUNDED):
+            model = CreateRefundTransaction(**request_data, cashierId=user_id)
+        else:
+            model = CreateTransaction(**request_data, cashierId=user_id)
+
         result = transactionRepository.insert_one(model)
 
         discounts = map(

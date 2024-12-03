@@ -44,6 +44,7 @@ class AuditLogRepository(BackupRepository):
                 {
                     "$project": {
                         'userId': 0,
+                        'data._id': 0,
                         'user': {
                             'password': 0,
                         }
@@ -59,10 +60,9 @@ class AuditLogRepository(BackupRepository):
                     }
                 }
             ]))
-
             return data
         except Exception as e:
-            raise Exception(e)
+            raise e
         
     def insert_one(self, data: AuditLog):
         return super().insert_one(data.model_dump())
