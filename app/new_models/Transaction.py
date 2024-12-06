@@ -2,9 +2,9 @@
 from datetime import datetime
 from enum import Enum
 from itertools import groupby
-from typing import List, Optional
+from typing import List, Optional, Self
 import uuid
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, model_validator
 from app.new_models.Discount import CustomerDiscountType, TransactionDiscount
 from app.new_models.Labtest import Labtest
 from app.new_models.Package import Package, PackageType
@@ -24,7 +24,7 @@ class TransactionStatus(str, Enum):
     REFUNDED = 'refunded'
 
 class TransactionItem(Labtest):
-    package: Optional[TransactionPackage] = None
+    package: Optional[Package] = None
 
     # @computed_field
     # @property
@@ -49,6 +49,14 @@ class CreateTransaction(BaseModel):
     tenderAmount: float
     invoiceNumber: int = None
 
+    @model_validator(mode='after')
+    def shouldZeroOrOnePackageDiscount(self) -> Self:
+        discounts = self._filterDiscounts(lambda i: i.packageType == PackageType.PACKAGE)
+        discountsCount = len(discounts)
+        if(discountsCount > 1):
+            raise ValueError(f'Package Discount should be only 0 or one. (PackageDiscountCount={discountsCount})')
+        return self
+
     @computed_field
     @property
     def totalGrossSales(self) -> float:
@@ -64,7 +72,7 @@ class CreateTransaction(BaseModel):
     @computed_field
     @property
     def totalSalesWithoutMemberDiscount(self) -> float:
-        packageSales = self._computeTotalPackageSales()
+        packageSales = self._computeTotalPackageGrossSales()
         promoNetSales = self._computeTotalPromoNetSales()
         return packageSales + promoNetSales
 
@@ -76,7 +84,7 @@ class CreateTransaction(BaseModel):
     @computed_field
     @property
     def totalMemberDiscount(self) -> float:
-        packageSales = self._computeTotalPackageSales()
+        packageSales = self._computeTotalPackageGrossSales()
         totalDiscount = self._computeTotalMemberDiscount(packageSales)
         return totalDiscount
     
@@ -90,36 +98,42 @@ class CreateTransaction(BaseModel):
         return datetime.fromisoformat(self.transactionDate)
     
     def _computeTotalMemberDiscount(self, totalSales) -> float:
-        discounts = self._filterDiscounts(lambda i: i.customerDiscountType == CustomerDiscountType.GOVERNMENT_BENEFICIARY)
+        discounts = self._filterDiscounts(lambda i: i.memberType is not None)
+        totalDiscount = self._sumTotalDiscount(discounts, totalSales)
+        return totalDiscount
+    
+    def _computeTotalPackageDiscount(self, totalSales) -> float:
+        discounts = self._filterDiscounts(lambda i: i.packageType == PackageType.PACKAGE)
         totalDiscount = self._sumTotalDiscount(discounts, totalSales)
         return totalDiscount
     
     def _computeTotalPackageNetSales(self) -> float:
-        packageSales = self._computeTotalPackageSales()
-        totalDiscount = self._computeTotalMemberDiscount(packageSales)
+        packageSales = self._computeTotalPackageGrossSales()
+        totalDiscount = self._computeTotalPackageDiscount(packageSales)
         return packageSales - totalDiscount
 
-    def _computeTotalPackageSales(self) -> float:
+    def _computeTotalPackageGrossSales(self) -> float:
         items = self._filterItemsByNotType(PackageType.PROMO)
-        totalPrice =  self._sum(self._getItemPrices(items))
+        totalPrice = self._sum(self._getItemPrices(items))
 
-        discounts = self._filterDiscounts(lambda i: i.packageType != PackageType.PROMO and i.customerDiscountType != CustomerDiscountType.GOVERNMENT_BENEFICIARY)
-        totalDiscount = self._sumTotalDiscount(discounts, totalPrice)
-        return totalPrice - totalDiscount
+        return totalPrice
     
     def _computeTotalPromoNetSales(self) -> float:
         totalPromoPrice: float = 0.0
 
         items = self._filterItems(lambda i: i.package is not None and i.package.type == PackageType.PROMO)
         items = groupby(items, lambda i: i.package.id)
-
+    
         for _, groupItems in items:
             groupItems = list(groupItems)
-            discount = groupItems[0].package.discount
+            discounts = self._filterDiscounts(lambda i: i.packageId == groupItems[0].package.id)
 
             prices = self._getItemPrices(groupItems)
             totalPrice = self._sum(prices)
-            totalPrice -= discount.calculateTotalDiscount(totalPrice)
+
+            if(len(discounts) > 0):
+                discount = discounts[0]
+                totalPrice -= discount.calculateTotalDiscount(totalPrice)
 
             totalPromoPrice += totalPrice
             
@@ -224,7 +238,7 @@ class Transaction(BaseModel):
         return datetime.fromisoformat(self.transactionDate)
     
     def _computeTotalMemberDiscount(self, totalSales) -> float:
-        discounts = self._filterDiscounts(lambda i: i.customerDiscountType == CustomerDiscountType.GOVERNMENT_BENEFICIARY)
+        discounts = self._filterDiscounts(lambda i: i.customerDiscountType == CustomerDiscountType.GOVERNMENT_MEMBER)
         totalDiscount = self._sumTotalDiscount(discounts, totalSales)
         return totalDiscount
     
@@ -237,7 +251,7 @@ class Transaction(BaseModel):
         items = self._filterItemsByNotType(PackageType.PROMO)
         totalPrice =  self._sum(self._getItemPrices(items))
 
-        discounts = self._filterDiscounts(lambda i: i.packageType != PackageType.PROMO and i.customerDiscountType != CustomerDiscountType.GOVERNMENT_BENEFICIARY)
+        discounts = self._filterDiscounts(lambda i: i.packageType != PackageType.PROMO and i.customerDiscountType != CustomerDiscountType.GOVERNMENT_MEMBER)
         totalDiscount = self._sumTotalDiscount(discounts, totalPrice)
         return totalPrice - totalDiscount
     
