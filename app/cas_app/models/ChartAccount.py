@@ -9,6 +9,7 @@ class ChartAccount:
     accountType = None
     accountGroup = None
     description = None
+    reportType = None
     @staticmethod
     def fromDict(data: dict):
         item = ChartAccount()
@@ -19,6 +20,7 @@ class ChartAccount:
         item.description = data.get('description')
         item.accountNumber = data.get('accountNumber')
         item.accountGroup = data.get('accountGroup')
+        item.reportType = data.get('reportType')
     
         return item
     
@@ -30,4 +32,5 @@ class ChartAccount:
             "description": self.description,
             "accountNumber": self.accountNumber,
             "accountGroup": self.accountGroup,
+            "reportType": self.reportType,
         }
