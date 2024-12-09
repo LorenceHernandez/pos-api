@@ -40,7 +40,6 @@ class Discount(BaseModel):
 class TransactionDiscount(Discount):
     packageType: Optional[PackageType] = Field(default=PackageType.PACKAGE)
     packageId: Optional[str] = None
-    customerDiscountType: Optional[CustomerDiscountType] = None
 
     @model_validator(mode='after')
     def requirePackageIdWhenPromo(self) -> Self:

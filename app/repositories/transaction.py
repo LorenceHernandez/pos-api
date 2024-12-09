@@ -2,11 +2,9 @@
 
 
 from bson import ObjectId
-from app.new_models.Transaction import CreateTransaction, Transaction
+from app.new_models.Transaction import CreateTransaction, TransactionStatus
 from app.repositories.base import BackupRepository
-from app.utils.invoice_setting import generate_invoice_str
-from app.database.config import counters
-from app.utils.utils import getLocalDateStr, getLocalTimeStr
+from app.utils.utils import getLocalDateStr
 
 
 class TransactionRepository(BackupRepository):
@@ -149,7 +147,12 @@ class TransactionRepository(BackupRepository):
         })
 
     def insert_one(self, data: CreateTransaction):
-        data.invoiceNumber = self._get_next_sequence('invoice')
+
+        if data.status != TransactionStatus.CANCELLED:
+            data.invoiceNumber = self._get_next_sequence('INVOICE_NUMBER')
+
+        data.transactionNumber = self._get_next_sequence('TRANSACTION_NUMBER')
+
         data = data.model_dump(by_alias=True, exclude={'discounts'})
         result = super().insert_one(data)
         return self.find_one({ '_id': ObjectId(result.inserted_id) })

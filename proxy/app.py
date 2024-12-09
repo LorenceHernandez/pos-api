@@ -106,10 +106,14 @@ def print_receipt():
     cashier = data['cashier']
     dvote = request_data['dvoteDetails'][0]
     customer = data['customerData']
+    reprint = data.get('reprint') 
+    reprintLabel = '(RE-PRINT)' if reprint else ''
+
     companyCopy = request_data.get('companyCopy')
     companyLabel = '(COMPANY\'S COPY)' if companyCopy else ''
 
     dt = datetime.datetime.fromisoformat(data['transactionDate'])
+    dateNow = datetime.datetime.now()
 
     # discount = data.get('discountApplied') or {}
     # discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
@@ -126,10 +130,13 @@ def print_receipt():
         p.text(upper_case(branch['streetAddress']) + '\n\n')
 
         p.set(align='center', bold=True)
-        p.text(f'INVOICE\n')
+        p.text(f'INVOICE {reprintLabel}\n')
 
         p.textln('-' * 40)
         p.set(align='left', bold=False)
+
+        if(reprint):
+            p.textln(f'{'Reprint Date & Time: ':<21}{dateNow.strftime("%m-%d-%Y %I:%M:%S%p"):>19}')
 
         p.textln(f'{'Invoice No.: ':<13}{str(data['invoiceNumber']).zfill(5):>27}')
         p.textln(f'{'MIN: ':<5}{'---':>35}')
@@ -315,9 +322,13 @@ def print_report():
     cashSales = data['cashSales']
     endingCashOnHand = data['endingCashOnHand'] or {}
 
+    reprint = data.get('reprint') 
+    reprintLabel = '(RE-PRINT)' if reprint else ''
+    dateNow = datetime.datetime.now()
+
     try:
         p.set(align='center', bold=True)
-        p.text(f'MMG-ALBAY\n\n')
+        p.text(f'MMG-ALBAY {reprintLabel}\n\n')
         p.set(bold=False)
         p.text(f'Operated By: \n')
         p.set(bold=True)
@@ -337,6 +348,9 @@ def print_report():
 
         p.textln('-' * 40)
         p.set(align='left')
+
+        if(reprint):
+            p.textln(f'{'Reprint Date & Time: ':<21}{dateNow.strftime("%m-%d-%Y %I:%M:%S%p"):>19}')
 
         p.textln(f'{'MIN: ':<5}{'---':>35}')
         p.textln(f'{'SN: ':<4}{'---':>36}')

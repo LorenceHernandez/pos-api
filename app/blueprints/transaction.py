@@ -1,4 +1,3 @@
-from datetime import datetime
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
@@ -6,11 +5,10 @@ from pydantic import ValidationError
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.middlewares.authorized_attribute import authorized
 # from app.new_models.Transaction import CreateTransaction
-from app.new_models.Transaction import CreateRefundTransaction, CreateTransaction, CreateVoidTransaction, Transaction, TransactionStatus
+from app.new_models.Transaction import CreateRefundTransaction, CreateTransaction, CreateVoidTransaction, TransactionStatus
 from app.repositories.transaction import TransactionRepository
 from app.repositories.transaction_discount import TransactionDiscountRepository
 from app.services.Transaction import TransactionService
-from app.utils.utils import getTimeZone
 
 api = '/v2/transactions'
 transaction_bp = Blueprint('transactions', __name__)
@@ -114,14 +112,14 @@ def print_transaction(user_id, id):
 def v3_create_transaction(user_id):
     try:
         request_data = request.get_json()
+        args = { **request_data, "cashierId": user_id }
+        model = CreateTransaction(**args)
 
-        if(request_data['status'] == TransactionStatus.CANCELLED):
-            model = CreateVoidTransaction(**request_data, cashierId=user_id)
-        if(request_data['status'] == TransactionStatus.REFUNDED):
-            model = CreateRefundTransaction(**request_data, cashierId=user_id)
-        else:
-            model = CreateTransaction(**request_data, cashierId=user_id)
-
+        if(model.status == TransactionStatus.VOIDED):
+            model = CreateVoidTransaction(**args)
+        if(model.status == TransactionStatus.REFUNDED):
+            model = CreateRefundTransaction(**args)
+       
         result = transactionRepository.insert_one(model)
 
         discounts = map(
