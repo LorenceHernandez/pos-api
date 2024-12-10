@@ -74,7 +74,9 @@ def approve_purchase_orders(user_id):
                 "name": user["first_name"] + " " + user["last_name"],
                 "userId": str(user["_id"]),
                 "notes": request_data["notes"], 
+                "status": request_data["status"], 
                 "createdAt": datetime.now().strftime("%m/%d/%Y %I:%M:%S %p"),
+
             }
             filter = { '_id': ObjectId(id) }
             new_val = { 
