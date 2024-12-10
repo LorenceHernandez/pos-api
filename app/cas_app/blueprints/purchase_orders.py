@@ -1,9 +1,10 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from pydash import omit
+from datetime import datetime
 
 from app.cas_app.models.PurchaseOrder import PurchaseOrder
-from app.database.config import purchase_orders
+from app.database.config import purchase_orders, users
 from app.database.store import insert_one
 from app.middlewares.authorized_attribute import authorized
 from app.utils.filter_values import filterValues
@@ -66,15 +67,29 @@ def approve_purchase_orders(user_id):
     request_data['approverUserID'] = request_data["approverUserID"]
     try:
         item = PurchaseOrder.fromDict(request_data)
-    
-   
-        filter = { '_id': ObjectId(id) }
-        new_val = { "$set": filterValues(omit(item.toDict(), 'id')) }
+        user = users.find_one({"_id": ObjectId(request_data['approverUserID'])})
+        
+        if user:
+            logs = {
+                "name": user["first_name"] + " " + user["last_name"],
+                "userId": str(user["_id"]),
+                "notes": request_data["notes"], 
+                "createdAt": datetime.now().strftime("%m/%d/%Y %I:%M:%S %p"),
+            }
+            filter = { '_id': ObjectId(id) }
+            new_val = { 
+                "$set": filterValues(omit(item.toDict(), 'id', 'logs')),  # Update other fields (but not 'logs')
+                 "$push": {
+                    "logs": logs  # Append the new log entry to 'logs'
+                },
+            }
 
-        res = purchase_orders.update_one(filter, new_val)
+            res = purchase_orders.update_one(filter, new_val)
 
-        if res.modified_count > 0:
-            return { 'message': 'Purchase order successfully updated.' }
+            if res.modified_count > 0:
+                return { 'message': 'Purchase order successfully updated.' }
+            else:
+                return { 'message': 'Unable to update purchase order.' }, 400
         else:
             return { 'message': 'Unable to update purchase order.' }, 400
     except Exception as e:

@@ -13,6 +13,7 @@ class PurchaseOrder:
     notes = None
     approverUserID = None
     isOrderCompleted = None
+    logs= []
     @staticmethod
     def fromDict(data: dict):
         item = PurchaseOrder()
@@ -28,7 +29,9 @@ class PurchaseOrder:
         item.approverUserID = data.get('approverUserID')
         if data.get('isOrderCompleted') is not None:
             item.isOrderCompleted = data.get('isOrderCompleted')
+        item.logs = data.get('logs') or []
         return item
+       
     
     def toDict(self):
         return {
@@ -42,4 +45,5 @@ class PurchaseOrder:
             "supplierName": self.supplierName,
             "notes": self.notes,
             "approverUserID": self.approverUserID,
+            "logs": self.logs or []
         }

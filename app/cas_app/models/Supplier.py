@@ -35,7 +35,7 @@ class Supplier:
     contactInformation = None
     notes = None
     paymentHistory = []
-    
+    tinNumber = None
     @staticmethod
     def fromDict(data: dict):
         item = Supplier()
@@ -46,7 +46,7 @@ class Supplier:
         item.name = data.get('name')
         item.contactInformation = ContactInformation.fromDict(data.get('contactInformation'))
         item.notes = data.get('notes')
-        
+        item.tinNumber = data.get('tinNumber') or ""
       
         return item
     
@@ -57,4 +57,5 @@ class Supplier:
             "contactInformation": self.contactInformation.toDict(),
             "notes": self.notes,
             "paymentHistory": self.paymentHistory,
+            "tinNumber": self.tinNumber or ""
         }
