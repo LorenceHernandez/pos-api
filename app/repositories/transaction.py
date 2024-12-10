@@ -150,9 +150,8 @@ class TransactionRepository(BackupRepository):
 
         if data.status != TransactionStatus.CANCELLED:
             data.invoiceNumber = self._get_next_sequence('INVOICE_NUMBER')
-
         data.transactionNumber = self._get_next_sequence('TRANSACTION_NUMBER')
-
+        
         data = data.model_dump(by_alias=True, exclude={'discounts'})
         result = super().insert_one(data)
         return self.find_one({ '_id': ObjectId(result.inserted_id) })

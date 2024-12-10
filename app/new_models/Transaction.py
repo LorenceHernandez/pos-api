@@ -4,10 +4,33 @@ from enum import Enum
 from itertools import groupby
 from typing import List, Optional, Self
 from pydantic import BaseModel, Field, computed_field, model_validator
-from app.new_models.Discount import TransactionDiscount
+from app.new_models.Discount import MemberType, Discount
 from app.new_models.Labtest import Labtest
 from app.new_models.Package import Package, PackageType
 from app.utils.utils import getLocalDateStr, getLocalTimeStr
+
+
+class TransactionStatus(str, Enum):
+    CANCELLED = "cancelled"
+    COMPLETED = "completed"
+    REFUNDED = "refunded"
+    VOIDED = "voided"
+
+class TransactionDiscount(Discount):
+    packageType: Optional[PackageType] = Field(default=PackageType.PACKAGE)
+    packageId: Optional[str] = None
+
+    @model_validator(mode='after')
+    def requirePackageIdWhenPromo(self) -> Self:
+        if(self.packageType == PackageType.PROMO and self.packageId is None):
+            raise ValueError(f'PackageId should not be none when package type is {PackageType.PROMO}')
+        return self
+    
+
+class TransactionDiscountQuery(BaseModel):
+    memberType: Optional[MemberType] = None
+    name: Optional[str] = None
+    status: Optional[TransactionStatus] = TransactionStatus.COMPLETED
 
 
 class TransactionPackage(Package):
@@ -17,11 +40,6 @@ class TenderType(str, Enum):
     CASH = "cash"
     CHEQUE = "cheque"
     
-class TransactionStatus(str, Enum):
-    CANCELLED = "cancelled"
-    COMPLETED = "completed"
-    REFUNDED = "refunded"
-    VOIDED = "voided"
 
 class TransactionItem(Labtest):
     package: Optional[Package] = None
@@ -31,7 +49,7 @@ class BaseTransaction(BaseModel):
     status: TransactionStatus
     date: str = Field(default_factory=getLocalDateStr)
     transactionDate: str = Field(default_factory=getLocalTimeStr)
-    transactionNumber: str
+    transactionNumber: int = None
     transactionItems: List[TransactionItem] = Field(min_length=1)
     discounts: List[TransactionDiscount] = None
     tenderType: TenderType
