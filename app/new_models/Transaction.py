@@ -2,7 +2,7 @@
 from datetime import datetime
 from enum import Enum
 from itertools import groupby
-from typing import List, Optional, Self
+from typing import List, Optional
 from pydantic import BaseModel, Field, computed_field, model_validator
 from app.new_models.Discount import MemberType, Discount
 from app.new_models.Labtest import Labtest
@@ -21,7 +21,7 @@ class TransactionDiscount(Discount):
     packageId: Optional[str] = None
 
     @model_validator(mode='after')
-    def requirePackageIdWhenPromo(self) -> Self:
+    def requirePackageIdWhenPromo(self):
         if(self.packageType == PackageType.PROMO and self.packageId is None):
             raise ValueError(f'PackageId should not be none when package type is {PackageType.PROMO}')
         return self
@@ -57,7 +57,7 @@ class BaseTransaction(BaseModel):
     invoiceNumber: int = None
 
     @model_validator(mode='after')
-    def shouldZeroOrOnePackageDiscount(self) -> Self:
+    def shouldZeroOrOnePackageDiscount(self):
         discounts = self._filterDiscounts(lambda i: i.packageType == PackageType.PACKAGE)
         discountsCount = len(discounts)
         if(discountsCount > 1):

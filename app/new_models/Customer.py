@@ -1,7 +1,7 @@
 
 from enum import Enum
-from typing import Optional, Self
-from pydantic import BaseModel, Field, computed_field, model_validator
+from typing import Optional
+from pydantic import Field, model_validator
 
 from app.new_models.User import Person
 
@@ -18,7 +18,7 @@ class Customer(Person):
     customerTypeNumber: Optional[str] = None
 
     @model_validator(mode='after')
-    def requireCustomerNumberWhenMember(self) -> Self:
+    def requireCustomerNumberWhenMember(self):
         if(self.customerType == CustomerType.GOVERNMENT_MEMBER and self.customerTypeNumber is None):
             raise ValueError(f'Customer Number should not be none when customer type is {CustomerType.GOVERNMENT_MEMBER}')
         return self
