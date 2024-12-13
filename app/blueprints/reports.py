@@ -81,7 +81,7 @@ def download_discount_reports(user_id):
         worksheet.cell(5, 1, os.getenv('APP_VERSION'))
 
         user = users.find_one({ '_id': ObjectId(user_id) })
-        worksheet.cell(10, 1, start_case(f'{user['first_name']} {user['last_name']}'))
+        worksheet.cell(10, 1, start_case(user['first_name'] + ' ' + user['last_name']))
         
 
         default_row = 17
