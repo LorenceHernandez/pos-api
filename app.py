@@ -7,11 +7,11 @@ from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
 from app.blueprints.audit_log import audit_log_bp
-# from app.blueprints.reports import discount_reports_bp
-# from app.blueprints.cashier_report import cashier_report_bp
-# from app.blueprints.branch_report import branch_report_bp
-# from app.blueprints.sales import sales_bp
-# from app.blueprints.transaction import transaction_bp
+from app.blueprints.reports import discount_reports_bp
+from app.blueprints.cashier_report import cashier_report_bp
+from app.blueprints.branch_report import branch_report_bp
+from app.blueprints.sales import sales_bp
+from app.blueprints.transaction import transaction_bp
 from app.cas_app.blueprints.accounts_group import accounts_group_bp
 # from app.cas_app.blueprints.accounts_type import accounts_type_bp
 # from app.cas_app.blueprints.category import category_bp
