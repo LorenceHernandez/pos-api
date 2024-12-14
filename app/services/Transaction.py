@@ -9,6 +9,8 @@ from app.utils.Printer import Printer
 
 
 class TransactionService:
+    def test(): 
+        return ''
     # printer = Printer().printer
 
     # _companyDetail = {
