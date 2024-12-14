@@ -12,8 +12,8 @@ from app.services.Transaction import TransactionService
 
 api = '/v2/transactions'
 transaction_bp = Blueprint('transactions', __name__)
-transactionRepository = TransactionRepository()
-discountRepository = TransactionDiscountRepository()
+# transactionRepository = TransactionRepository()
+# discountRepository = TransactionDiscountRepository()
 
 # @transaction_bp.get(api)
 # @authorized
