@@ -18,7 +18,8 @@ class Printer:
     def __init__(self):
         try:
             self._printer = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
-        except Exception:
+        except Exception as e:
+            print(e)
             try:
                 self._printer = printer.Network("192.168.5.200")
             except Exception:
