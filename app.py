@@ -7,19 +7,19 @@ from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
 from app.blueprints.audit_log import audit_log_bp
-from app.blueprints.reports import discount_reports_bp
-from app.blueprints.cashier_report import cashier_report_bp
-from app.blueprints.branch_report import branch_report_bp
-from app.blueprints.sales import sales_bp
-from app.blueprints.transaction import transaction_bp
+# from app.blueprints.reports import discount_reports_bp
+# from app.blueprints.cashier_report import cashier_report_bp
+# from app.blueprints.branch_report import branch_report_bp
+# from app.blueprints.sales import sales_bp
+# from app.blueprints.transaction import transaction_bp
 from app.cas_app.blueprints.accounts_group import accounts_group_bp
-from app.cas_app.blueprints.accounts_type import accounts_type_bp
-from app.cas_app.blueprints.category import category_bp
-from app.cas_app.blueprints.chart_account import chart_of_accounts_bp
-from app.cas_app.blueprints.goods_receipt import goods_receipt_bp
-from app.cas_app.blueprints.inventory import inventory_bp
-from app.cas_app.blueprints.item import item_bp
-from app.cas_app.blueprints.journal_entries import journal_entry_bp
+# from app.cas_app.blueprints.accounts_type import accounts_type_bp
+# from app.cas_app.blueprints.category import category_bp
+# from app.cas_app.blueprints.chart_account import chart_of_accounts_bp
+# from app.cas_app.blueprints.goods_receipt import goods_receipt_bp
+# from app.cas_app.blueprints.inventory import inventory_bp
+# from app.cas_app.blueprints.item import item_bp
+# from app.cas_app.blueprints.journal_entries import journal_entry_bp
 # from app.cas_app.blueprints.payments import payment_bp
 # from app.cas_app.blueprints.purchase_invoice import purchase_invoice_bp
 # from app.cas_app.blueprints.purchase_orders import purchase_order_bp
