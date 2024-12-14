@@ -39,76 +39,76 @@ from datetime import datetime
 
 from bson import ObjectId
 
-from app.database.config import bookings
-from app.middlewares.authorization_validator import authorization_validator
-from app.middlewares.request_validator import request_validator
-from app.middlewares.token_validator import token_validator
-from app.routes.branch_reports.create import create_branch_reports
-from app.routes.branch_reports.read import get_branch_reports
-from app.routes.branch_reports.read_generated import \
-    get_generated_branch_reports
-from app.routes.branches.create import create_branch
-from app.routes.branches.read import get_branches
-from app.routes.branches.read_one import get_branch
-from app.routes.branches.update import update_branch
-from app.routes.cashier_reports.read import get_cashier_reports
-from app.routes.cashier_reports.read_today import get_cashier_report_today
-from app.routes.cashier_reports.time_in import time_in_cashier_report
-from app.routes.cashier_reports.time_out import time_out_cashier_report
-from app.routes.corporates.create import create_company
-from app.routes.corporates.read import get_companies
-from app.routes.corporates.read_one import get_company
-from app.routes.corporates.update import update_company
-from app.routes.customers.create import create_customer
-from app.routes.customers.read import get_customers
-from app.routes.customers.read_one import get_customer
-from app.routes.customers.update import update_customer
-from app.routes.discounts.create import create_discount
-from app.routes.discounts.read import get_discounts
-from app.routes.discounts.read_one import get_discount
-from app.routes.discounts.update import update_discount
-from app.routes.doctors.create import create_doctor
-from app.routes.doctors.read import get_doctors
-from app.routes.doctors.read_one import get_doctor
-from app.routes.doctors.update import update_doctor
-from app.routes.packages.create import create_package
-from app.routes.packages.read import get_packages
-from app.routes.packages.read_one import get_package
-from app.routes.packages.update import update_package
-from app.routes.product_categories.create import create_product_category
-from app.routes.product_categories.read import get_product_categories
-from app.routes.product_categories.read_one import get_product_category
-from app.routes.product_categories.update import update_product_category
-from app.routes.products.create import create_product
-from app.routes.products.read import get_products
-from app.routes.products.read_one import get_product
-from app.routes.products.update import update_product
-from app.routes.roles.create import create_role
-from app.routes.roles.read import get_roles
-from app.routes.roles.read_one import get_role
-from app.routes.roles.read_resources import get_resources
-from app.routes.roles.update import update_role
-from app.routes.sales.read_betalife_reports import get_betalife_reports
-from app.routes.sales.read_monthly_report_mancom import get_mancom
-from app.routes.sales.read_municipality_reports import get_municipality_reports
-from app.routes.sales.read_no_of_patients_per_services import \
-    get_products_reports
-from app.routes.sales.read_packages_reports import get_packages_reports
-from app.routes.sales.read_reports import get_reports
-from app.routes.sales.read_sales_reports import get_sales
-from app.routes.sales.read_summary_income import get_summary_income
-from app.routes.sales_deposit.create import create_sales_deposit
-from app.routes.sales_deposit.read import get_sales_deposits
-from app.routes.transaction.create import create_transaction
-from app.routes.transaction.read import get_transactions
-from app.routes.transaction.read_active import get_active_transaction
-from app.routes.transaction.read_one import get_transaction
-from app.routes.transaction.update import update_transaction
-from app.routes.users.auth import login
-from app.routes.users.read import get_users
-from app.routes.users.read_one import get_user
-from app.routes.users.register import register
-from app.routes.users.update import update_user
+# from app.database.config import bookings
+# from app.middlewares.authorization_validator import authorization_validator
+# from app.middlewares.request_validator import request_validator
+# from app.middlewares.token_validator import token_validator
+# from app.routes.branch_reports.create import create_branch_reports
+# from app.routes.branch_reports.read import get_branch_reports
+# from app.routes.branch_reports.read_generated import \
+#     get_generated_branch_reports
+# from app.routes.branches.create import create_branch
+# from app.routes.branches.read import get_branches
+# from app.routes.branches.read_one import get_branch
+# from app.routes.branches.update import update_branch
+# from app.routes.cashier_reports.read import get_cashier_reports
+# from app.routes.cashier_reports.read_today import get_cashier_report_today
+# from app.routes.cashier_reports.time_in import time_in_cashier_report
+# from app.routes.cashier_reports.time_out import time_out_cashier_report
+# from app.routes.corporates.create import create_company
+# from app.routes.corporates.read import get_companies
+# from app.routes.corporates.read_one import get_company
+# from app.routes.corporates.update import update_company
+# from app.routes.customers.create import create_customer
+# from app.routes.customers.read import get_customers
+# from app.routes.customers.read_one import get_customer
+# from app.routes.customers.update import update_customer
+# from app.routes.discounts.create import create_discount
+# from app.routes.discounts.read import get_discounts
+# from app.routes.discounts.read_one import get_discount
+# from app.routes.discounts.update import update_discount
+# from app.routes.doctors.create import create_doctor
+# from app.routes.doctors.read import get_doctors
+# from app.routes.doctors.read_one import get_doctor
+# from app.routes.doctors.update import update_doctor
+# from app.routes.packages.create import create_package
+# from app.routes.packages.read import get_packages
+# from app.routes.packages.read_one import get_package
+# from app.routes.packages.update import update_package
+# from app.routes.product_categories.create import create_product_category
+# from app.routes.product_categories.read import get_product_categories
+# from app.routes.product_categories.read_one import get_product_category
+# from app.routes.product_categories.update import update_product_category
+# from app.routes.products.create import create_product
+# from app.routes.products.read import get_products
+# from app.routes.products.read_one import get_product
+# from app.routes.products.update import update_product
+# from app.routes.roles.create import create_role
+# from app.routes.roles.read import get_roles
+# from app.routes.roles.read_one import get_role
+# from app.routes.roles.read_resources import get_resources
+# from app.routes.roles.update import update_role
+# from app.routes.sales.read_betalife_reports import get_betalife_reports
+# from app.routes.sales.read_monthly_report_mancom import get_mancom
+# from app.routes.sales.read_municipality_reports import get_municipality_reports
+# from app.routes.sales.read_no_of_patients_per_services import \
+#     get_products_reports
+# from app.routes.sales.read_packages_reports import get_packages_reports
+# from app.routes.sales.read_reports import get_reports
+# from app.routes.sales.read_sales_reports import get_sales
+# from app.routes.sales.read_summary_income import get_summary_income
+# from app.routes.sales_deposit.create import create_sales_deposit
+# from app.routes.sales_deposit.read import get_sales_deposits
+# from app.routes.transaction.create import create_transaction
+# from app.routes.transaction.read import get_transactions
+# from app.routes.transaction.read_active import get_active_transaction
+# from app.routes.transaction.read_one import get_transaction
+# from app.routes.transaction.update import update_transaction
+# from app.routes.users.auth import login
+# from app.routes.users.read import get_users
+# from app.routes.users.read_one import get_user
+# from app.routes.users.register import register
+# from app.routes.users.update import update_user
 
 # PORT = os.getenv('PORT')
 # HOST = os.getenv('HOST')
