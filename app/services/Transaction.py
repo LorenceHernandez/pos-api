@@ -9,16 +9,16 @@ from app.utils.Printer import Printer
 
 
 class TransactionService:
-    printer = Printer().printer
+    # printer = Printer().printer
 
-    _companyDetail = {
-        'name': '',
-        'address': '',
-        'tin': '',
-        'accredNo': '',
-        'dateIssued': '',
-        'ptuNo': ''
-    }
+    # _companyDetail = {
+    #     'name': '',
+    #     'address': '',
+    #     'tin': '',
+    #     'accredNo': '',
+    #     'dateIssued': '',
+    #     'ptuNo': ''
+    # }
 
     # def print(self, value: Transaction, forCompany: bool):
     #     printer = self.printer
