@@ -6,6 +6,6 @@ from pydantic import BaseModel, Field
 from app.utils.utils import getLocalDateStr
 
 
-class GetGeneratedSales(BaseModel): 
-    date: str = Field(default=getLocalDateStr())
+class GetBranchSalesQuery(BaseModel): 
+    date: Optional[str] = None
     branchId: str

@@ -85,7 +85,6 @@ class CashierReportRepository(BackupRepository):
                                     "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
                                     "invoiceStartNumber": { '$min': "$invoiceNumber" },
                                     "invoiceEndNumber": { '$max': "$invoiceNumber" },
-                                    # "discounts": { '$push': "$discounts" },
                                 }
                             },
                         ],
@@ -121,10 +120,6 @@ class CashierReportRepository(BackupRepository):
                     'path': "$sales",
                     'preserveNullAndEmptyArrays': True    
                 }},
-                # { "$unwind": {
-                #     'path': "$discounts",
-                #     'preserveNullAndEmptyArrays': True    
-                # }},
                 {
                     "$addFields": {
                         "cashier.name": {

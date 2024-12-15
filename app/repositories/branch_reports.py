@@ -52,7 +52,7 @@ class BranchReportRepository(BackupRepository):
                         "from": self._transaction_collection,
                         "let": {
                             "branchIds": "$cashier.branches",
-                            # "date": "$date"
+                            "date": "$date"
                         },
                         "pipeline": [
                             {
@@ -60,7 +60,7 @@ class BranchReportRepository(BackupRepository):
                                     "$expr": {
                                         "$and": [
                                             { "$in": ['$branchId', '$$branchIds'] },
-                                            # { "$eq": ["$date", "$$date"] },
+                                            { "$eq": ["$date", "$$date"] },
                                             { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     },
@@ -87,7 +87,7 @@ class BranchReportRepository(BackupRepository):
                         "from": 'transaction_discount',
                         "let": {
                             "branchIds": "$cashier.branches",
-                            # "date": "$date"
+                            "date": "$date"
                         },
                         "pipeline": [
                             {
@@ -95,11 +95,23 @@ class BranchReportRepository(BackupRepository):
                                     "$expr": {
                                         "$and": [
                                             { "$in": ['$branchId', '$$branchIds'] },
-                                            # { "$eq": ["$date", "$$date"] },
+                                            { "$eq": ["$date", "$$date"] },
                                             { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     },
                                 },
+                            },
+                            { 
+                                '$group': {
+                                    "_id": "$status",
+                                    "totalGrossSales": { "$sum": "$totalGrossSales" },
+                                    "totalNetSales": { "$sum": "$totalNetSales" },
+                                    "totalDiscount": { "$sum": '$totalDiscount' } ,
+                                    "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
+                                    "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
+                                    "invoiceStartNumber": { '$min': "$invoiceNumber" },
+                                    "invoiceEndNumber": { '$max': "$invoiceNumber" },
+                                }
                             },
                         ],
                         "as": "discounts"
