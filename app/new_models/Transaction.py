@@ -79,7 +79,7 @@ class BaseTransaction(BaseModel):
     @computed_field
     @property
     def totalSalesWithoutMemberDiscount(self) -> float:
-        packageSales = self._computeTotalPackageGrossSales()
+        packageSales = self._computeTotalPackageNetSalesWithoutMemberDiscount()
         promoNetSales = self._computeTotalPromoNetSales()
         return packageSales + promoNetSales
 
@@ -109,14 +109,20 @@ class BaseTransaction(BaseModel):
         totalDiscount = self._sumTotalDiscount(discounts, totalSales)
         return totalDiscount
     
-    def _computeTotalPackageDiscount(self, totalSales) -> float:
-        discounts = self._filterDiscounts(lambda i: i.packageType == PackageType.PACKAGE)
-        totalDiscount = self._sumTotalDiscount(discounts, totalSales)
-        return totalDiscount
+    def _computeTotalPackageNotMemberDiscount(self, totalSales) -> float:
+        return self._computeTotalDiscount(lambda i: i.packageType == PackageType.PACKAGE and i.memberType is None, totalSales)
     
+    def _computeTotalPackageDiscount(self, totalSales) -> float:
+        return self._computeTotalDiscount(lambda i: i.packageType == PackageType.PACKAGE, totalSales)
+
     def _computeTotalPackageNetSales(self) -> float:
         packageSales = self._computeTotalPackageGrossSales()
         totalDiscount = self._computeTotalPackageDiscount(packageSales)
+        return packageSales - totalDiscount
+    
+    def _computeTotalPackageNetSalesWithoutMemberDiscount(self) -> float:
+        packageSales = self._computeTotalPackageGrossSales()
+        totalDiscount = self._computeTotalPackageNotMemberDiscount(packageSales)
         return packageSales - totalDiscount
 
     def _computeTotalPackageGrossSales(self) -> float:
@@ -145,6 +151,11 @@ class BaseTransaction(BaseModel):
             totalPromoPrice += totalPrice
             
         return totalPromoPrice
+    
+    def _computeTotalDiscount(self, func, totalSales) -> float:
+        discounts = self._filterDiscounts(func)
+        totalDiscount = self._sumTotalDiscount(discounts, totalSales)
+        return totalDiscount
    
     def _filterItems(self, func) -> List[TransactionItem]:
         return list(filter(func, self.transactionItems))

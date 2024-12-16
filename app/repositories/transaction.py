@@ -131,9 +131,6 @@ class TransactionRepository(BackupRepository):
                 if item.get('requestedBy') is None or item.get('requestedBy').get('_id') is None:
                     item['requestedBy'] = None
                 
-                discounts = item.get('discounts') or []
-
-                # item['discounts'] = list(map(lambda i: { **i, '_id': str(i['_id']) }, discounts))
                 transactions.append(item)
             return transactions
         except Exception as e:

@@ -141,6 +141,7 @@ def v3_create_transaction(user_id):
         )
         discountRepository.insert_many(discounts)
 
+        result = transactionRepository.find_one({ '_id': ObjectId(result['_id']) })
         return jsonify({'message': 'Transaction created successfully', 'data': result })
     except ValidationError as e:
         return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
