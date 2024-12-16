@@ -26,7 +26,7 @@ class CashierReport(BaseModel):
     id: Optional[str] = Field(alias="_id", default=None)
     branch: object
     cashier: object
-    cashSales: object
+    sales: Optional[object] = None
     beginningCashOnHand: CashCount = None
     endingCashOnHand: CashCount = None
     timeIn: str
@@ -58,7 +58,10 @@ class CashierReport(BaseModel):
 
     # @computed_field
     def difference(self) -> float:
-        totalSales = self.cashSales['totalNetSales'] if self.cashSales is not None else 0
+        if(self.sales is None):
+            return 0
+        
+        totalSales = self.sales['totalNetSales'] if self.sales is not None else 0
         cashOnHand = self.endingCashOnHand['total'] if self.endingCashOnHand is not None else 0
         return cashOnHand - totalSales
     

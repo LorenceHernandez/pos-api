@@ -135,6 +135,7 @@ class CashierReportRepository(BackupRepository):
                 {
                     '$project': {
                         "discounts._id": 0,
+                        "transactions._id": 0,
                         "sales._id": 0,
                         'cashierId': 0,
                         'branchId': 0,
@@ -154,11 +155,12 @@ class CashierReportRepository(BackupRepository):
                     }
                 }
             ]))
-            reports = []
-            for item in data:
-                report = CashierReport.model_construct(**item)
-                reports.append(report.model_dump(exclude={'transactions'}))
-            return reports
+            # reports = []
+            # for item in data:
+            #     report = CashierReport(**item)
+            #     reports.append(report.model_dump(exclude={'transactions'}))
+            # print(data)
+            return data
         except Exception as e:
             raise e
    
