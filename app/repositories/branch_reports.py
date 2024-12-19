@@ -140,10 +140,10 @@ class BranchReportRepository(BackupRepository):
                 }
             ]))
 
-            reports = []
-            for item in data:
-                reports.append(item)
-            return reports
+            # reports = []
+            # for item in data:
+            #     reports.append(item)
+            return data
         except Exception as e:
             raise e
 

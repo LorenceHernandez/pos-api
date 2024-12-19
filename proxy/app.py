@@ -346,38 +346,30 @@ def print_report():
         # p.text(branch['streetAddress'] + ' ' + branch['city'] + ', ' + branch['state'] + '\n')
         # p.text(branch['tin'] + '\n')
 
+        p.set(align='center', bold=True)
+
+        if(type == 'X_REPORT'):
+            p.textln('X-READING REPORT')
+        else:
+            p.textln('Z-READING REPORT')
+
+        p.set(align='left', bold=False)
         p.textln('-' * 40)
-        p.set(align='left')
 
-        if(reprint):
-            p.textln(f'{'Reprint Date & Time: ':<21}{dateNow.strftime("%m-%d-%Y %I:%M:%S%p"):>19}')
-
+        p.textln(f'{'Print Date & Time: ':<21}{dateNow.strftime("%m-%d-%Y %I:%M:%S%p"):>19}')
         p.textln(f'{'MIN: ':<5}{'---':>35}')
         p.textln(f'{'SN: ':<4}{'---':>36}')
         
         if(type == 'X_REPORT'):
-            p.textln(f'{'Cashier Name: ':<14}{start_case(cashier['first_name'] + ' ' + cashier['last_name']):>26}')
-        p.textln(f'{'Date: ':<6}{data['date']:>34}')
+            p.textln(f'{'Cashier: ':<14}{start_case(cashier['first_name'] + ' ' + cashier['last_name']):>26}')
         
+        p.textln(f'{'Date: ':<6}{data['date']:>34}')
+                
         if(type == 'X_REPORT'):
             p.textln(f'{'Time In & Out: ':<15}{f'{timeInDate.strftime("%I:%M%p")} - {timeOutDate.strftime("%I:%M%p")}':>25}')
-        
-        if(type == 'X_REPORT'):
             p.textln(f'{'Beginning Balance: ':<19}{beginningCashTotal:>21}')
 
-        p.textln('-' * 40)
-
         p.textln(f'{'Invoice Numbers: ':<17}{f'{cashSales['invoiceStartNumber']} - {cashSales['invoiceEndNumber']}':>23}')
-        
-        if(type == 'X_REPORT'):
-            p.textln('Cash Count: ')
-
-        cash_count = endingCashOnHand.get('count')
-        if(cash_count is not None):
-            for key, value in dict(cash_count).items():
-                p.textln(f'{f'{key} * {value}':>40}')
-        p.textln(f'{'Total Cash Count: ':<18}{(endingCashOnHand.get('total', 0)):>22}')
-
         p.textln('-' * 40)
 
         discounts = [
@@ -389,14 +381,47 @@ def print_report():
         totalDiscount = cashSales['totalGrossSales'] - cashSales['totalNetSales']
         totalDiscount = "{:.2f}".format(totalDiscount)
 
-        for discount in discounts:
-                indented = '    '
-
-                discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
-                p.textln(f'{(discount['name'] + ' Discount')[:29]:<30}{f'- {totalDiscount}':<10}')
-
-        p.textln(f'{'Total Discount: ':<16}{totalDiscount:>24}')
+        p.textln(f'{'Less Discount: ':<16}{totalDiscount:>24}')
+        p.textln(f'{'Less Return: ':<13}{0:>27}')
+        p.textln(f'{'Less Void: ':<11}{0:>29}')
+        p.textln(f'{'Less VAT Adjustment: ':<21}{0:>19}')
         p.textln(f'{'Net Sales: ':<11}{cashSales['totalNetSales']:>29}')
+
+        p.textln('-' * 40)
+        p.set(align='center')
+        p.textln('DISCOUNT SUMMARY')
+        p.set(align='left')
+
+        p.textln(f'{'SC Discount: ':<13}{totalDiscount:>27}')
+        p.textln(f'{'PWD Discount: ':<14}{totalDiscount:>26}')
+        p.textln(f'{'NAAC Discount: ':<15}{totalDiscount:>25}')
+        p.textln(f'{'Solo Parent Discount: ':<22}{totalDiscount:>18}')
+        p.textln(f'{'Other Discount: ':<16}{totalDiscount:>24}')
+
+        # for discount in discounts:
+        #         indented = '    '
+
+        #         discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
+        #         p.textln(f'{(discount['name'] + ' Discount')[:29]:<30}{f'- {totalDiscount}':<10}')
+
+        p.textln('-' * 40)
+        p.set(align='center')
+        p.textln('SALES ADJUSTMENT')
+        p.set(align='left')
+        
+
+        p.textln('-' * 40)
+        p.set(align='center')
+        p.textln('TRANSACTION SUMMARY')
+        p.set(align='left')
+
+        p.textln(f'{'CASH: ':<6}{totalDiscount:>34}')
+        p.textln(f'{'CHEQUE: ':<7}{totalDiscount:>33}')
+        # p.textln(f'{'CREDIT CARD: ':<15}{totalDiscount:>25}')
+        # p.textln(f'{'Solo Parent Discount: ':<22}{totalDiscount:>18}')
+        # p.textln(f'{'Other Discount: ':<16}{totalDiscount:>24}')
+
+        p.textln('-' * 40)
 
         difference = (cashSales['totalNetSales']) - endingCashOnHand.get('total', 0)
         cashLoss = difference if difference > 0 else 0

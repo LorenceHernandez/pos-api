@@ -122,12 +122,13 @@ def v3_create_transaction(user_id):
        
         result = transactionRepository.insert_one(model)
 
-        discounts = map(
+        discounts = list(map(
             lambda i: { 
                 **i.model_dump(exclude='id'),
                 'discountId': i.id, 
                 'transactionId': result['_id'],
                 'customerId': result['customer']['_id'],
+                'memberId': result['customer']['customer_type_id'],
                 **model.model_dump(
                     include={
                         'cashierId', 
@@ -138,8 +139,9 @@ def v3_create_transaction(user_id):
                 )
             }, 
             model.discounts
-        )
-        discountRepository.insert_many(discounts)
+        ))
+        if(len(discounts) > 0):
+            discountRepository.insert_many(discounts)
 
         result = transactionRepository.find_one({ '_id': ObjectId(result['_id']) })
         return jsonify({'message': 'Transaction created successfully', 'data': result })
