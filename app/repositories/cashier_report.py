@@ -16,14 +16,6 @@ class CashierReportRepository(BackupRepository):
         try:
             data = list(self._db[self._collection].aggregate([
                 { '$match': query },
-                { 
-                    '$lookup': {
-                        'from': 'transactions',
-                        'localField': 'cashierId',
-                        'foreignField': 'cashierId',
-                        'as': 'transactions'
-                    }, 
-                },
                 {
                     "$addFields": {
                         "cashierId": {"$toObjectId": "$cashierId"},
@@ -52,6 +44,31 @@ class CashierReportRepository(BackupRepository):
                     "$addFields": {
                         "cashierId": {"$toString": "$cashierId"},
                         "branchId": {"$toString": "$branchId"}
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": self._transaction_collection,
+                        "let": {
+                            "branchId": "$branchId",
+                            "cashierId": "$cashierId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$cashierId", "$$cashierId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                            { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
+                                        ]
+                                    }
+                                }
+                            },
+                        ],
+                        "as": "transactions"
                     }
                 },
                 {
@@ -112,6 +129,26 @@ class CashierReportRepository(BackupRepository):
                                     }
                                 },
                             },
+                            {
+                                "$addFields": {
+                                    "transactionId": {"$toObjectId": "$transactionId"}
+                                }
+                            },
+                            { 
+                                '$lookup': {
+                                    'from': self._transaction_collection,
+                                    'localField': 'transactionId',
+                                    'foreignField': '_id',
+                                    'as': 'transaction'
+                                }, 
+                            },
+                            { "$unwind": "$transaction" },
+                            {
+                                '$project': {
+                                    "_id": 0,
+                                    "transactionId": 0,
+                                }
+                            },
                         ],
                         "as": "discounts"
                     }
@@ -135,7 +172,11 @@ class CashierReportRepository(BackupRepository):
                 {
                     '$project': {
                         "discounts._id": 0,
+                        "discounts.transaction._id": 0,
+                        "discounts.transaction.transactionId": 0,
+                        "discounts.transaction.transactionItems": 0,
                         "transactions._id": 0,
+                        "transactions.transactionItems": 0,
                         "sales._id": 0,
                         'cashierId': 0,
                         'branchId': 0,

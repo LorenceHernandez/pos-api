@@ -1,8 +1,9 @@
 import datetime
+from itertools import groupby
 import os
 from flask import Flask, request, Response
 from flask_cors import CORS
-from pydash import start_case, upper_case
+from pydash import get, start_case, upper_case
 import requests
 import socket
 from pydash.strings import to_lower
@@ -23,6 +24,7 @@ print('CLOUD_SERVER_URL', CLOUD_SERVER_URL)
 
 
 def is_internet_connected():
+    # return False
     try:
         socket.create_connection(("www.google.com", 80))
         return True
@@ -101,18 +103,18 @@ def print_receipt():
     
     print(f'PRINTING... {repr(p)}')
 
-    data = request_data['combinedData']
-    branch = data['branch']
-    cashier = data['cashier']
+    transaction = request_data['transaction']
+    branch = transaction['branch']
+    cashier = transaction['cashier']
     dvote = request_data['dvoteDetails'][0]
-    customer = data['customerData']
-    reprint = data.get('reprint') 
+    customer = transaction['customer']
+    reprint = request_data.get('reprint') 
     reprintLabel = '(RE-PRINT)' if reprint else ''
 
     companyCopy = request_data.get('companyCopy')
     companyLabel = '(COMPANY\'S COPY)' if companyCopy else ''
 
-    dt = datetime.datetime.fromisoformat(data['transactionDate'])
+    dt = datetime.datetime.fromisoformat(transaction['transactionDate'])
     dateNow = datetime.datetime.now()
 
     # discount = data.get('discountApplied') or {}
@@ -121,105 +123,120 @@ def print_receipt():
     try:
         p.set(align='center', bold=True)
         p.text(f'MMG-ALBAY {companyLabel}\n\n')
-        p.set(bold=False)
-        p.text(f'Operated By: \n')
-        p.set(bold=True)
-        p.text(f'MEDICAL MISSION GROUP MULTIPURPOSE COOPERATIVE-ALBAY\n')
-        p.set(bold=False)
+        p.set(align='center', bold=False)
+        p.text('Operated By:\n')
+        p.set(align='center', bold=True)
+        p.text('MEDICAL MISSION GROUP MULTIPURPOSE COOPERATIVE-ALBAY\n')
+        p.set(align='center', bold=False)
         p.text('NON-VAT REG TIN ' + branch['tin'] + '\n')
         p.text(upper_case(branch['streetAddress']) + '\n\n')
 
         p.set(align='center', bold=True)
         p.text(f'INVOICE {reprintLabel}\n')
-
-        p.textln('-' * 40)
         p.set(align='left', bold=False)
+        p.textln('-' * 33)
 
         if(reprint):
-            p.textln(f'{'Reprint Date & Time: ':<21}{dateNow.strftime("%m-%d-%Y %I:%M:%S%p"):>19}')
+            p.textln(f'{"Reprint: ":<9}{dateNow.strftime("%Y-%m-%d %I:%M%p"):>24}')
 
-        p.textln(f'{'Invoice No.: ':<13}{str(data['invoiceNumber']).zfill(5):>27}')
-        p.textln(f'{'MIN: ':<5}{'---':>35}')
-        p.textln(f'{'SN: ':<4}{'---':>36}')
-        p.textln(f'{'Date & Time: ':<13}{dt.strftime("%m-%d-%Y %I:%M:%S%p"):>27}')
-        p.textln(f'{'Cashier: ':<14}{start_case(cashier['first_name'] + ' ' + cashier['last_name']):>26}')
+        p.textln(f'{"MIN: ":<5}{"---":>28}')
+        p.textln(f'{"SN: ":<4}{"---":>29}')
+        p.textln(f'{"Date & Time: ":<13}{dt.strftime("%Y-%m-%d %I:%M%p"):>20}')
+        p.textln(f'{"Cashier: ":<9}{start_case(cashier["first_name"] + " " + cashier["last_name"]):>24}')
+        p.textln(f'{"Invoice #: ":<11}{str(transaction["invoiceNumber"]).zfill(5):>22}')
 
-        p.textln('-' * 40)
-
+        p.textln('-' * 33)
         p.set(align='center', bold=True)
         p.text('SOLD TO\n')
         p.set(align='left', bold=False)
 
-        p.textln(f'{'Name: ':<6}{start_case(to_lower(customer['name'])):>34}')
-        p.textln(f'{'Address: ':<9}{start_case(to_lower(customer['address'])):>31}')
-        p.textln(f'{'TIN: ':<5}{customer['tin']:>35}')
+        p.textln(f'{"Name: ":<6}{start_case(to_lower(customer["name"])):>27}')
+        p.textln(f'{"Address: ":<9}{start_case(to_lower(customer["address"])):>24}')
+        p.textln(f'{"TIN: ":<5}{customer.get("tin_number") or "---":>28}')
 
         if(companyCopy):
-            p.textln(f'{'Age: ':<5}{customer['age']:>35}')
-            p.textln(f'{'Birth Date: ':<12}{customer['birthDate']:>28}')
+            p.textln(f'{"Age: ":<5}{customer["age"]:>28}')
+            p.textln(f'{"Birth Date: ":<12}{str(customer["birthDate"]).split("T")[0]:>21}')
         else:
-            p.textln(f'{'Age: ':<5}{'---':>35}')
-            p.textln(f'{'Birth Date: ':<12}{'---':>28}')
+            p.textln(f'{"Age: ":<5}{"---":>28}')
+            p.textln(f'{"Birth Date: ":<12}{"---":>21}')
             
-        p.textln(f'{'Requested By: ':<14}{data.get('requestedByName', '---'):>26}')
+        p.textln(f'{"Requested By: ":<14}{transaction.get("requestedByName", "---"):>19}')
         # p.textln(f'{'SC/PWD/Other ID No.: ':<21}{customer.get('customerTypeId') or '---':>19}')
 
-        p.textln('-' * 40)
-        p.set(bold=True)
-        p.textln(f'{'ITEM DESCRIPTION':<18}| QTY | PRICE | AMOUNT')
+        p.textln('-' * 33)
+        p.set(align='center', bold=True)
+        p.textln(f'{"ITEM ":<16}|QTY|PRICE|AMOUNT')
         p.set(bold=False)
-        p.textln('-' * 40)
+        p.textln('-' * 33)
 
-        for service in data['items']:
-            is_labtest = service['source'] == 'labTest'
+        for key, items in groupby(transaction['transactionItems'], lambda i: i.get('package')):
+            package = key
 
-            if(is_labtest):
-                amount = service['amount'] if data['status'] == 'Completed' else service['amount'] * -1
-                p.textln(f'{service['name'][:17]:<18}{f'({service['qty']})':^7}{amount:^7}{amount:>8}')
-                continue
-
-            p.set(align='left', bold=True)
-            p.text(f'> {service['name']} \n')
-        
-            p.set(bold=False)
-            for test in service['labTest']:
+            indented = ''
+            if(package is not None):
                 indented = '  '
-                amount = test['amount'] if data['status'] == 'Completed' else test['amount'] * -1
-                p.textln(f'{(indented + start_case(test['name']))[:17]:<18}{f'({test['qty']})':^7}{amount:^7}{amount:>8}')
+                p.text(f'> {package["name"]} \n')
 
-            discount = service['discount']
-            if(data['status'] == 'Completed' and service['packageForMemberType'] != 'seniorcitizenpwd' and discount != None):
-                totalDiscount = discount['value'] if discount['type'] == 'fixed' else (data['subTotal'] * (discount['value'] / 100))
-                p.textln(f'{f'  - Less: {discount['name']}':<31}{f'- {totalDiscount}':>9}')
+            for item in list(items):
+                # is_labtest = item['source'] == 'labTest'
+
+                # if(is_labtest):
+                #     amount = item['amount'] if transaction['status'] == 'Completed' else item['amount'] * -1
+                #     p.textln(str(item["name"][:17]).ljust(18) + f'({item["qty"]})'.center(7) + str(amount).center(7) + str(amount).rjust(8))
+                #     continue
                 
+                
+                amount = item['price'] if transaction['status'] == 'completed' else item['price'] * -1
+                p.textln(str(indented + item["name"][:14]).ljust(16) + f'({item["quantity"]})'.center(5) + str(amount).center(6) + str(amount).rjust(6))
             
-            # if(service['source'] == 'promo'):
-            #     serviceDiscount = service.get('discount')
-            #     serviceDiscountAmount = service.get('totalPackagePrice', 0) - service.get('totalDiscountedPrice', 0)
-            #     p.textln(f'{(indented + 'Discount: ' + serviceDiscount['name'])[:31]:<31}{'- ' + str(serviceDiscountAmount):>9}')
+            if(package is not None):
+                discounts = list(filter(lambda i: i.get('packageId') == package['_id'] and i['memberType'] is None, transaction['discounts']))
+                if(len(discounts) > 0):
+                    discount = discounts[0]
+                    totalDiscount = discount['value'] if discount['type'] == 'fixed' else (transaction['totalGrossSales'] * (discount['value'] / 100))
+                    p.textln(f'  - Less: {discount["name"]}'[:23].ljust(24) + f'- {"{:.2f}".format(totalDiscount)}'.rjust(9))
+
+                # p.set(bold=False)
+                # for test in item['labTest']:
+                #     indented = '  '
+                #     amount = test['amount'] if transaction['status'] == 'Completed' else test['amount'] * -1
+                #     p.textln(indented + start_case(test["name"][:17]).ljust(18) + f'({test["qty"]})'.center(7) + str(amount).center(7) + str(amount).rjust(8))
+                #     # p.textln(f'{(indented + start_case(test["name"]))[:17]:<18}{f'({test["qty"]})':^7}{amount:^7}{amount:>8}')
+
+                # discount = item['discount']
+                # if(transaction['status'] == 'Completed' and item['packageForMemberType'] != 'seniorcitizenpwd' and discount != None):
+                #     totalDiscount = discount['value'] if discount['type'] == 'fixed' else (transaction['subTotal'] * (discount['value'] / 100))
+                #     p.textln(f'  - Less: {discount["name"]}'.ljust(31) + f'- {totalDiscount}'.rjust(9))
+                    
+                
+                # if(service['source'] == 'promo'):
+                #     serviceDiscount = service.get('discount')
+                #     serviceDiscountAmount = service.get('totalPackagePrice', 0) - service.get('totalDiscountedPrice', 0)
+                #     p.textln(f'{(indented + 'Discount: ' + serviceDiscount['name'])[:31]:<31}{'- ' + str(serviceDiscountAmount):>9}')
 
 
-        paymentDue = data['paymentDue']
+        paymentDue = transaction.get('paymentDue')
 
-        p.textln('-' * 40)
-        if (data['status'] == 'Cancelled'):
+        p.textln('-' * 33)
+        if (transaction['status'] == 'Cancelled'):
             p.set(align='center', bold=True)
             p.text('*** VOIDED TRANSACTION ***\n\n')
             p.set(align='left', bold=False)
 
-            p.textln(f'{'Total Amount: ':<20}{data['paymentDetails']['subTotal']:>20}')
-            p.textln(f'{'Reason: ':<8}{data.get('reason') or '---':>32}')
-        elif(data['status'] == 'Refunded'):
+            p.textln(f'{"Total Amount: ":<20}{transaction["paymentDetails"]["subTotal"]:>20}')
+            p.textln(f'{"Reason: ":<8}{transaction.get("reason") or "---":>32}')
+        elif(transaction['status'] == 'Refunded'):
             # p.textln(f'{'Number of Items: ':<20}{request_data['totalQuantity']:>20}')
             p.set(align='center', bold=True)
             p.text('*** REFUNDED TRANSACTION ***\n\n')
             p.set(align='left', bold=False)
-            p.textln(f'{'Refunded Amount: ':<20}{paymentDue:>20}')
-            p.textln(f'{'Previous Invoice Number: ':<25}{str(data['previousInvoiceNumber']).zfill(5):>15}')
-            p.textln(f'{'Reason: ':<8}{data.get('refundedReason') or '---':>32}')
+            p.textln(f'{"Refunded Amount: ":<20}{paymentDue:>20}')
+            p.textln(f'{"Previous Invoice Number: ":<25}{str(transaction["previousInvoiceNumber"]).zfill(5):>15}')
+            p.textln(f'{"Reason: ":<8}{transaction.get("refundedReason") or "---":>32}')
         else:
             p.set(align='left', bold=True)
-            p.textln(f'{'Total Sales: ':<20}{data['subTotal']:>20}')
+            p.textln(f'{"Total Sales: ":<13}{transaction["totalSalesWithoutMemberDiscount"]:>20}')
 
             p.set(bold=False)
             # for discount in data['discounts']:
@@ -228,38 +245,37 @@ def print_receipt():
             #     discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
             #     p.textln(f'{(discount.get('name', '---') + ' Discount')[:29]:<30}{f'- {discountAmount}':<10}')
             
-            p.textln(f'{'Less: Discount(SC/PWD/NAAC/MOV/SP) ':<35}{f'({data['totalMemberDiscount']})':>5}')
-            p.textln(f'{'Less: Withholding Tax ':<22}{'(0)':>18}')
+            p.textln(f'{"Less: SC/PWD/NAAC/MOV/SP ":<25}' + f'({transaction["totalMemberDiscount"]})'.rjust(8))
+            p.textln(f'{"Less: Withholding Tax ":<22}{"(0)":>11}')
             
             p.set(bold=True)
-            p.textln(f'{'TOTAL AMOUNT DUE: ':<20}{data['paymentDue']:>20}\n')
+            p.textln(f'{"TOTAL AMOUNT DUE: ":<18}{transaction["totalNetSales"]:>15}')
             
             p.set(bold=False)
-            p.textln(f'{'Tender Amount: ':<20}{request_data['amountGiven']:>20}')
-            p.textln(f'{'Tender Type: ':<20}{upper_case(request_data['tenderType']):>20}')
-            p.textln(f'{'Change: ':<20}{request_data['change']:>20}')
+            p.textln(f'{"Tender Amount: ":<15}{transaction["tenderAmount"]:>18}')
+            p.textln(f'{"Tender Type: ":<13}{upper_case(transaction["tenderType"]):>20}')
+            p.textln(f'{"Change: ":<8}{transaction["change"]:>25}')
             # p.textln(f'{'Number of Items: ':<20}{data.get('totalQuantity', 0):>20}')
 
-        p.textln('-' * 40)
+        p.textln('-' * 33)
 
         p.set(align='center', bold=True)
         p.text('*THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX*\n')
-        p.textln('-' * 40)
+        p.textln('-' * 33)
         p.textln()
         p.set(align='left', bold=False)
 
-        totalMemberDiscount = data['totalMemberDiscount']
-        customerTypeId = customer.get('customerTypeId') or ('_' * 8) 
+        totalMemberDiscount = transaction['totalMemberDiscount']
+        customerTypeId = customer.get('customer_type_id') or ('_' * 8) 
 
-        p.text(f'{'ID No. (SC/PWD/NAAC/MOV/SP): ':<29}{customerTypeId:>11}\n\n')
-        p.text(f'{'Signature (SC/PWD/NAAC/MOV/SP): ':<32}{('_' * 8):>8}\n\n')
-        p.textln()
+        p.text(f'{"ID (SC/PWD/NAAC/MOV/SP): ":<25}{customerTypeId:>8}\n\n')
+        p.text(f'{"Signature: ":<11}{("_" * 8):>22}\n\n')
 
         p.set(align="center", bold=True)
         p.text('SUPPLIER\n')
         p.text(dvote['name'].upper() + '\n')
-        p.set(bold=False)
-        p.text('Address' + dvote['address'] + '\n')
+        p.set(align="center", bold=False)
+        p.text('Address: ' + dvote['address'] + '\n')
         p.text('Vat Reg. TIN: ' + dvote['tin'] + '\n')
         p.text('Accred No: ' + dvote['accredNo'] + '\n')
         p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
@@ -278,6 +294,11 @@ def print_receipt():
         }, 500
     return { 'message': 'Printed successfully' }, 200
 
+def compute_sum(discounts, key, fn):
+    _sum = 0
+    for item in discounts[key]:
+        _sum += float(fn(item))
+    return _sum
 
 @app.post('/print-report')
 def print_report():
@@ -316,11 +337,14 @@ def print_report():
     timeOutDate = None
     if(type == 'X_REPORT'):
         timeInDate = datetime.datetime.fromisoformat(data['timeIn'])
-        timeOutDate = datetime.datetime.fromisoformat(data['timeOut'])
+        if(data.get('timeOut') is not None):
+            timeOutDate = datetime.datetime.fromisoformat(data['timeOut'])
 
-    beginningCashTotal = data['beginningCashOnHand']['total'] if data['beginningCashOnHand'] is not None else 0
-    cashSales = data['cashSales']
-    endingCashOnHand = data['endingCashOnHand'] or {}
+    # beginningCashTotal = data['beginningCashOnHand']['total'] if data['beginningCashOnHand'] is not None else 0
+    beginningCashTotal = get(data, 'beginningCashOnHand.total', 0)
+    endingCashTotal = get(data, 'endingCashOnHand.total', 0)
+    sales = data['sales']
+    # endingCashOnHand = data.get('endingCashOnHand') or {}
 
     reprint = data.get('reprint') 
     reprintLabel = '(RE-PRINT)' if reprint else ''
@@ -328,75 +352,84 @@ def print_report():
 
     try:
         p.set(align='center', bold=True)
-        p.text(f'MMG-ALBAY {reprintLabel}\n\n')
-        p.set(bold=False)
+        p.text(f'MMG-ALBAY\n\n')
+        p.set(align='center', bold=False)
         p.text(f'Operated By: \n')
-        p.set(bold=True)
+        p.set(align='center', bold=True)
         p.text(f'MEDICAL MISSION GROUP MULTIPURPOSE COOPERATIVE-ALBAY\n')
-        p.set(bold=False)
+        p.set(align='center', bold=False)
         p.text('NON-VAT REG TIN ' + branch['tin'] + '\n')
         p.text(upper_case(branch['streetAddress']) + '\n\n')
-
-        # p.set(align='center', bold=True)
-        # p.text(f'{title}\n')
-        # p.text(f'MMG-ALBAY\n')
-        # p.set(bold=False)
-        # p.set(bold=True)
-        # p.set(bold=False)
-        # p.text(branch['streetAddress'] + ' ' + branch['city'] + ', ' + branch['state'] + '\n')
-        # p.text(branch['tin'] + '\n')
 
         p.set(align='center', bold=True)
 
         if(type == 'X_REPORT'):
-            p.textln('X-READING REPORT')
+            p.textln(f'X-READING REPORT {reprintLabel}')
         else:
-            p.textln('Z-READING REPORT')
+            p.textln(f'Z-READING REPORT {reprintLabel}')
 
         p.set(align='left', bold=False)
-        p.textln('-' * 40)
+        p.textln('-' * 33)
 
-        p.textln(f'{'Print Date & Time: ':<21}{dateNow.strftime("%m-%d-%Y %I:%M:%S%p"):>19}')
-        p.textln(f'{'MIN: ':<5}{'---':>35}')
-        p.textln(f'{'SN: ':<4}{'---':>36}')
+        if(reprint):
+            p.textln(f'{"Reprint: ":<9}{dateNow.strftime("%Y-%m-%d %I:%M%p"):>24}')
+        p.textln(f'{"MIN: ":<5}{"---":>28}')
+        p.textln(f'{"SN: ":<4}{"---":>29}')
         
         if(type == 'X_REPORT'):
-            p.textln(f'{'Cashier: ':<14}{start_case(cashier['first_name'] + ' ' + cashier['last_name']):>26}')
-        
-        p.textln(f'{'Date: ':<6}{data['date']:>34}')
+            p.textln(f'{"Cashier: ":<14}{start_case(cashier["first_name"] + " " + cashier["last_name"]):>19}')
+        else:
+            p.textln(f'{"Z-Counter #: ":<13}{1:>20}')
+            
+        p.textln(f'{"Date: ":<6}{data["date"]:>27}')
                 
         if(type == 'X_REPORT'):
-            p.textln(f'{'Time In & Out: ':<15}{f'{timeInDate.strftime("%I:%M%p")} - {timeOutDate.strftime("%I:%M%p")}':>25}')
-            p.textln(f'{'Beginning Balance: ':<19}{beginningCashTotal:>21}')
+            timeOutDate = ' - '+ timeOutDate.strftime("%I:%M%p") if timeOutDate is not None else ''
+            p.textln(f'{"Time In & Out: ":<15}' + f'{timeInDate.strftime("%I:%M%p")}{timeOutDate}'.rjust(18))
+            p.textln(f'{"Beginning Balance: ":<19}{beginningCashTotal:>14}')
+        else:
+            p.textln(f'{"Reset Counter #: ":<17}{0:>16}')
+            
+        p.textln(f'{"Invoice #: ":<11}' + f'{sales["invoiceStartNumber"]} - {sales["invoiceEndNumber"]}'.rjust(22))
+        p.textln('-' * 33)
 
-        p.textln(f'{'Invoice Numbers: ':<17}{f'{cashSales['invoiceStartNumber']} - {cashSales['invoiceEndNumber']}':>23}')
-        p.textln('-' * 40)
+        p.textln(f'{"Gross Sales: ":<13}{"{:.2f}".format(sales["totalGrossSales"]):>20}')
+        p.textln(f'{"Less Discount: ":<16}{"{:.2f}".format(sales["totalMemberDiscount"]):>17}')
+        p.textln(f'{"Less Return: ":<13}{0:>20}')
+        p.textln(f'{"Less Void: ":<11}{0:>22}')
+        p.textln(f'{"Less VAT Adjustment: ":<21}{0:>12}')
+        p.textln(f'{"Net Sales: ":<11}{"{:.2f}".format(sales["totalNetSales"]):>22}')
 
-        discounts = [
-            { 'name': 'SR/PWD 20%', 'value': 476 },
-            # { 'name': 'Non-Member 7%', 'value': 277.55 },
-        ]
 
-        p.textln(f'{'Gross Sales: ':<13}{cashSales['totalGrossSales']:>27}')
-        totalDiscount = cashSales['totalGrossSales'] - cashSales['totalNetSales']
-        totalDiscount = "{:.2f}".format(totalDiscount)
+        difference = (sales['totalNetSales']) - endingCashTotal
+        cashLoss = difference if difference > 0 else 0
+        cashGain = difference * -1 if difference < 0 else 0
 
-        p.textln(f'{'Less Discount: ':<16}{totalDiscount:>24}')
-        p.textln(f'{'Less Return: ':<13}{0:>27}')
-        p.textln(f'{'Less Void: ':<11}{0:>29}')
-        p.textln(f'{'Less VAT Adjustment: ':<21}{0:>19}')
-        p.textln(f'{'Net Sales: ':<11}{cashSales['totalNetSales']:>29}')
+        p.textln('-' * 33)
+        p.textln(f'{"Cash Gain: ":<11}{"{:.2f}".format(cashGain):>22}')
+        p.textln(f'{"Cash Loss: ":<11}{"({:.2f})".format(cashLoss):>22}')
 
-        p.textln('-' * 40)
+        p.textln('-' * 33)
         p.set(align='center')
         p.textln('DISCOUNT SUMMARY')
         p.set(align='left')
 
-        p.textln(f'{'SC Discount: ':<13}{totalDiscount:>27}')
-        p.textln(f'{'PWD Discount: ':<14}{totalDiscount:>26}')
-        p.textln(f'{'NAAC Discount: ':<15}{totalDiscount:>25}')
-        p.textln(f'{'Solo Parent Discount: ':<22}{totalDiscount:>18}')
-        p.textln(f'{'Other Discount: ':<16}{totalDiscount:>24}')
+        discounts = groupby(filter(lambda i: i['memberType'] is not None, data['discounts']), lambda i: i['memberType'])
+        discountDict = {}
+        for key, value in discounts:
+            discountDict[key] = list(value)
+
+        getValue = lambda i: i['transaction']['totalMemberDiscount']
+        scDiscount = compute_sum(discountDict, 'senior_citizen', getValue)
+        pwdDiscount = compute_sum(discountDict, 'pwd', getValue)
+        naacDiscount = compute_sum(discountDict, 'naac', getValue)
+        spDiscount = compute_sum(discountDict, 'solo_parent', getValue)
+
+        p.textln(f'{"SC Discount: ":<13}{"{:.2f}".format(scDiscount):>20}')
+        p.textln(f'{"PWD Discount: ":<14}{"{:.2f}".format(pwdDiscount):>19}')
+        p.textln(f'{"NAAC Discount: ":<15}{"{:.2f}".format(naacDiscount):>18}')
+        p.textln(f'{"Solo Parent Discount: ":<22}{"{:.2f}".format(spDiscount):>11}')
+        p.textln(f'{"Other Discount: ":<16}{0:>17}')
 
         # for discount in discounts:
         #         indented = '    '
@@ -404,40 +437,40 @@ def print_report():
         #         discountAmount = discount.get('value', '---') if discount.get('type') == 'fixed' else discount.get('totalDiscount', '---')
         #         p.textln(f'{(discount['name'] + ' Discount')[:29]:<30}{f'- {totalDiscount}':<10}')
 
-        p.textln('-' * 40)
+        p.textln('-' * 33)
         p.set(align='center')
         p.textln('SALES ADJUSTMENT')
         p.set(align='left')
+        p.textln(f'{"VOID: ":<6}{0:>27}')
+        p.textln(f'{"RETURN: ":<8}{0:>25}')
         
 
-        p.textln('-' * 40)
+        p.textln('-' * 33)
         p.set(align='center')
         p.textln('TRANSACTION SUMMARY')
         p.set(align='left')
 
-        p.textln(f'{'CASH: ':<6}{totalDiscount:>34}')
-        p.textln(f'{'CHEQUE: ':<7}{totalDiscount:>33}')
-        # p.textln(f'{'CREDIT CARD: ':<15}{totalDiscount:>25}')
+        tenders = groupby(data['transactions'], lambda i: i['tenderType'])
+        tendersDict = {}
+        for key, value in tenders:
+            tendersDict[key] = list(value)
+
+        getValue = lambda i: i['totalNetSales']
+        cashTender = compute_sum(tendersDict, 'cash', getValue)
+
+        p.textln(f'{"CASH: ":<6}{"{:.2f}".format(cashTender):>27}')
+        p.textln(f'{"CHEQUE: ":<8}{0:>25}')
+        p.textln(f'{"CREDIT CARD: ":<13}{0:>20}')
         # p.textln(f'{'Solo Parent Discount: ':<22}{totalDiscount:>18}')
         # p.textln(f'{'Other Discount: ':<16}{totalDiscount:>24}')
 
-        p.textln('-' * 40)
-
-        difference = (cashSales['totalNetSales']) - endingCashOnHand.get('total', 0)
-        cashLoss = difference if difference > 0 else 0
-        cashGain = difference * -1 if difference < 0 else 0
-
-        if(type == 'X_REPORT'):
-            p.textln(f'{'Cash Gain: ':<11}{"{:.2f}".format(cashGain):>29}')
-            p.textln(f'{'Cash Loss: ':<11}{"({:.2f})".format(cashLoss):>29}')
-        
-        p.textln('-' * 40)
+        p.textln()
 
         p.set(bold=True, align='center')
         p.text('SUPPLIER\n')
         p.text(dvote['name'].upper() + '\n')
-        p.set(bold=False)
-        p.text('Address' + dvote['address'] + '\n')
+        p.set(bold=False, align='center')
+        p.text('Address: ' + dvote['address'] + '\n')
         p.text('Vat Reg. TIN: ' + dvote['tin'] + '\n')
         p.text('Accred No: ' + dvote['accredNo'] + '\n')
         p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
