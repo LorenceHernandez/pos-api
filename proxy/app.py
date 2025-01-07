@@ -1,6 +1,8 @@
 import datetime
 from itertools import groupby
 import os
+import platform
+import time
 from flask import Flask, request, Response
 from flask_cors import CORS
 from pydash import get, start_case, upper_case
@@ -8,6 +10,9 @@ import requests
 import socket
 from pydash.strings import to_lower
 from escpos import *
+import serial
+from serial.tools import list_ports
+import usb
 
 
 app = Flask(__name__)
@@ -23,13 +28,43 @@ print('LOCAL_SERVER_URL', LOCAL_SERVER_URL)
 print('CLOUD_SERVER_URL', CLOUD_SERVER_URL)
 
 
+def list_serial_ports():
+  """Lists available serial ports on the system."""
+  ports = list_ports.comports()
+  if ports:
+    for port in ports:
+      print(f"Port: {port.device}")
+      print(f"  Description: {port.description}")
+      print(f"  Manufacturer: {port.manufacturer}")
+      print("-" * 20)
+  else:
+    print("No serial ports found.")
+
+list_serial_ports()
+
+def check_os_windows():
+  system = platform.system()
+  return system == 'Windows'
+
+def get_display_device():
+    if(check_os_windows()):
+        return serial.Serial(port='COM3', baudrate=9600)
+    else:
+        return serial.Serial(port='/dev/ttyACM1', baudrate=9600)
+
+vfd = get_display_device()
+vfd.write("\x0C".encode())
+vfd.write('WELCOME TO'.center(20).encode())
+vfd.write("MMG-ALBAY!!".center(20).encode())
+
+
 def is_internet_connected():
-    # return False
-    try:
-        socket.create_connection(("www.google.com", 80))
-        return True
-    except OSError:
-        return False
+    return False
+    # try:
+    #     socket.create_connection(("www.google.com", 80))
+    #     return True
+    # except OSError:
+    #     return False
 
 cors = CORS(app, origins=["*", "*"])
 @app.before_request
@@ -82,21 +117,13 @@ def print_receipt():
     request_data = request.get_json()
     p = None
     try:
-        p = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
-        # p = printer.Network("192.168.5.200")
-        # p = printer.Usb(0x04B8, 0x0202)
+        p = printer.Network("192.168.192.168")
 
     except Exception as e:
-        try:
-            p = printer.Network("192.168.5.200")
-
-            if p is None:
-                raise
-        except Exception as e:
-            return {
-                'message': 'Unable to print the request',
-                'error': repr(e)
-            }, 500
+        return {
+            'message': 'Unable to print the request',
+            'error': repr(e)
+        }, 500
     
     # p = escpos.printer(Usb(0x04b8, 0x0202))  # For USB connection
     # p = escpos.Network("192.168.1.100")  # For network connection
@@ -143,7 +170,7 @@ def print_receipt():
         p.textln(f'{"SN: ":<4}{"---":>29}')
         p.textln(f'{"Date & Time: ":<13}{dt.strftime("%Y-%m-%d %I:%M%p"):>20}')
         p.textln(f'{"Cashier: ":<9}{start_case(cashier["first_name"] + " " + cashier["last_name"]):>24}')
-        p.textln(f'{"Invoice #: ":<11}{str(transaction["invoiceNumber"]).zfill(5):>22}')
+        p.textln(f'{"Invoice #: ":<11}{str(transaction["invoiceNumber"]).zfill(6):>22}')
 
         p.textln('-' * 33)
         p.set(align='center', bold=True)
@@ -232,7 +259,7 @@ def print_receipt():
             p.text('*** REFUNDED TRANSACTION ***\n\n')
             p.set(align='left', bold=False)
             p.textln(f'{"Refunded Amount: ":<20}{paymentDue:>20}')
-            p.textln(f'{"Previous Invoice Number: ":<25}{str(transaction["previousInvoiceNumber"]).zfill(5):>15}')
+            p.textln(f'{"Previous Invoice Number: ":<25}{str(transaction["previousInvoiceNumber"]).zfill(6):>15}')
             p.textln(f'{"Reason: ":<8}{transaction.get("refundedReason") or "---":>32}')
         else:
             p.set(align='left', bold=True)
@@ -280,8 +307,7 @@ def print_receipt():
         p.text('Accred No: ' + dvote['accredNo'] + '\n')
         p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
         p.text('Valid Until: ' + '---' + '\n')
-        p.text('PTU No: ' + dvote.get('PTUno', '---') + '\n\n')
-        p.cut()
+        p.text('PTU No: ' + dvote.get('PTUno', '---') + '\n\n\n\n')
         p.cut()
         p.close()
     except Exception as e: 
@@ -305,23 +331,15 @@ def print_report():
     data = request.get_json()
     p = None
     try:
-        p = printer.Usb(0x04B8,0x0202, 0, profile="TM-U220")
-        # p = printer.Usb(0x04B8, 0x0202)
-
+        p = printer.Network("192.168.192.168")
         if p is None:
             raise
     except Exception as e:
-        try:
-            p = printer.Network("192.168.5.200")
+        return {
+            'message': 'Unable to print the request',
+            'error': repr(e)
+        }, 500
 
-            if p is None:
-                raise
-        except Exception as e:
-            return {
-                'message': 'Unable to print the request',
-                'error': repr(e)
-            }, 500
-    
     # p = escpos.printer(Usb(0x04b8, 0x0202))  # For USB connection
     # p = escpos.Network("192.168.1.100")  # For network connection
     
@@ -475,8 +493,7 @@ def print_report():
         p.text('Accred No: ' + dvote['accredNo'] + '\n')
         p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
         p.text('Valid Until: ' + '---' + '\n')
-        p.text('PTU No: ' + dvote.get('PTUno', '---') + '\n\n')
-        p.cut()
+        p.text('PTU No: ' + dvote.get('PTUno', '---') + '\n\n\n\n')
         p.cut()
         p.close()
     except Exception as e: 
@@ -488,6 +505,50 @@ def print_report():
             'error': repr(e)
         }, 500
     return { 'message': 'Printed successfully' }, 200
+
+@app.post('/display')
+def display_message():
+    vfd.write("\x0C".encode())
+    vfd.write('WELCOME TO'.center(20).encode())
+    vfd.write("MMG-ALBAY!!".center(20).encode())
+
+    return { 'message': 'Displayed successfully' }, 200
+
+@app.post('/display/item')
+def display_item():
+    data = request.get_json()
+    item = data
+    
+    vfd.write("\x0C".encode())
+    vfd.write('MMG-ALBAY'.ljust(20).encode())
+    vfd.write(f'{item["name"][:11]:<12}{"{:.2f}".format(item["price"])[:8]:>8}'.encode())
+
+    return { 'message': 'Displayed successfully' }, 200
+
+@app.post('/display/total')
+def display_total():
+    data = request.get_json()
+    total = data['total']
+        
+    vfd.write("\x0C".encode())
+    vfd.write('TOTAL'.ljust(20).encode())
+    vfd.write("{:.2f}".format(total).rjust(20).encode())
+
+    return { 'message': 'Displayed successfully' }, 200
+
+@app.post('/display/next')
+def display_next():
+    vfd.write("\x0C".encode())
+    vfd.write('THANK YOU!'.center(20).encode())
+    vfd.write('COME AGAIN!'.center(20).encode())
+    time.sleep(5)
+    # vfd.write('NEXT CUSTOMER'.center(20).encode())
+    # vfd.write('PLEASE!'.center(20).encode())
+    # time.sleep(8)
+    vfd.write('WELCOME TO'.center(20).encode())
+    vfd.write("MMG-ALBAY!!".center(20).encode())
+
+    return { 'message': 'Displayed successfully' }, 200
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5001)
