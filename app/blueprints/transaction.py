@@ -128,7 +128,7 @@ def v3_create_transaction(user_id):
                 'discountId': i.id, 
                 'transactionId': result['_id'],
                 'customerId': result['customer']['_id'],
-                'memberId': result['customer']['customer_type_id'],
+                'memberId': result['customer'].get('customer_type_id'),
                 **model.model_dump(
                     include={
                         'cashierId', 

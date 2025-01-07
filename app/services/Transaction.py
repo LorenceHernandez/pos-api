@@ -5,7 +5,6 @@ from itertools import groupby
 from pydash import start_case, to_lower, upper_case
 from app.new_models.Package import PackageType
 from app.new_models.Transaction import Transaction
-from app.utils.Printer import Printer
 
 
 class TransactionService:
