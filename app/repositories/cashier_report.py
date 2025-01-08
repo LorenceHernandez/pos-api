@@ -62,7 +62,7 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$cashierId", "$$cashierId"] },
                                             { "$eq": ["$date", "$$date"] },
-                                            { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
+                                            # { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     }
                                 }
@@ -87,7 +87,7 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$cashierId", "$$cashierId"] },
                                             { "$eq": ["$date", "$$date"] },
-                                            { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
+                                            # { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     }
                                 }

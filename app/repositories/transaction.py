@@ -10,7 +10,9 @@ from app.utils.utils import getLocalDateStr
 class TransactionRepository(BackupRepository):
     _collection = 'new_transactions'
 
-    def find(self, query={}, *args):
+    def find(self, query={}, *args, agreggate=True):
+        if(not agreggate): 
+            return list(self._db[self._collection].find(query, *args))
         try: 
             data = list(self._db[self._collection].aggregate([
                 { '$match': query },
@@ -135,6 +137,11 @@ class TransactionRepository(BackupRepository):
             return transactions
         except Exception as e:
             raise e
+
+    def find_one(self, query={}, agreggate=True):
+        print(self.find(query, agreggate=agreggate))
+        return self.find(query, agreggate=agreggate)[0]
+
     def find_active(self, user_id):
         
         return self.find_one({
@@ -143,12 +150,6 @@ class TransactionRepository(BackupRepository):
            "date": getLocalDateStr(),
         })
 
-    def insert_one(self, data: CreateTransaction):
-
-        if data.status != TransactionStatus.CANCELLED:
-            data.invoiceNumber = self._get_next_sequence('INVOICE_NUMBER')
-        data.transactionNumber = self._get_next_sequence('TRANSACTION_NUMBER')
-        
-        data = data.model_dump(by_alias=True, exclude={'discounts'})
+    def insert_one(self, data):
         result = super().insert_one(data)
         return self.find_one({ '_id': ObjectId(result.inserted_id) })

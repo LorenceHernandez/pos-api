@@ -14,7 +14,7 @@ class TransactionStatus(str, Enum):
     CANCELLED = "cancelled"
     COMPLETED = "completed"
     REFUNDED = "refunded"
-    VOIDED = "voided"
+    HOLD = "HOLD"
 
 class TransactionDiscount(Discount):
     packageType: Optional[PackageType] = Field(default=PackageType.PACKAGE)
@@ -46,7 +46,7 @@ class TransactionItem(Labtest):
 
 
 class BaseTransaction(BaseModel):
-    status: TransactionStatus
+    status: TransactionStatus = TransactionStatus.COMPLETED
     date: str = Field(default_factory=getLocalDateStr)
     transactionDate: str = Field(default_factory=getLocalTimeStr)
     transactionNumber: int = None
@@ -206,9 +206,15 @@ class CreateTransaction(BaseTransaction):
     referredById: Optional[str] = None
     requestedById: Optional[str] = None
 
-class CreateVoidTransaction(CreateTransaction):
+class CreateCancelledTransaction(BaseModel):
     reason: Optional[str] = None
-    
+    cashierId: str
+    branchId: str
+    invoiceNumber: int
+    status: TransactionStatus = TransactionStatus.CANCELLED
+    autoRefund: bool = True
+    dateCancelled: str = Field(default_factory=getLocalTimeStr)
+
 class CreateRefundTransaction(CreateTransaction):
     reason: Optional[str] = None
     refundedInvoiceNumber: int

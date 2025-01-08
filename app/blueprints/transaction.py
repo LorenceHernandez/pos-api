@@ -1,14 +1,16 @@
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
+from pydash import omit
 
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.middlewares.authorized_attribute import authorized
 from app.new_models.Transaction import CreateTransaction
-from app.new_models.Transaction import CreateRefundTransaction, CreateTransaction, CreateVoidTransaction, TransactionStatus
+from app.new_models.Transaction import CreateRefundTransaction, CreateTransaction, CreateCancelledTransaction, TransactionStatus
 from app.repositories.transaction import TransactionRepository
 from app.repositories.transaction_discount import TransactionDiscountRepository
 from app.services.Transaction import TransactionService
+from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 api = '/v2/transactions'
 transaction_bp = Blueprint('transactions', __name__)
@@ -115,12 +117,17 @@ def v3_create_transaction(user_id):
         args = { **request_data, "cashierId": user_id }
         model = CreateTransaction(**args)
 
-        if(model.status == TransactionStatus.VOIDED):
-            model = CreateVoidTransaction(**args)
-        if(model.status == TransactionStatus.REFUNDED):
-            model = CreateRefundTransaction(**args)
+        # if(model.status == TransactionStatus.HOLD):
+        #     model = CreateCancelledTransaction(**args)
+        # if(model.status == TransactionStatus.REFUNDED):
+        #     model = CreateRefundTransaction(**args)
        
-        result = transactionRepository.insert_one(model)
+        # if model.status != TransactionStatus.CANCELLED:
+        model.invoiceNumber = transactionRepository._get_next_sequence('INVOICE_NUMBER')
+        model.transactionNumber = transactionRepository._get_next_sequence('TRANSACTION_NUMBER')
+                
+        data = model.model_dump(by_alias=True, exclude={'discounts'})
+        result = transactionRepository.insert_one(data)
 
         discounts = list(map(
             lambda i: { 
@@ -149,4 +156,51 @@ def v3_create_transaction(user_id):
         return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
     except Exception as e:
         return jsonify({'message': 'Unable to create transaction', 'error': repr(e)}), 500
+
+@transaction_bp.post('/v3/transactions/cancel')
+@authorized
+def v3_cancel_transaction(user_id):
+    try:
+        request_data = request.get_json()
+        args = { **request_data, "cashierId": user_id }
+        model = CreateCancelledTransaction(**args)
+
+        res = None
+        if(model.status == TransactionStatus.CANCELLED):
+            res = transactionRepository.update_one(
+                { 
+                    "invoiceNumber": model.invoiceNumber, 
+                    "branchId": model.branchId 
+                }, 
+                model
+            )
+
+        #TODO update transaction discount if status is updated
+        if((model.autoRefund and model.status == TransactionStatus.CANCELLED) or (model.status == TransactionStatus.REFUNDED)):
+            res = transactionRepository.find_one(
+            { "invoiceNumber": model.invoiceNumber, "branchId": model.branchId }, 
+                agreggate=False
+            )
+            res = omit(res, "_id")
+            res['cashierId'] = user_id
+            res['transactionNumber'] = transactionRepository._get_next_sequence('TRANSACTION_NUMBER')
+            res['status'] = TransactionStatus.REFUNDED
+            res['change'] = None
+            res['tenderAmount'] = None
+            res['tenderType'] = None
+            res['totalNetSales'] = -1 * res['totalNetSales']
+            res['totalGrossSales'] = -1 * res['totalGrossSales']
+            res['totalSalesWithoutMemberDiscount'] = -1 * res['totalSalesWithoutMemberDiscount']
+            res['totalDiscount'] = -1 * res['totalDiscount']
+            res['totalMemberDiscount'] = -1 * res['totalMemberDiscount']
+            res['transactionDate'] = getLocalTimeStr()
+            res['date'] = getLocalDateStr()
+            
+            res = transactionRepository.insert_one(res)
+
+        return jsonify({'message': 'Transaction cancelled successfully', 'data': res })
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
+    except Exception as e:
+        return jsonify({'message': 'Unable to cancelled transaction', 'error': repr(e)}), 500
 

@@ -1,6 +1,7 @@
 
 import abc
 
+from bson import ObjectId
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import pymongo
@@ -47,10 +48,10 @@ class Repository(abc.ABC):
    
     def update_one(self, query, data: BaseModel, *args, **kwargs):
         try:
-            data = data.model_dump(exclude_unset=True)
+            data = data.model_dump(exclude_none=True)
             data = { '$set': data }
             return_document = self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
-            return self.find_one({ '_id': return_document['_id'] })
+            return self.find_one({ '_id': ObjectId(return_document['_id']) })
         except:
             raise
     
