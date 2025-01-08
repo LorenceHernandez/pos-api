@@ -9,10 +9,9 @@ from pydash import get, start_case, upper_case
 import requests
 import socket
 from pydash.strings import to_lower
-from escpos import *
 import serial
+from escpos.printer import Network
 from serial.tools import list_ports
-import usb
 
 
 app = Flask(__name__)
@@ -127,7 +126,7 @@ def print_receipt():
     request_data = request.get_json()
     p = None
     try:
-        p = printer.Network("192.168.192.168")
+        p = Network("192.168.192.168")
 
     except Exception as e:
         return {
@@ -341,7 +340,7 @@ def print_report():
     data = request.get_json()
     p = None
     try:
-        p = printer.Network("192.168.192.168")
+        p = Network("192.168.192.168")
         if p is None:
             raise
     except Exception as e:
