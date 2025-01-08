@@ -51,20 +51,30 @@ def get_display_device():
         return serial.Serial(port='COM3', baudrate=9600)
     else:
         return serial.Serial(port='/dev/ttyACM1', baudrate=9600)
+   
+def display_welcome():
+    vfd = None
+    try:
+        vfd = get_display_device()
+    except:
+        pass
+    
+    if(vfd is None):
+        return
 
-vfd = get_display_device()
-vfd.write("\x0C".encode())
-vfd.write('WELCOME TO'.center(20).encode())
-vfd.write("MMG-ALBAY!!".center(20).encode())
+    vfd.write("\x0C".encode())
+    vfd.write('WELCOME TO'.center(20).encode())
+    vfd.write("MMG-ALBAY!!".center(20).encode())
 
+display_welcome()
 
 def is_internet_connected():
-    return False
-    # try:
-    #     socket.create_connection(("www.google.com", 80))
-    #     return True
-    # except OSError:
-    #     return False
+    # return False
+    try:
+        socket.create_connection(("www.google.com", 80))
+        return True
+    except OSError:
+        return False
 
 cors = CORS(app, origins=["*", "*"])
 @app.before_request
@@ -508,6 +518,7 @@ def print_report():
 
 @app.post('/display')
 def display_message():
+    vfd = get_display_device()
     vfd.write("\x0C".encode())
     vfd.write('WELCOME TO'.center(20).encode())
     vfd.write("MMG-ALBAY!!".center(20).encode())
@@ -519,6 +530,7 @@ def display_item():
     data = request.get_json()
     item = data
     
+    vfd = get_display_device()
     vfd.write("\x0C".encode())
     vfd.write('MMG-ALBAY'.ljust(20).encode())
     vfd.write(f'{item["name"][:11]:<12}{"{:.2f}".format(item["price"])[:8]:>8}'.encode())
@@ -530,6 +542,7 @@ def display_total():
     data = request.get_json()
     total = data['total']
         
+    vfd = get_display_device()
     vfd.write("\x0C".encode())
     vfd.write('TOTAL'.ljust(20).encode())
     vfd.write("{:.2f}".format(total).rjust(20).encode())
@@ -538,13 +551,12 @@ def display_total():
 
 @app.post('/display/next')
 def display_next():
+    vfd = get_display_device()
     vfd.write("\x0C".encode())
     vfd.write('THANK YOU!'.center(20).encode())
     vfd.write('COME AGAIN!'.center(20).encode())
     time.sleep(5)
-    # vfd.write('NEXT CUSTOMER'.center(20).encode())
-    # vfd.write('PLEASE!'.center(20).encode())
-    # time.sleep(8)
+
     vfd.write('WELCOME TO'.center(20).encode())
     vfd.write("MMG-ALBAY!!".center(20).encode())
 
