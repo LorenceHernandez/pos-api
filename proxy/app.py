@@ -331,7 +331,7 @@ def print_receipt():
 
 def compute_sum(discounts, key, fn):
     _sum = 0
-    for item in discounts[key]:
+    for item in discounts.get(key):
         _sum += float(fn(item))
     return _sum
 
