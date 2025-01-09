@@ -1,6 +1,9 @@
 
 
 
+from itertools import groupby
+
+from pydash import get
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.new_models.CashierReport import CashierReport
 from app.new_models.Transaction import TransactionStatus
@@ -62,7 +65,6 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$cashierId", "$$cashierId"] },
                                             { "$eq": ["$date", "$$date"] },
-                                            # { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     }
                                 }
@@ -87,7 +89,6 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$cashierId", "$$cashierId"] },
                                             { "$eq": ["$date", "$$date"] },
-                                            # { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     }
                                 }
@@ -124,7 +125,6 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$cashierId", "$$cashierId"] },
                                             { "$eq": ["$date", "$$date"] },
-                                            { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
                                         ]
                                     }
                                 },
@@ -168,7 +168,7 @@ class CashierReportRepository(BackupRepository):
                         }
                     }
                 },
-                
+
                 {
                     '$project': {
                         "discounts._id": 0,
@@ -196,12 +196,36 @@ class CashierReportRepository(BackupRepository):
                     }
                 }
             ]))
-            # reports = []
-            # for item in data:
-            #     report = CashierReport(**item)
-            #     reports.append(report.model_dump(exclude={'transactions'}))
-            # print(data)
-            return data
+            reports = []
+            for item in data:
+                discountSummary = {}
+                discounts = filter(lambda i: i['memberType'] is not None, item['discounts'])
+                for key, value in groupby(discounts, lambda i: i['memberType']):
+                    discountSummary[key] = sum(map(lambda i: i['transaction']['totalMemberDiscount'], value))
+                item['discountSummary'] = discountSummary
+
+
+                salesAdjustment = {}
+                for key, value in groupby(item['transactions'], lambda i: i['status']):
+                    salesAdjustment[key] = sum(map(lambda i: i['totalNetSales'], value))
+                item['salesAdjustment'] = salesAdjustment
+
+                if(item.get('sales') is not None):
+                    endingCashTotal = get(item, 'endingCashOnHand.total', 0)
+                    difference = (item['sales']['totalNetSales']) - endingCashTotal
+                    cashLoss = difference if difference > 0 else 0
+                    cashGain = difference * -1 if difference < 0 else 0
+                    item['sales']['cashGain'] = cashGain
+                    item['sales']['cashLoss'] = cashLoss
+
+                transactionSummary = {}
+                transactions = filter(lambda i: i['tenderType'] is not None and i['status'] == 'completed', item['transactions'])
+                for key, value in groupby(transactions, lambda i: i['tenderType']):
+                    transactionSummary[key] = sum(map(lambda i: i['totalNetSales'], value))
+                item['transactionSummary'] = transactionSummary                
+
+                reports.append(item)
+            return reports
         except Exception as e:
             raise e
    

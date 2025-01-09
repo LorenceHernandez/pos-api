@@ -3,7 +3,8 @@
 
 from bson import ObjectId
 from flask import Blueprint, jsonify, request,g
-from pydantic import ValidationError 
+from pydantic import ValidationError
+from pydash import omit, pick 
 
 from app.filters.date_filter import DateFilter
 from app.middlewares.authorized_attribute import authorized
@@ -26,15 +27,15 @@ def get_reports(user_id):
     custom_date = request.args.get('customDate')
     start_date = request.args.get('startDate')
     end_date = request.args.get('endDate')
-    cashierId = request.args.get('cashierId')
+    params = pick(request.args.to_dict(), ['date', 'cashierId'])
 
     try:
         previous_report = repository.find_one({ 
             'cashierId': user_id, 
         })
 
-        query = {} if cashierId is None else { 'cashierId': cashierId }
-        reports = repository.find_by_date_and(date_filter, start_date, end_date, custom_date, query)
+        # query = {} if cashierId is None else { 'cashierId': cashierId }
+        reports = repository.find_by_date_and(date_filter, start_date, end_date, custom_date, params)
 
         return jsonify({
             'data': {
@@ -88,15 +89,13 @@ def time_out_report(_):
     )
 
     query = { '_id': ObjectId(report.id) }
-    new_val = { "$set": report.model_dump(exclude_none=True, exclude={'id'}) }
-    result = repository.update_one(query, new_val)
-    
-    updated_value = repository.find_one(query)
+    # new_val = { "$set": report.model_dump(exclude_none=True, exclude={'id'}) }
+    result = repository.update_one(query, report)    
 
     if result is not None:
         logger.insert_one(AuditLog(action=AuditCode.CASHIER_REPORT_TIME_OUT, userId=g.user_id, data=report.model_dump()))
 
-        return jsonify({'message': 'Report updated successfully', 'data': updated_value })
+        return jsonify({'message': 'Report updated successfully', 'data': result })
     else:
         logger.insert_one(AuditLog(action=AuditCode.CASHIER_REPORT_TIME_OUT_ERR, userId=g.user_id, data=report.model_dump(), error='Unable to time out report'))
 

@@ -13,7 +13,7 @@ from pydash import start_case
 
 from app.middlewares.authorized_attribute import authorized
 from app.new_models.Discount import MemberType
-from app.new_models.Sales import GetBranchSalesQuery
+from app.new_models.Sales import GetBranchReportQuery
 from app.repositories.branch_reports import BranchReportRepository
 from app.database.config import users
 from app.utils.reports import export_sales_reports, load_sheet
@@ -30,7 +30,7 @@ def get_today_sales(user_id):
     params = request.args.to_dict()
 
     try:
-        model = GetBranchSalesQuery(**params, date=getLocalDateStr())
+        model = GetBranchReportQuery(**params)
         query = model.model_dump()
         sales = repository.find_sales(query)
         return jsonify({ 'data': sales })
@@ -46,7 +46,7 @@ def get_sales(user_id):
     params = request.args.to_dict()
 
     try:
-        model = GetBranchSalesQuery(**params)
+        model = GetBranchReportQuery(**params)
         query = model.model_dump(exclude_unset=True)
         sales = repository.find(query)
         return jsonify({ 'data': sales })
@@ -61,7 +61,7 @@ def download_sales(user_id):
     params = request.args.to_dict()
 
     try:
-        model = GetBranchSalesQuery(**params)
+        model = GetBranchReportQuery(**params)
         query = model.model_dump(exclude_unset=True)
         sales = repository.find(query)
         
