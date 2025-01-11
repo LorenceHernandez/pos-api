@@ -45,12 +45,27 @@ class Repository(abc.ABC):
             return self._db[self._collection].insert_many(data)
         except:
             raise
-   
+    
+    def update_many(self, query, data:BaseModel, *args, **kwargs):
+        data = data.model_dump(exclude_none=True)
+        data = { '$set': data }
+        self._db[self._collection].update_many(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+    
     def update_one(self, query, data: BaseModel, *args, **kwargs):
         try:
             data = data.model_dump(exclude_none=True)
             data = { '$set': data }
             return_document = self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+            return self.find_one({ '_id': ObjectId(return_document['_id']) })
+        except:
+            raise
+    
+    def update_one_bare(self, query, data, refetch: bool = True, *args, **kwargs):
+        try:
+            data = { '$set': data }
+            return_document = self._db[self._collection].find_one_and_update(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+            if(return_document is None or not refetch):
+                return None
             return self.find_one({ '_id': ObjectId(return_document['_id']) })
         except:
             raise

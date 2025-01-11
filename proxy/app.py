@@ -182,7 +182,11 @@ def print_receipt():
         p.text(upper_case(branch['streetAddress']) + '\n\n')
 
         p.set(align='center', bold=True)
-        p.text(f'INVOICE {reprintLabel}\n')
+        if(transaction['status'] == 'completed'):
+            p.text(f'INVOICE {reprintLabel}\n')
+        else:
+            p.text(f'{transaction["status"].upper()} DOCUMENT\n')
+
         p.set(align='left', bold=False)
         # p.textln('-' * MAX_CHAR_PER_ROW)
         line(p)
@@ -196,7 +200,11 @@ def print_receipt():
         row(p, "SN: ", "---")
         row(p, "Date & Time: ", dt.strftime("%Y-%m-%d %I:%M%p"))
         row(p, "Cashier: ", start_case(cashier["first_name"] + " " + cashier["last_name"]))
-        row(p, "Invoice #: ", str(transaction["invoiceNumber"]).zfill(6))
+        if(transaction['status'] == 'completed'):
+            row(p, "Invoice #: ", str(transaction["invoiceNumber"]).zfill(6))
+        else:
+            row(p, "Serial #: ", str(transaction["serialNumber"]).zfill(6))
+            row(p, "Reference #: ", str(transaction["invoiceNumber"]).zfill(6))
 
         line(p)
         p.set(align='center', bold=True)
@@ -272,50 +280,21 @@ def print_receipt():
 
 
         line(p)
-        if (transaction['status'] == 'cancelled'):
-            p.set(align='center', bold=True)
-            p.text('*** CANCELLED TRANSACTION ***\n\n')
-            p.set(align='left', bold=False)
+        p.set(align='left', bold=True)
+        row(p, "Total Sales: ", transaction["totalSalesWithoutMemberDiscount"])
+        p.set(bold=False)
 
-            row(p, "Reason: ", transaction.get("reasonCancelled") or "---")
-            p.set(align='left', bold=True)
-            row(p, "Total Sales: ", transaction["totalSalesWithoutMemberDiscount"])
-            p.set(bold=False)
+        row(p, "Less: SC/PWD/NAAC/MOV/SP ", f'({transaction["totalMemberDiscount"]})')
+        row(p, "Less: Withholding Tax ", "(0)")
+        
+        p.set(bold=True)
+        row(p, "TOTAL AMOUNT DUE: ", transaction["totalNetSales"])
+        
+        p.set(bold=False)
+        row(p, "Tender Amount: ", transaction["tenderAmount"])
+        row(p, "Tender Type: ", upper_case(transaction["tenderType"]))
+        row(p, "Change: ", transaction["change"])
 
-            row(p, "Less: SC/PWD/NAAC/MOV/SP ", f'({transaction["totalMemberDiscount"]})')
-            row(p, "Less: Withholding Tax ", "(0)")
-            
-            p.set(bold=True)
-            row(p, "TOTAL AMOUNT DUE: ", transaction["totalNetSales"])
-            
-            p.set(bold=False)
-            row(p, "Tender Amount: ", transaction["tenderAmount"])
-            row(p, "Tender Type: ", upper_case(transaction["tenderType"]))
-            row(p, "Change: ", transaction["change"])
-
-        elif(transaction['status'] == 'refunded'):
-            # text(p, 'Number of Items: ':<20}{request_data['totalQuantity']:>20}')
-            p.set(align='center', bold=True)
-            p.text('*** REFUNDED TRANSACTION ***\n\n')
-            p.set(align='left', bold=False)
-            row(p, "Refunded Amount: ", transaction["totalNetSales"])
-            row(p, "Previous Invoice Number: ", str(transaction["invoiceNumber"]).zfill(6))
-            row(p, "Reason: ", transaction.get("reason") or "---")
-        else:
-            p.set(align='left', bold=True)
-            row(p, "Total Sales: ", transaction["totalSalesWithoutMemberDiscount"])
-            p.set(bold=False)
-
-            row(p, "Less: SC/PWD/NAAC/MOV/SP ", f'({transaction["totalMemberDiscount"]})')
-            row(p, "Less: Withholding Tax ", "(0)")
-            
-            p.set(bold=True)
-            row(p, "TOTAL AMOUNT DUE: ", transaction["totalNetSales"])
-            
-            p.set(bold=False)
-            row(p, "Tender Amount: ", transaction["tenderAmount"])
-            row(p, "Tender Type: ", upper_case(transaction["tenderType"]))
-            row(p, "Change: ", transaction["change"])
 
 
         line(p)
@@ -384,7 +363,6 @@ def print_report():
     print('printing...')
 
     branch = data['branch']
-    cashier = data['cashier']
     dvote = data['dvoteDetails'][0]
     # title = data['title']
     type = data['type']
@@ -396,13 +374,12 @@ def print_report():
         if(data.get('timeOut') is not None):
             timeOutDate = datetime.datetime.fromisoformat(data['timeOut'])
 
-    # beginningCashTotal = data['beginningCashOnHand']['total'] if data['beginningCashOnHand'] is not None else 0
     beginningCashTotal = get(data, 'beginningCashOnHand.total', 0)
     endingCashTotal = get(data, 'endingCashOnHand.total', 0)
-    sales = data['sales']
+    sales = data if type == 'Z_REPORT' else data['sales']
+    
     salesAdjustment = data['salesAdjustment']
     discountSummary = data['discountSummary']
-    # endingCashOnHand = data.get('endingCashOnHand') or {}
 
     reprint = data.get('reprint') 
     reprintLabel = '(RE-PRINT)' if reprint else ''
@@ -434,13 +411,15 @@ def print_report():
 
         row(p, "MIN: ", "---")
         row(p, "SN: ", "---")
+
+        row(p, "Report: ", data["date"])
         
         if(type == 'X_REPORT'):
+            cashier = data['cashier']
             row(p, "Cashier: ", start_case(cashier["first_name"] + " " + cashier["last_name"]))
         else:
             row(p, "Z-Counter #: ", str(1))
             
-        row(p, "Date: ", data["date"])
                 
         if(type == 'X_REPORT'):
             timeOutDate = ' - '+ timeOutDate.strftime("%I:%M%p") if timeOutDate is not None else ''
@@ -448,9 +427,24 @@ def print_report():
             row(p, "Beginning Balance: ", beginningCashTotal)
             row(p, "Ending Cash On Hand: ", endingCashTotal)
         else:
-            row(p, "Reset Counter #: ", 0)
+            row(p, "Reset Counter: ", 0)
             
-        row(p, "Invoice #: ", f'{sales["invoiceStartNumber"]} - {sales["invoiceEndNumber"]}')
+        row(p, "Beg. Invoice #: ", str(sales["invoiceStartNumber"]).zfill(6))
+        row(p, "End. Invoice #: ", str(sales["invoiceEndNumber"]).zfill(6))
+        if(type == 'Z_REPORT'):
+            refund = sales.get('refundNumber', {})
+            cancel = sales.get('cancelNumber', {})
+            row(p, "Beg. Cancel #: ", str(cancel.get('beginning', 0)).zfill(6))
+            row(p, "End. Cancel #: ", str(cancel.get('ending', 0)).zfill(6))
+            row(p, "Beg. Refund #: ", str(refund.get('beginning', 0)).zfill(6))
+            row(p, "End. Refund #: ", str(refund.get('ending', 0)).zfill(6))
+            
+            line(p)
+            report = sales['report']
+
+            row(p, "Grand Accum Beg. Balance: ", "{:.2f}".format(report['beginningCashOnHandTotal']))
+            row(p, "Grand Accum Sales Ending: ", "{:.2f}".format(report['endingCashOnHandTotal']))
+            
         line(p)
 
         row(p, "Gross Sales: ", "{:.2f}".format(sales["totalSalesWithoutMemberDiscount"]))

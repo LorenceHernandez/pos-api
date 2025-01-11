@@ -12,6 +12,7 @@ from pydash import start_case
 
 from app.new_models.Discount import MemberType
 from app.database.config import users
+from app.new_models.Transaction import TransactionStatus
 
 def get_template_name(type: MemberType):
     return f'annex_{type.value}_template.xlsx'
@@ -65,7 +66,7 @@ def append_discount_reports(worksheet, reports):
         default_col = 1
         worksheet.cell(column=default_col, row=default_row + index, value=report['transaction']['transactionDate'])
         worksheet.cell(column=default_col + 1, row=default_row + index, value=report['customer']['name'])
-        worksheet.cell(column=default_col + 2, row=default_row + index, value=report['customer']['customer_type_id'])
+        worksheet.cell(column=default_col + 2, row=default_row + index, value=report['customer'].get('customer_type_id'))
         worksheet.cell(column=default_col + 3, row=default_row + index, value=report['customer']['tin_number'])
         worksheet.cell(column=default_col + 4, row=default_row + index, value=report['transaction']['invoiceNumber'])
         worksheet.cell(column=default_col + 5, row=default_row + index, value=report['transaction']['totalSalesWithoutMemberDiscount'])
@@ -78,7 +79,7 @@ def append_naac_reports(worksheet, reports):
         default_col = 1
         worksheet.cell(column=default_col, row=default_row + index, value=report['transaction']['transactionDate'])
         worksheet.cell(column=default_col + 1, row=default_row + index, value=report['customer']['name'])
-        worksheet.cell(column=default_col + 2, row=default_row + index, value=report['customer']['customer_type_id'])
+        worksheet.cell(column=default_col + 2, row=default_row + index, value=report['customer'].get('customer_type_id'))
         worksheet.cell(column=default_col + 3, row=default_row + index, value=report['transaction']['invoiceNumber'])
         worksheet.cell(column=default_col + 4, row=default_row + index, value=report['transaction']['totalSalesWithoutMemberDiscount'])
         worksheet.cell(column=default_col + 5, row=default_row + index, value=report['transaction']['totalMemberDiscount'])
@@ -90,14 +91,13 @@ def append_solo_parent_reports(worksheet, reports):
         default_col = 1
         worksheet.cell(column=default_col, row=default_row + index, value=report['transaction']['transactionDate'])
         worksheet.cell(column=default_col + 1, row=default_row + index, value=report['customer']['name'])
-        worksheet.cell(column=default_col + 2, row=default_row + index, value=report['customer']['customer_type_id'])
+        worksheet.cell(column=default_col + 2, row=default_row + index, value=report['customer'].get('customer_type_id'))
         worksheet.cell(column=default_col + 6, row=default_row + index, value=report['transaction']['invoiceNumber'])
         worksheet.cell(column=default_col + 7, row=default_row + index, value=report['transaction']['totalSalesWithoutMemberDiscount'])
         worksheet.cell(column=default_col + 9, row=default_row + index, value=report['transaction']['totalMemberDiscount'])
         worksheet.cell(column=default_col + 10, row=default_row + index, value=report['transaction']['totalNetSales'])
 
-def export_sales_reports(sales, user_id):
-    workbook = load_sheet(type)
+def export_sales_reports(workbook, sales, user_id):
     worksheet = workbook.active
 
     append_base_header(worksheet, user_id)
@@ -105,24 +105,31 @@ def export_sales_reports(sales, user_id):
     return convert_to_bytes(workbook)
 
 def append_sales_reports(worksheet, sales):
-    default_row = 17
+    default_row = 16
+    def clip(value):
+        return "{:.2f}".format(value)
     for index, sale in enumerate(sales):
         default_col = 0
         col = default_col
         row = default_row + index
 
         worksheet.cell(row, col + 1, sale['date'])
-        worksheet.cell(row, col + 2, sale['sales']['invoiceStartNumber'])
-        worksheet.cell(row, col + 3, sale['sales']['invoiceEndNumber'])
-        # worksheet.cell(row, col + 4, sale['totalEndingCashOnHand'])
-        # worksheet.cell(row, col + 5, sale['totalBeginningCashOnHand'])
-        # worksheet.cell(row, col + 6, sale['totalBeginningCashOnHand'])
-        worksheet.cell(row, col + 7, sale['totalGrossSales'])
-
-        discounts = groupby(sale['discounts'], lambda i: i.memberType)
-        discounts = dict(discounts)
+        worksheet.cell(row, col + 2, str(sale['invoiceStartNumber']).zfill(6))
+        worksheet.cell(row, col + 3, str(sale['invoiceEndNumber']).zfill(6))
+        worksheet.cell(row, col + 4, clip(sale['report']['endingCashOnHandTotal']))
+        worksheet.cell(row, col + 5, clip(sale['report']['beginningCashOnHandTotal']))
+        worksheet.cell(row, col + 7, clip(sale['totalGrossSales']))
         
-        # discounts[MemberType.SENIOR_CITIZEN.value]
+        discountSummary = sale['discountSummary']
+        worksheet.cell(row, col + 12, clip(discountSummary.get(MemberType.SENIOR_CITIZEN.value, 0)))
+        worksheet.cell(row, col + 13, clip(discountSummary.get(MemberType.PWD.value, 0)))
+        worksheet.cell(row, col + 14, clip(discountSummary.get(MemberType.NAAC.value, 0)))
+        worksheet.cell(row, col + 15, clip(discountSummary.get(MemberType.SOLO_PARENT.value, 0)))
 
+        discountSummary = sale['salesAdjustment']
+        worksheet.cell(row, col + 19, clip(discountSummary.get(TransactionStatus.REFUNDED.value, 0) * -1))
 
-        worksheet.cell(row, col + 27, sale['totalNetSales'])
+        worksheet.cell(row, col + 27, clip(sale['totalNetSales']))
+        worksheet.cell(row, col + 28, clip(sale['cashDifference']))
+        worksheet.cell(row, col + 30, 1)
+        worksheet.cell(row, col + 31, 0)

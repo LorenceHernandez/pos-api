@@ -117,15 +117,7 @@ def v3_create_transaction(user_id):
         args = { **request_data, "cashierId": user_id }
         model = CreateTransaction(**args)
 
-        # if(model.status == TransactionStatus.HOLD):
-        #     model = CreateCancelledTransaction(**args)
-        # if(model.status == TransactionStatus.REFUNDED):
-        #     model = CreateRefundTransaction(**args)
-       
-        # if model.status != TransactionStatus.CANCELLED:
         model.invoiceNumber = transactionRepository._get_next_sequence('INVOICE_NUMBER')
-        model.transactionNumber = transactionRepository._get_next_sequence('TRANSACTION_NUMBER')
-                
         data = model.model_dump(by_alias=True, exclude={'discounts'})
         result = transactionRepository.insert_one(data)
 
@@ -162,43 +154,69 @@ def v3_create_transaction(user_id):
 def v3_cancel_transaction(user_id):
     try:
         request_data = request.get_json()
-        args = { **request_data, "cashierId": user_id }
+        args = { **request_data, "cashierCancelled": user_id }
         model = CreateCancelledTransaction(**args)
 
-        res = None
         if(model.status == TransactionStatus.CANCELLED):
-            res = transactionRepository.update_one(
-                { 
-                    "invoiceNumber": model.invoiceNumber, 
-                    "branchId": model.branchId 
-                }, 
-                model
-            )
+            transaction = transactionRepository.find_one({ 
+                "invoiceNumber": model.invoiceNumber,  
+                "branchId": model.branchId, 
+                "status": TransactionStatus.COMPLETED 
+            }, agreggate=False)
 
-        #TODO update transaction discount if status is updated
-        if((model.autoRefund and model.status == TransactionStatus.CANCELLED) or (model.status == TransactionStatus.REFUNDED)):
-            res = transactionRepository.find_one(
-            { "invoiceNumber": model.invoiceNumber, "branchId": model.branchId }, 
-                agreggate=False
-            )
-            res = omit(res, "_id")
-            res['cashierId'] = user_id
-            res['transactionNumber'] = transactionRepository._get_next_sequence('TRANSACTION_NUMBER')
-            res['status'] = TransactionStatus.REFUNDED
-            res['change'] = None
-            res['tenderAmount'] = None
-            res['tenderType'] = None
-            res['totalNetSales'] = -1 * res['totalNetSales']
-            res['totalGrossSales'] = -1 * res['totalGrossSales']
-            res['totalSalesWithoutMemberDiscount'] = -1 * res['totalSalesWithoutMemberDiscount']
-            res['totalDiscount'] = -1 * res['totalDiscount']
-            res['totalMemberDiscount'] = -1 * res['totalMemberDiscount']
-            res['transactionDate'] = getLocalTimeStr()
-            res['date'] = getLocalDateStr()
+            if(not transaction):
+                return jsonify({'message': 'Transaction not found nor allowed for cancellation', 'data': transaction })
             
-            res = transactionRepository.insert_one(res)
+            transactionRepository.update_one_bare({ "_id": transaction["_id"] }, { "status": TransactionStatus.CANCELLED , "refundable": True })
 
-        return jsonify({'message': 'Transaction cancelled successfully', 'data': res })
+            transaction = omit(transaction, "_id")
+            transaction['cashierId'] = user_id
+            transaction['serialNumber'] = transactionRepository._get_next_sequence('CANCEL_NUMBER')
+            transaction['status'] = TransactionStatus.CANCELLED
+            transaction['totalNetSales'] = 0
+            transaction['totalGrossSales'] = 0
+            transaction['totalSalesWithoutMemberDiscount'] = 0
+            transaction['totalDiscount'] = 0
+            transaction['totalMemberDiscount'] = 0
+            transaction['transactionDate'] = getLocalTimeStr()
+            transaction['date'] = getLocalDateStr()
+            
+            transactionRepository.insert_one(transaction, refetch=False)
+
+
+            # discountRepository.update_many()
+
+        autoRefund = model.status == TransactionStatus.CANCELLED and model.autoRefund
+        
+        if(autoRefund or model.status == TransactionStatus.REFUNDED):
+            transaction = transactionRepository.find_one({ 
+                "invoiceNumber": model.invoiceNumber, 
+                "branchId": model.branchId, 
+                "status": TransactionStatus.CANCELLED, 
+                "refundable": True,
+                "serialNumber": None
+            }, agreggate=False)
+
+            if(not transaction):
+                return jsonify({'message': 'Transaction not found nor refundable', 'data': transaction })
+
+            transactionRepository.update_one_bare({ "_id": transaction["_id"] }, { "refundable": False })
+
+            transaction = omit(transaction, "_id")
+            transaction['cashierId'] = user_id
+            transaction['serialNumber'] = transactionRepository._get_next_sequence('REFUND_NUMBER')
+            transaction['status'] = TransactionStatus.REFUNDED
+            transaction['totalNetSales'] = -1 * transaction['totalNetSales']
+            transaction['totalGrossSales'] = 0
+            transaction['totalSalesWithoutMemberDiscount'] = 0
+            transaction['totalDiscount'] = 0
+            transaction['totalMemberDiscount'] = 0
+            transaction['transactionDate'] = getLocalTimeStr()
+            transaction['date'] = getLocalDateStr()
+            
+            transactionRepository.insert_one(transaction, refetch=False)
+
+        return jsonify({'message': f'Transaction {model.status.lower()} successfully' })
     except ValidationError as e:
         return jsonify({'message': 'Unable to process data', 'error': e.errors(include_input=False)}), 500
     except Exception as e:

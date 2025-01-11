@@ -49,7 +49,6 @@ class BaseTransaction(BaseModel):
     status: TransactionStatus = TransactionStatus.COMPLETED
     date: str = Field(default_factory=getLocalDateStr)
     transactionDate: str = Field(default_factory=getLocalTimeStr)
-    transactionNumber: int = None
     transactionItems: List[TransactionItem] = Field(min_length=1)
     discounts: List[TransactionDiscount] = None
     tenderType: TenderType
@@ -208,11 +207,11 @@ class CreateTransaction(BaseTransaction):
 
 class CreateCancelledTransaction(BaseModel):
     reason: Optional[str] = None
-    cashierId: str
     branchId: str
     invoiceNumber: int
-    status: TransactionStatus = TransactionStatus.CANCELLED
+    status: TransactionStatus
     autoRefund: bool = True
+    cashierCancelled: str
     dateCancelled: str = Field(default_factory=getLocalTimeStr)
 
 class CreateRefundTransaction(CreateTransaction):

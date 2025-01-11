@@ -139,8 +139,11 @@ class TransactionRepository(BackupRepository):
             raise e
 
     def find_one(self, query={}, agreggate=True):
-        print(self.find(query, agreggate=agreggate))
-        return self.find(query, agreggate=agreggate)[0]
+        data = self.find(query, agreggate=agreggate)
+
+        if(len(data) > 0):
+            return data[0]
+        return None
 
     def find_active(self, user_id):
         
@@ -150,6 +153,11 @@ class TransactionRepository(BackupRepository):
            "date": getLocalDateStr(),
         })
 
-    def insert_one(self, data):
+    def insert_one(self, data, refetch: bool = True):
         result = super().insert_one(data)
+
+        if(not refetch):
+            return result
+        
         return self.find_one({ '_id': ObjectId(result.inserted_id) })
+        

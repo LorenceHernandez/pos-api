@@ -29,7 +29,6 @@ def get_reports(user_id):
 
     try:
         model = GetBranchReportQuery(**omit(params, 'branchIds'), branchIds=branchIds)
-        print(model)
         query = { 
             **omit(model.model_dump(exclude_none=True), 'branchIds'),  
             "branchId": { "$in": model.branchIds }

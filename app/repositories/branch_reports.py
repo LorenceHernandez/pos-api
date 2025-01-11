@@ -152,62 +152,62 @@ class BranchReportRepository(BackupRepository):
 
     def find(self, query={}, *args):
         try:
-            data = list(self._db[self._cashier_report_collection].aggregate([
+            data = list(self._db[self._transaction_collection].aggregate([
                 { '$match': query },
-                {
-                    "$lookup": {
-                        "from": self._transaction_collection,
-                        "let": {
-                            "branchId": "$branchId",
-                            "date": "$date"
-                        },
-                        "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            { "$eq": ["$branchId", "$$branchId"] },
-                                            { "$eq": ["$date", "$$date"] },
-                                        ]
-                                    }
-                                }
-                            },
-                            { 
-                                '$group': {
-                                    "_id": None,
-                                    "totalGrossSales": { "$sum": "$totalGrossSales" },
-                                    "totalNetSales": { "$sum": "$totalNetSales" },
-                                    "totalDiscount": { "$sum": '$totalDiscount' } ,
-                                    "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
-                                    "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
-                                    "invoiceStartNumber": { '$min': "$invoiceNumber" },
-                                    "invoiceEndNumber": { '$max': "$invoiceNumber" },
-                                }
-                            },
-                        ],
-                        "as": "sales"
-                    }
-                },
-                { "$unwind": {
-                    'path': "$sales",
-                    'preserveNullAndEmptyArrays': True    
-                }},
+                # {
+                #     "$lookup": {
+                #         "from": self._transaction_collection,
+                #         "let": {
+                #             "branchId": "$branchId",
+                #             "date": "$date"
+                #         },
+                #         "pipeline": [
+                #             {
+                #                 "$match": {
+                #                     "$expr": {
+                #                         "$and": [
+                #                             { "$eq": ["$branchId", "$$branchId"] },
+                #                             { "$eq": ["$date", "$$date"] },
+                #                         ]
+                #                     }
+                #                 }
+                #             },
+                #             { 
+                #                 '$group': {
+                #                     "_id": None,
+                #                     "totalGrossSales": { "$sum": "$totalGrossSales" },
+                #                     "totalNetSales": { "$sum": "$totalNetSales" },
+                #                     "totalDiscount": { "$sum": '$totalDiscount' } ,
+                #                     "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
+                #                     "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
+                #                     "invoiceStartNumber": { '$min': "$invoiceNumber" },
+                #                     "invoiceEndNumber": { '$max': "$invoiceNumber" },
+                #                 }
+                #             },
+                #         ],
+                #         "as": "sales"
+                #     }
+                # },
+                # { "$unwind": {
+                #     'path': "$sales",
+                #     'preserveNullAndEmptyArrays': True    
+                # }},
                 {
                     "$group": {
                         "_id": { "branchId": "$branchId", "date": "$date"  },
                         'date': { '$first': '$date' },
                         'branchId': { '$first': '$branchId' },
-                        "beginningCashOnHandTotal": { "$sum": "$beginningCashOnHand.total" },
-                        "beginningCashOnHandCount": { "$push": "$beginningCashOnHand.count" },
-                        "endingCashOnHandCount": { "$push": "$endingCashOnHand.count" },
-                        "endingCashOnHandTotal": { "$sum": "$endingCashOnHand.total" },
-                        "totalGrossSales": { "$sum": "$sales.totalGrossSales" },
-                        "totalNetSales": { "$sum": "$sales.totalNetSales" },
-                        "totalDiscount": { "$sum": "$sales.totalDiscount" },
-                        "totalSalesWithoutMemberDiscount": { "$sum": '$sales.totalSalesWithoutMemberDiscount' } ,
-                        "totalMemberDiscount": { "$sum": '$sales.totalMemberDiscount' } ,
-                        "invoiceStartNumber": { '$min': "$sales.invoiceStartNumber" },
-                        "invoiceEndNumber": { '$max': "$sales.invoiceEndNumber" }
+                        # "beginningCashOnHandTotal": { "$sum": "$beginningCashOnHand.total" },
+                        # "beginningCashOnHandCount": { "$push": "$beginningCashOnHand.count" },
+                        # "endingCashOnHandCount": { "$push": "$endingCashOnHand.count" },
+                        # "endingCashOnHandTotal": { "$sum": "$endingCashOnHand.total" },
+                        "totalGrossSales": { "$sum": "$totalGrossSales" },
+                        "totalNetSales": { "$sum": "$totalNetSales" },
+                        "totalDiscount": { "$sum": "$totalDiscount" },
+                        "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
+                        "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
+                        "invoiceStartNumber": { '$min': "$invoiceNumber" },
+                        "invoiceEndNumber": { '$max': "$invoiceNumber" }
                     }
                 },
                 {
@@ -229,6 +229,51 @@ class BranchReportRepository(BackupRepository):
                         "branchId": {"$toString": "$branchId"}
                     }
                 },
+                {
+                    "$lookup": {
+                        "from": self._cashier_report_collection,
+                        "let": {
+                            "branchId": "$branchId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                        ]
+                                    }
+                                }
+                            },
+                            { 
+                                '$group': {
+                                    "_id": None,
+                                    "beginningCashOnHandTotal": { "$sum": "$beginningCashOnHand.total" },
+                                    "beginningCashOnHandCount": { "$push": "$beginningCashOnHand.count" },
+                                    "endingCashOnHandCount": { "$push": "$endingCashOnHand.count" },
+                                    "endingCashOnHandTotal": { "$sum": "$endingCashOnHand.total" },
+                                }
+                            },
+                            {
+                                "$addFields": {
+                                    "_id": { "$toString": "$_id" },
+                                }
+                            },
+                            {
+                                "$project": {
+                                    "_id": 0
+                                }
+                            }
+                        ],
+                        "as": "report"
+                    }
+                },
+                { "$unwind": {
+                    'path': "$report",
+                    'preserveNullAndEmptyArrays': True    
+                }},
                 {
                     "$lookup": {
                         "from": self._transaction_collection,
@@ -256,6 +301,74 @@ class BranchReportRepository(BackupRepository):
                         "as": "transactions"
                     }
                 },
+                {
+                    "$lookup": {
+                        "from": self._transaction_collection,
+                        "let": {
+                            "branchId": "$branchId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                            {"$eq": ["$status", "cancelled"]}
+                                        ]
+                                    }
+                                }
+                            },
+                           { 
+                                '$group': {
+                                    "_id": None,
+                                    "beginning": { "$min": "$serialNumber" },
+                                    "ending": { "$max": "$serialNumber" },
+                                }
+                            },
+                        ],
+                        "as": "cancelledNumber"
+                    }
+                },
+                { "$unwind": {
+                    'path': "$cancelledNumber",
+                    'preserveNullAndEmptyArrays': True    
+                }},
+                {
+                    "$lookup": {
+                        "from": self._transaction_collection,
+                        "let": {
+                            "branchId": "$branchId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                            {"$eq": ["$status", "refunded"]}
+                                        ]
+                                    }
+                                }
+                            },
+                           { 
+                                '$group': {
+                                    "_id": None,
+                                    "beginning": { "$min": "$serialNumber" },
+                                    "ending": { "$max": "$serialNumber" },
+                                }
+                            },
+                        ],
+                        "as": "refundedNumber"
+                    }
+                },
+                { "$unwind": {
+                    'path': "$refundedNumber",
+                    'preserveNullAndEmptyArrays': True    
+                }},
                 {
                     "$lookup": {
                         "from": 'transaction_discount',
@@ -336,6 +449,7 @@ class BranchReportRepository(BackupRepository):
                 difference = item['totalNetSales'] - endingCashTotal
                 cashLoss = difference if difference > 0 else 0
                 cashGain = difference * -1 if difference < 0 else 0
+                item['cashDifference'] = difference
                 item['cashGain'] = cashGain
                 item['cashLoss'] = cashLoss
 
