@@ -349,7 +349,7 @@ class BranchReportRepository(BackupRepository):
                                         "$and": [
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$date", "$$date"] },
-                                            {"$eq": ["$status", "refunded"]}
+                                            { "$eq": ["$status", "refunded"]}
                                         ]
                                     }
                                 }

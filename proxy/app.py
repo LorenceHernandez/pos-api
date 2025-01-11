@@ -432,8 +432,8 @@ def print_report():
         row(p, "Beg. Invoice #: ", str(sales["invoiceStartNumber"]).zfill(6))
         row(p, "End. Invoice #: ", str(sales["invoiceEndNumber"]).zfill(6))
         if(type == 'Z_REPORT'):
-            refund = sales.get('refundNumber', {})
-            cancel = sales.get('cancelNumber', {})
+            refund = sales.get('refundedNumber', {})
+            cancel = sales.get('cancelledNumber', {})
             row(p, "Beg. Cancel #: ", str(cancel.get('beginning', 0)).zfill(6))
             row(p, "End. Cancel #: ", str(cancel.get('ending', 0)).zfill(6))
             row(p, "Beg. Refund #: ", str(refund.get('beginning', 0)).zfill(6))
