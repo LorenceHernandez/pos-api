@@ -8,7 +8,7 @@ from itertools import groupby
 import os
 from bson import ObjectId
 import openpyxl
-from pydash import start_case
+from pydash import get, start_case, upper_case
 
 from app.new_models.Discount import MemberType
 from app.database.config import users
@@ -29,7 +29,10 @@ def convert_to_bytes(workbook: openpyxl.Workbook):
     output.seek(0)
     return output
 
-def append_base_header(worksheet, user_id):
+def append_base_header(worksheet, user_id, branch):
+    worksheet.cell(1, 1, "MMG-ALBAY")
+    worksheet.cell(2, 1, upper_case(branch['streetAddress']))
+    worksheet.cell(3, 1, 'NON-VAT REG TIN ' + branch['tin'])
     worksheet.cell(9, 1, datetime.now().isoformat())
     worksheet.cell(5, 1, os.getenv('APP_VERSION'))
 
@@ -99,13 +102,14 @@ def append_solo_parent_reports(worksheet, reports):
 
 def export_sales_reports(workbook, sales, user_id):
     worksheet = workbook.active
-
-    append_base_header(worksheet, user_id)
+    
+    branch = sales[0]['branch'] if len(sales) > 0 else None
+    append_base_header(worksheet, user_id, branch)
     append_sales_reports(worksheet, sales)
     return convert_to_bytes(workbook)
 
 def append_sales_reports(worksheet, sales):
-    default_row = 16
+    default_row = 17
     def clip(value):
         return "{:.2f}".format(value)
     for index, sale in enumerate(sales):
@@ -116,9 +120,9 @@ def append_sales_reports(worksheet, sales):
         worksheet.cell(row, col + 1, sale['date'])
         worksheet.cell(row, col + 2, str(sale['invoiceStartNumber']).zfill(6))
         worksheet.cell(row, col + 3, str(sale['invoiceEndNumber']).zfill(6))
-        worksheet.cell(row, col + 4, clip(sale['report']['endingCashOnHandTotal']))
-        worksheet.cell(row, col + 5, clip(sale['report']['beginningCashOnHandTotal']))
-        worksheet.cell(row, col + 7, clip(sale['totalGrossSales']))
+        worksheet.cell(row, col + 4, clip(get(sale, 'endingCashCount.total', 0)))
+        worksheet.cell(row, col + 5, clip(get(sale, 'openingFundd.total', 0)))
+        worksheet.cell(row, col + 7, clip(sale['totalSalesWithoutMemberDiscount']))
         
         discountSummary = sale['discountSummary']
         worksheet.cell(row, col + 12, clip(discountSummary.get(MemberType.SENIOR_CITIZEN.value, 0)))
@@ -131,5 +135,5 @@ def append_sales_reports(worksheet, sales):
 
         worksheet.cell(row, col + 27, clip(sale['totalNetSales']))
         worksheet.cell(row, col + 28, clip(sale['cashDifference']))
-        worksheet.cell(row, col + 30, 1)
-        worksheet.cell(row, col + 31, 0)
+        worksheet.cell(row, col + 30, 0)
+        worksheet.cell(row, col + 31, 1)

@@ -3,7 +3,7 @@
 from typing import Optional
 from pydantic import BaseModel, ValidationError, field_validator, validator
 
-_cash_keys = ['1000', '500', '200', '100', '50', '20', '10', '5', '1', '0.5', '0.25']
+_cash_keys = ['1000', '500', '200', '100', '50', '20', '10', '5', '1', '0.25', '0.05', '0.1']
 class CashCount(BaseModel):
     count: object
     total: Optional[float] = None
@@ -17,10 +17,16 @@ class CashCount(BaseModel):
             return None
         
         _new_count = {}
-        for cash, count in value.items():
-            if cash in _cash_keys and count > 0:
-                _new_count[cash] = count
-        
+        for key in _cash_keys:
+            formattedKey = self.formatKey(key)
+            try: 
+                count = value[key]
+                if(count is None):
+                    raise
+                _new_count[formattedKey] = count
+            except:
+                _new_count[formattedKey] = 0
+
         self.count = _new_count
         self.total = self._compute_cash_count_total(self.count)
 
@@ -29,7 +35,15 @@ class CashCount(BaseModel):
             return 0.0
         
         sum = 0.0
-        for cash, count in cash_count.items():
-            sum += float(cash) * count
+        for key, count in cash_count.items():
+            key = self.keyToFloat(key)
+            sum += float(key) * count
         return sum
+
+    @staticmethod
+    def formatKey(key):
+        return f'M{key}'.replace('.', 'P')   
     
+    @staticmethod
+    def keyToFloat(key):
+        return str(key).split('M')[1].replace('P', '.')

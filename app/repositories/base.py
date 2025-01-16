@@ -49,7 +49,11 @@ class Repository(abc.ABC):
     def update_many(self, query, data:BaseModel, *args, **kwargs):
         data = data.model_dump(exclude_none=True)
         data = { '$set': data }
-        self._db[self._collection].update_many(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+        return self._db[self._collection].update_many(query, data, *args, **kwargs, return_document=pymongo.ReturnDocument.AFTER)
+    
+    def update_many_bare(self, query, data, *args, **kwargs):
+        data = { '$set': data }
+        return self._db[self._collection].update_many(query, data, *args, **kwargs)
     
     def update_one(self, query, data: BaseModel, *args, **kwargs):
         try:
@@ -70,9 +74,9 @@ class Repository(abc.ABC):
         except:
             raise
     
-    def _get_next_sequence(self, name):
+    def _get_next_sequence(self, data):
         counter = self._db['counters'].find_one_and_update(
-            {"_id": name},
+            data,
             {"$inc": {"seq": 1}},
             upsert=True,
             return_document=True

@@ -1,206 +1,50 @@
 
 
 
+from datetime import timedelta
 from itertools import groupby
 
 from pydash import get
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.new_models.CashierReport import CashierReport
-from app.new_models.Transaction import TransactionStatus
+from app.new_models.Transaction import TenderType, TransactionStatus
 from app.repositories.base import BackupRepository
 from app.repositories.cashier_report import CashierReportRepository
+from app.repositories.report_cash_count import CashCountRepository
 from app.repositories.transaction import TransactionRepository
-
+from app.new_models.CashCount import _cash_keys, CashCount
+from app.utils.utils import getLocalDateStr, getLocalTime
 
 class BranchReportRepository(BackupRepository):
     _collection = 'branch_reports'
     _transaction_collection = TransactionRepository()._collection
     _cashier_report_collection = CashierReportRepository()._collection
+    _cash_count_collection = CashCountRepository()._collection
 
-    # def find(self, query={}, *args):
-    #     try:
-    #         data = list(self._db[self._collection].aggregate([
-    #             { '$match': query },
-    #             {
-    #                 "$addFields": {
-    #                     "cashierId": {"$toObjectId": "$cashierId"},
-    #                     "branchId": {"$toObjectId": "$branchId"}
-    #                 }
-    #             },
-    #             { 
-    #                 '$lookup': {
-    #                     'from': 'users',
-    #                     'localField': 'cashierId',
-    #                     'foreignField': '_id',
-    #                     'as': 'cashier'
-    #                 }, 
-    #             },
-    #             { "$unwind": "$cashier" },
-    #             { 
-    #                 '$lookup': {
-    #                     'from': 'branches',
-    #                     'localField': 'branchId',
-    #                     'foreignField': '_id',
-    #                     'as': 'branch'
-    #                 }, 
-    #             },
-    #             { "$unwind": "$branch" },
-    #             {
-    #                 "$addFields": {
-    #                     "branchId": {"$toString": "$branchId"}
-    #                 }
-    #             },
-    #             {
-    #                 "$lookup": {
-    #                     "from": self._transaction_collection,
-    #                     "let": {
-    #                         "branchIds": "$cashier.branches",
-    #                         "date": "$date"
-    #                     },
-    #                     "pipeline": [
-    #                         {
-    #                             "$match": {
-    #                                 "$expr": {
-    #                                     "$and": [
-    #                                         { "$in": ['$branchId', '$$branchIds'] },
-    #                                         { "$eq": ["$date", "$$date"] },
-    #                                         { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
-    #                                     ]
-    #                                 },
-    #                             }
-    #                         },
-    #                         { 
-    #                             '$group': {
-    #                                 "_id": None,
-    #                                 "totalGrossSales": { "$sum": "$totalGrossSales" },
-    #                                 "totalNetSales": { "$sum": "$totalNetSales" },
-    #                                 "totalDiscount": { "$sum": '$totalDiscount' } ,
-    #                                 "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
-    #                                 "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
-    #                                 "invoiceStartNumber": { '$min': "$invoiceNumber" },
-    #                                 "invoiceEndNumber": { '$max': "$invoiceNumber" },
-    #                             }
-    #                         },
-    #                     ],
-    #                     "as": "sales"
-    #                 }
-    #             },
-    #             {
-    #                 "$lookup": {
-    #                     "from": 'transaction_discount',
-    #                     "let": {
-    #                         "branchIds": "$cashier.branches",
-    #                         "date": "$date"
-    #                     },
-    #                     "pipeline": [
-    #                         {
-    #                             "$match": {
-    #                                 "$expr": {
-    #                                     "$and": [
-    #                                         { "$in": ['$branchId', '$$branchIds'] },
-    #                                         { "$eq": ["$date", "$$date"] },
-    #                                         { "$eq": ["$status", TransactionStatus.COMPLETED.value] }
-    #                                     ]
-    #                                 },
-    #                             },
-    #                         },
-    #                         { 
-    #                             '$group': {
-    #                                 "_id": "$status",
-    #                                 "totalGrossSales": { "$sum": "$totalGrossSales" },
-    #                                 "totalNetSales": { "$sum": "$totalNetSales" },
-    #                                 "totalDiscount": { "$sum": '$totalDiscount' } ,
-    #                                 "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
-    #                                 "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
-    #                                 "invoiceStartNumber": { '$min': "$invoiceNumber" },
-    #                                 "invoiceEndNumber": { '$max': "$invoiceNumber" },
-    #                             }
-    #                         },
-    #                     ],
-    #                     "as": "discounts"
-    #                 }
-    #             },
-    #             { "$unwind": {
-    #                 'path': "$sales",
-    #                 'preserveNullAndEmptyArrays': True    
-    #             }},
-    #             {
-    #                 '$project': {
-    #                     "discounts._id": 0,
-    #                     "sales._id": 0,
-    #                     'cashierId': 0,
-    #                     'branchId': 0,
-    #                     'cashier': 0
-    #                 }
-    #             },
-    #             { "$sort": { "_id": -1 }},
-    #             *args,
-    #             {
-    #                 "$addFields": {
-    #                     "_id": { "$toString": "$_id" },
-    #                     "branch._id": { "$toString": "$branch._id" },
-    #                 }
-    #             }
-    #         ]))
+    _defaultFilter = {
+                "$match": {
+                    "$expr": {
+                        "$and": [
+                            { "$eq": ["$branchId", "$$branchId"] },
+                            { "$eq": ["$date", "$$date"] },
+                        ]
+                    }
+                }
+            }
 
-    #         # reports = []
-    #         # for item in data:
-    #         #     reports.append(item)
-    #         return data
-    #     except Exception as e:
-    #         raise e
 
     def find(self, query={}, *args):
+     
         try:
+            
             data = list(self._db[self._transaction_collection].aggregate([
                 { '$match': query },
-                # {
-                #     "$lookup": {
-                #         "from": self._transaction_collection,
-                #         "let": {
-                #             "branchId": "$branchId",
-                #             "date": "$date"
-                #         },
-                #         "pipeline": [
-                #             {
-                #                 "$match": {
-                #                     "$expr": {
-                #                         "$and": [
-                #                             { "$eq": ["$branchId", "$$branchId"] },
-                #                             { "$eq": ["$date", "$$date"] },
-                #                         ]
-                #                     }
-                #                 }
-                #             },
-                #             { 
-                #                 '$group': {
-                #                     "_id": None,
-                #                     "totalGrossSales": { "$sum": "$totalGrossSales" },
-                #                     "totalNetSales": { "$sum": "$totalNetSales" },
-                #                     "totalDiscount": { "$sum": '$totalDiscount' } ,
-                #                     "totalSalesWithoutMemberDiscount": { "$sum": '$totalSalesWithoutMemberDiscount' } ,
-                #                     "totalMemberDiscount": { "$sum": '$totalMemberDiscount' } ,
-                #                     "invoiceStartNumber": { '$min': "$invoiceNumber" },
-                #                     "invoiceEndNumber": { '$max': "$invoiceNumber" },
-                #                 }
-                #             },
-                #         ],
-                #         "as": "sales"
-                #     }
-                # },
-                # { "$unwind": {
-                #     'path': "$sales",
-                #     'preserveNullAndEmptyArrays': True    
-                # }},
+                { '$match': { "status": { "$in": [TransactionStatus.COMPLETED, TransactionStatus.REFUNDED] } } },
                 {
                     "$group": {
                         "_id": { "branchId": "$branchId", "date": "$date"  },
                         'date': { '$first': '$date' },
                         'branchId': { '$first': '$branchId' },
-                        # "beginningCashOnHandTotal": { "$sum": "$beginningCashOnHand.total" },
-                        # "beginningCashOnHandCount": { "$push": "$beginningCashOnHand.count" },
-                        # "endingCashOnHandCount": { "$push": "$endingCashOnHand.count" },
-                        # "endingCashOnHandTotal": { "$sum": "$endingCashOnHand.total" },
                         "totalGrossSales": { "$sum": "$totalGrossSales" },
                         "totalNetSales": { "$sum": "$totalNetSales" },
                         "totalDiscount": { "$sum": "$totalDiscount" },
@@ -210,70 +54,15 @@ class BranchReportRepository(BackupRepository):
                         "invoiceEndNumber": { '$max': "$invoiceNumber" }
                     }
                 },
-                {
-                    "$addFields": {
-                        "branchId": {"$toObjectId": "$branchId"}
-                    }
-                },
-                { 
-                    '$lookup': {
-                        'from': 'branches',
-                        'localField': 'branchId',
-                        'foreignField': '_id',
-                        'as': 'branch'
-                    }, 
-                },
-                { "$unwind": "$branch" },
-                {
-                    "$addFields": {
-                        "branchId": {"$toString": "$branchId"}
-                    }
-                },
-                {
-                    "$lookup": {
-                        "from": self._cashier_report_collection,
-                        "let": {
-                            "branchId": "$branchId",
-                            "date": "$date"
-                        },
-                        "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            { "$eq": ["$branchId", "$$branchId"] },
-                                            { "$eq": ["$date", "$$date"] },
-                                        ]
-                                    }
-                                }
-                            },
-                            { 
-                                '$group': {
-                                    "_id": None,
-                                    "beginningCashOnHandTotal": { "$sum": "$beginningCashOnHand.total" },
-                                    "beginningCashOnHandCount": { "$push": "$beginningCashOnHand.count" },
-                                    "endingCashOnHandCount": { "$push": "$endingCashOnHand.count" },
-                                    "endingCashOnHandTotal": { "$sum": "$endingCashOnHand.total" },
-                                }
-                            },
-                            {
-                                "$addFields": {
-                                    "_id": { "$toString": "$_id" },
-                                }
-                            },
-                            {
-                                "$project": {
-                                    "_id": 0
-                                }
-                            }
-                        ],
-                        "as": "report"
-                    }
-                },
-                { "$unwind": {
-                    'path': "$report",
-                    'preserveNullAndEmptyArrays': True    
-                }},
+                *self._create_branch_query(),
+                *self._create_cash_count_query("openingFund", "opening"),
+                *self._create_cash_count_query("endingCashCount", "ending"),
+                *self._create_serial_number_range_query("cancelledNumber", TransactionStatus.CANCELLED),
+                *self._create_serial_number_range_query("refundedNumber", TransactionStatus.REFUNDED),
+                
+                *self._create_branch_report_query(),
+                *self._create_gross_sales_query("previousAccumulatedSales", False),
+                *self._create_gross_sales_query("presentAccumulatedSales"),
                 {
                     "$lookup": {
                         "from": self._transaction_collection,
@@ -282,16 +71,7 @@ class BranchReportRepository(BackupRepository):
                             "date": "$date"
                         },
                         "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            { "$eq": ["$branchId", "$$branchId"] },
-                                            { "$eq": ["$date", "$$date"] },
-                                        ]
-                                    }
-                                }
-                            },
+                            self._defaultFilter,
                             {
                                 "$addFields": {
                                     "_id": { "$toString": "$_id" },
@@ -303,90 +83,13 @@ class BranchReportRepository(BackupRepository):
                 },
                 {
                     "$lookup": {
-                        "from": self._transaction_collection,
-                        "let": {
-                            "branchId": "$branchId",
-                            "date": "$date"
-                        },
-                        "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            { "$eq": ["$branchId", "$$branchId"] },
-                                            { "$eq": ["$date", "$$date"] },
-                                            {"$eq": ["$status", "cancelled"]}
-                                        ]
-                                    }
-                                }
-                            },
-                           { 
-                                '$group': {
-                                    "_id": None,
-                                    "beginning": { "$min": "$serialNumber" },
-                                    "ending": { "$max": "$serialNumber" },
-                                }
-                            },
-                        ],
-                        "as": "cancelledNumber"
-                    }
-                },
-                { "$unwind": {
-                    'path': "$cancelledNumber",
-                    'preserveNullAndEmptyArrays': True    
-                }},
-                {
-                    "$lookup": {
-                        "from": self._transaction_collection,
-                        "let": {
-                            "branchId": "$branchId",
-                            "date": "$date"
-                        },
-                        "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            { "$eq": ["$branchId", "$$branchId"] },
-                                            { "$eq": ["$date", "$$date"] },
-                                            { "$eq": ["$status", "refunded"]}
-                                        ]
-                                    }
-                                }
-                            },
-                           { 
-                                '$group': {
-                                    "_id": None,
-                                    "beginning": { "$min": "$serialNumber" },
-                                    "ending": { "$max": "$serialNumber" },
-                                }
-                            },
-                        ],
-                        "as": "refundedNumber"
-                    }
-                },
-                { "$unwind": {
-                    'path': "$refundedNumber",
-                    'preserveNullAndEmptyArrays': True    
-                }},
-                {
-                    "$lookup": {
                         "from": 'transaction_discount',
                         "let": {
                             "branchId": "$branchId",
                             "date": "$date"
                         },
                         "pipeline": [
-                            {
-                                "$match": {
-                                    "$expr": {
-                                        "$and": [
-                                            { "$eq": ["$branchId", "$$branchId"] },
-                                            { "$eq": ["$date", "$$date"] },
-                                        ]
-                                    }
-                                },
-                            },
+                            self._defaultFilter,
                             {
                                 "$addFields": {
                                     "transactionId": {"$toObjectId": "$transactionId"}
@@ -436,34 +139,44 @@ class BranchReportRepository(BackupRepository):
                 discountSummary = {}
                 discounts = filter(lambda i: i['memberType'] is not None, item['discounts'])
                 for key, value in groupby(discounts, lambda i: i['memberType']):
-                    discountSummary[key] = sum(map(lambda i: i['transaction']['totalMemberDiscount'], value))
+                    total = sum(map(lambda i: i['transaction']['totalMemberDiscount'], value))
+                    total += discountSummary.get(key, 0)
+                    discountSummary[key] = total
                 item['discountSummary'] = discountSummary
 
 
                 salesAdjustment = {}
-                for key, value in groupby(item['transactions'], lambda i: i['status']):
-                    salesAdjustment[key] = sum(map(lambda i: i['totalNetSales'], value))
+                transactions = filter(lambda i: i['totalNetSales'] > 0, item['transactions'])
+                for key, value in groupby(transactions, lambda i: i['status']):
+                    total = sum(map(lambda i: i['totalNetSales'], value))
+                    total += salesAdjustment.get(key, 0)
+                    salesAdjustment[key] = total
                 item['salesAdjustment'] = salesAdjustment
 
-                endingCashTotal = item.get('endingCashOnHandTotal') or 0
-                difference = item['totalNetSales'] - endingCashTotal
-                cashLoss = difference if difference > 0 else 0
-                cashGain = difference * -1 if difference < 0 else 0
+                transactions = filter(lambda i: i['status'] == TransactionStatus.COMPLETED and get(i, 'tender.type') != TenderType.CASH, item['transactions'])
+                item['totalPayments'] = sum(map(lambda i: i['tender']['amount'], transactions))
+                item['totalPayments'] += get(item, 'endingCashCount.total', 0)
+                
+                openingFundTotal = get(item, 'openingFund.total', 0)
+                difference = item['totalPayments'] - openingFundTotal - item['totalNetSales']
                 item['cashDifference'] = difference
-                item['cashGain'] = cashGain
-                item['cashLoss'] = cashLoss
 
                 transactionSummary = {}
-                transactions = filter(lambda i: i['tenderType'] is not None and i['status'] == 'completed', item['transactions'])
-                for key, value in groupby(transactions, lambda i: i['tenderType']):
-                    transactionSummary[key] = sum(map(lambda i: i['totalNetSales'], value))
-                item['transactionSummary'] = transactionSummary                
+                transactions = filter(lambda i: get(i, 'tender.type') is not None and i['status'] == 'completed', item['transactions'])
+                for key, value in groupby(transactions, lambda i: get(i, 'tender.type')):
+                    total = sum(map(lambda i: i['totalNetSales'], value))
+                    total += transactionSummary.get(key, 0)
+                    transactionSummary[key] = total
+                item['transactionSummary'] = transactionSummary       
+
+                item['presentAccumulatedSales'] = get(item, 'presentAccumulatedSales.totalSales', 0)
+                item['previousAccumulatedSales'] = get(item, 'previousAccumulatedSales.totalSales', 0)         
 
                 reports.append(item)
             return reports
         except Exception as e:
             raise e
-        
+
     def find_by_date_and(self, date_filter: DateFilter, start_date=None, end_date=None, custom_date=None, query={}):
         reports = self.find(query)
 
@@ -486,3 +199,196 @@ class BranchReportRepository(BackupRepository):
         ]
 
         return filtered_reports
+    
+    def _create_branch_query(self): 
+        return [
+            {
+                    "$addFields": {
+                        "branchId": {"$toObjectId": "$branchId"}
+                    }
+                },
+                { 
+                    '$lookup': {
+                        'from': 'branches',
+                        'localField': 'branchId',
+                        'foreignField': '_id',
+                        'as': 'branch'
+                    }, 
+                },
+                { "$unwind": "$branch" },
+                {
+                    "$addFields": {
+                        "branchId": {"$toString": "$branchId"}
+                    }
+                }
+        ]
+    
+    def _create_gross_sales_query(self, name, present: bool = True):
+        startDate = getLocalTime().replace(day=1)
+        endDate = getLocalTime()
+
+        if(not present):
+            endDate = (endDate - timedelta(days=1))
+        
+        typeQuery = [
+            {  "$gte": [ "$date", str(startDate.date()) ] },
+            {  "$lte": [ "$date", str(endDate.date()) ] },
+        ]
+        return [
+            {
+                "$lookup": {
+                    "from": self._transaction_collection,
+                    "let": {
+                        "branchId": "$branchId",
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        { "$eq": ["$branchId", "$$branchId"] },
+                                        *typeQuery
+                                    ],
+                                }
+                            }
+                        },
+                        {
+                            "$group": {
+                                "_id": None,
+                                "totalSales": { "$sum": "$totalSalesWithoutMemberDiscount" }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "_id": 0
+                            }
+                        }
+                    ],
+                    "as": name
+                }
+            },
+             { "$unwind": {
+                'path': f"${name}",
+                'preserveNullAndEmptyArrays': True    
+            }}
+        ]
+
+    def _create_branch_report_query(self):
+        now = getLocalDateStr()
+
+        return [
+            {
+                "$lookup": {
+                    "from": self._collection,
+                    "let": {
+                        "branchId": "$branchId",
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        { "$eq": ["$branchId", "$$branchId"] },
+                                        { "$lt": [ "date", now ] }
+                                    ]
+                                }
+                            }
+                        },
+                        { "$sort": { "_id": -1 } },
+                        { "$limit": 1 },
+                        {
+                            "$project": {
+                                "_id": 0
+                            }
+                        }
+                    ],
+                    "as": "branchReport"
+                }
+            },
+            { "$unwind": {
+                'path': "$branchReport",
+                'preserveNullAndEmptyArrays': True    
+            }}
+        ]
+
+    def _create_serial_number_range_query(self, name, type):
+        return [
+            {
+                    "$lookup": {
+                        "from": self._transaction_collection,
+                        "let": {
+                            "branchId": "$branchId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$expr": {
+                                        "$and": [
+                                            { "$eq": ["$branchId", "$$branchId"] },
+                                            { "$eq": ["$date", "$$date"] },
+                                            {"$eq": ["$status", type]}
+                                        ]
+                                    }
+                                }
+                            },
+                           { 
+                                '$group': {
+                                    "_id": None,
+                                    "beginning": { "$min": "$serialNumber" },
+                                    "ending": { "$max": "$serialNumber" },
+                                }
+                            },
+                        ],
+                        "as": name
+                    }
+                },
+                { "$unwind": {
+                    'path': f"${name}",
+                    'preserveNullAndEmptyArrays': True    
+                }},
+        ]
+
+    def _create_cash_count_query(self, name, type):
+
+        cashCountScript = [{ CashCount.formatKey(key): { "$sum": f'${CashCount.formatKey(key)}' } } for key in _cash_keys]
+        cashCountQuery = {}
+        for item in cashCountScript:
+            cashCountQuery.update(item)
+
+        return [
+            {
+                "$lookup": {
+                    "from": self._cash_count_collection,
+                        "let": {
+                        "branchId": "$branchId",
+                        "date": "$date"
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        { "$eq": ["$branchId", "$$branchId"] },
+                                        { "$eq": ["$date", "$$date"] },
+                                        { "$eq": ["$type", type] },
+                                    ]
+                                }
+                            }
+                        },
+                        { 
+                            '$group': {
+                                "_id": None,
+                                **cashCountQuery,
+                                "total": { '$sum': "$total" },
+                            }
+                        },
+                    ],
+                    "as": name
+                }
+            },
+            { "$unwind": {
+                'path': f"${name}",
+                'preserveNullAndEmptyArrays': True    
+            }},
+        ]

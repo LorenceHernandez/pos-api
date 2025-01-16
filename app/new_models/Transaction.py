@@ -14,7 +14,7 @@ class TransactionStatus(str, Enum):
     CANCELLED = "cancelled"
     COMPLETED = "completed"
     REFUNDED = "refunded"
-    HOLD = "HOLD"
+    HOLD = "hold"
 
 class TransactionDiscount(Discount):
     packageType: Optional[PackageType] = Field(default=PackageType.PACKAGE)
@@ -39,7 +39,19 @@ class TransactionPackage(Package):
 class TenderType(str, Enum):
     CASH = "cash"
     CHEQUE = "cheque"
-    
+
+class Tender(BaseModel):
+    type: TenderType = TenderType.CASH
+    amount: float
+
+class ChequeTender(Tender):
+    type: TenderType = TenderType.CHEQUE
+    chequeNumber: str
+    accountNumber: str
+    accountName: str
+    bankName: str
+    branchName: str
+    amount: float
 
 class TransactionItem(Labtest):
     package: Optional[Package] = None
@@ -51,8 +63,6 @@ class BaseTransaction(BaseModel):
     transactionDate: str = Field(default_factory=getLocalTimeStr)
     transactionItems: List[TransactionItem] = Field(min_length=1)
     discounts: List[TransactionDiscount] = None
-    tenderType: TenderType
-    tenderAmount: float
     invoiceNumber: int = None
 
     @model_validator(mode='after')
@@ -94,10 +104,6 @@ class BaseTransaction(BaseModel):
         totalDiscount = self._computeTotalMemberDiscount(packageSales)
         return totalDiscount
     
-    @computed_field
-    @property
-    def change(self) -> float:
-        return self.tenderAmount - self.totalNetSales
     
     @property
     def transactionDateObject(self) -> datetime:
@@ -205,14 +211,36 @@ class CreateTransaction(BaseTransaction):
     referredById: Optional[str] = None
     requestedById: Optional[str] = None
 
+class CreateChequeTransaction(CreateTransaction):
+    tender: Optional[ChequeTender] = None
+
+    @computed_field
+    @property
+    def change(self) -> Optional[float]:
+        if(self.tender is None):
+            return None
+        return self.tender.amount - self.totalNetSales
+
+class CreateCashTransaction(CreateTransaction):
+    tender: Optional[Tender] = None
+
+    @computed_field
+    @property
+    def change(self) -> Optional[float]:
+        if(self.tender is None):
+            return None
+        return self.tender.amount - self.totalNetSales
+
+class ContinueTransaction(BaseModel):
+    branchId: str
+    invoiceNumber: int
+    cashierId: str
+    
 class CreateCancelledTransaction(BaseModel):
     reason: Optional[str] = None
     branchId: str
     invoiceNumber: int
     status: TransactionStatus
-    autoRefund: bool = True
-    cashierCancelled: str
-    dateCancelled: str = Field(default_factory=getLocalTimeStr)
 
 class CreateRefundTransaction(CreateTransaction):
     reason: Optional[str] = None

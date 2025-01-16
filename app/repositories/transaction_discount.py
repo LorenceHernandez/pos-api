@@ -18,7 +18,16 @@ class TransactionDiscountRepository(Repository):
                     '$addFields': {
                         'transactionId': {'$toObjectId': '$transactionId' },
                         'customerId': {'$toObjectId': '$customerId' },
+                        'customerId': {'$toObjectId': '$branchId' },
                     }
+                },
+                { 
+                    '$lookup': {
+                        'from': 'branches',
+                        'localField': 'branchId',
+                        'foreignField': '_id',
+                        'as': 'branch'
+                    }, 
                 },
                 { 
                     '$lookup': {
@@ -38,10 +47,12 @@ class TransactionDiscountRepository(Repository):
                 },
                 { "$unwind": "$transaction" },
                 { "$unwind": "$customer" },
+                { "$unwind": "$branch" },
                 {
                     '$project': {
                         'transactionId': 0,
                         'customerId': 0,
+                        'branchId': 0,
                     }
                 },
                 { '$sort': {"_id":-1} },
@@ -49,6 +60,7 @@ class TransactionDiscountRepository(Repository):
                 {
                     "$addFields": {
                         "_id": { "$toString": "$_id" },
+                        "branch._id": { "$toString": "$branch._id" },
                         "transaction._id": { "$toString": "$transaction._id" },
                         "customer._id": { "$toString": "$customer._id" },
                         "customer.name": {

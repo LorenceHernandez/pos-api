@@ -6,20 +6,25 @@ from pydantic import BaseModel, Field, computed_field
 from pydash import omit
 
 from app.new_models.CashCount import CashCount
+from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
 
 class TimeInCashierReport(BaseModel):
     branchId: str
     timeOut: Optional[str] = None
-    beginningCashOnHand: Optional[CashCount] = None
+    openingFund: Optional[CashCount] = None
+    # endingCashCount: Optional[str] = None
     cashierId: str = None
-    timeIn: str = None
-    date: str = None
+    timeIn: str = Field(default_factory=getLocalTimeStr)
+    date: str = Field(default_factory=getLocalDateStr)
 
+    
 class TimeOutCashierReport(BaseModel):
     id: str
-    endingCashOnHand: CashCount
-    timeOut: str
+    branchId: str
+    endingCashCount: CashCount
+    timeOut: str = Field(default_factory=getLocalTimeStr)
+    date: str = Field(default_factory=getLocalDateStr)
 
 
 class CashierReport(BaseModel):

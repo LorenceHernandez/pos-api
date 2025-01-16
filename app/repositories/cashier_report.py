@@ -6,23 +6,27 @@ from itertools import groupby
 from pydash import get
 from app.filters.date_filter import DateFilter, compare_date_filter
 from app.new_models.CashierReport import CashierReport
-from app.new_models.Transaction import TransactionStatus
-from app.repositories.base import BackupRepository
+from app.new_models.Transaction import TenderType, TransactionStatus
+from app.repositories.base import BackupRepository, Repository
+from app.repositories.report_cash_count import CashCountRepository
 from app.repositories.transaction import TransactionRepository
 
-
-class CashierReportRepository(BackupRepository):
+class CashierReportRepository(Repository):
     _collection = 'cashier_reports'
     _transaction_collection = TransactionRepository()._collection
+    _cash_count_collection = CashCountRepository()._collection
 
     def find(self, query={}, *args):
+
         try:
             data = list(self._db[self._collection].aggregate([
                 { '$match': query },
                 {
                     "$addFields": {
                         "cashierId": {"$toObjectId": "$cashierId"},
-                        "branchId": {"$toObjectId": "$branchId"}
+                        "branchId": {"$toObjectId": "$branchId"},
+                        "openingFundId": {"$toObjectId": "$openingFundId"},
+                        "endingCashCountId": {"$toObjectId": "$endingCashCountId"},
                     }
                 },
                 { 
@@ -43,6 +47,30 @@ class CashierReportRepository(BackupRepository):
                     }, 
                 },
                 { "$unwind": "$branch" },
+                { 
+                    '$lookup': {
+                        'from': self._cash_count_collection,
+                        'localField': 'openingFundId',
+                        'foreignField': '_id',
+                        'as': 'openingFund'
+                    }, 
+                },
+                { "$unwind": {
+                    'path': "$openingFund",
+                    'preserveNullAndEmptyArrays': True    
+                }},
+                { 
+                    '$lookup': {
+                        'from': self._cash_count_collection,
+                        'localField': 'endingCashCountId',
+                        'foreignField': '_id',
+                        'as': 'endingCashCount'
+                    }, 
+                },
+                { "$unwind": {
+                    'path': "$endingCashCount",
+                    'preserveNullAndEmptyArrays': True    
+                }},
                 {
                     "$addFields": {
                         "cashierId": {"$toString": "$cashierId"},
@@ -89,6 +117,7 @@ class CashierReportRepository(BackupRepository):
                                             { "$eq": ["$branchId", "$$branchId"] },
                                             { "$eq": ["$cashierId", "$$cashierId"] },
                                             { "$eq": ["$date", "$$date"] },
+                                            { "$in": [ "$status", ['completed', 'refunded'] ]}
                                         ]
                                     }
                                 }
@@ -179,6 +208,8 @@ class CashierReportRepository(BackupRepository):
                         "transactions.transactionItems": 0,
                         "sales._id": 0,
                         'cashierId': 0,
+                        "openingFundId": 0,
+                        "endingCashCountId": 0,
                         'branchId': 0,
                         'cashier': {
                             'password': 0,
@@ -192,6 +223,8 @@ class CashierReportRepository(BackupRepository):
                     "$addFields": {
                         "_id": { "$toString": "$_id" },
                         "cashier._id": { "$toString": "$cashier._id" },
+                        "openingFund._id": { "$toString": "$openingFund._id" },
+                        "endingCashCount._id": { "$toString": "$endingCashCount._id" },
                         "branch._id": { "$toString": "$branch._id" },
                     }
                 }
@@ -201,27 +234,34 @@ class CashierReportRepository(BackupRepository):
                 discountSummary = {}
                 discounts = filter(lambda i: i['memberType'] is not None, item['discounts'])
                 for key, value in groupby(discounts, lambda i: i['memberType']):
-                    discountSummary[key] = sum(map(lambda i: i['transaction']['totalMemberDiscount'], value))
+                    total = sum(map(lambda i: i['transaction']['totalMemberDiscount'], value))
+                    total += discountSummary.get(key, 0)
+                    discountSummary[key] = total
                 item['discountSummary'] = discountSummary
 
-
                 salesAdjustment = {}
-                for key, value in groupby(item['transactions'], lambda i: i['status']):
-                    salesAdjustment[key] = sum(map(lambda i: i['totalNetSales'], value))
+                transactions = filter(lambda i: i['totalNetSales'] > 0, item['transactions'])
+                for key, value in groupby(transactions, lambda i: i['status']):
+                    total = sum(map(lambda i: i['totalNetSales'], value))
+                    total += salesAdjustment.get(key, 0)
+                    salesAdjustment[key] = total
                 item['salesAdjustment'] = salesAdjustment
+                
+                transactions = filter(lambda i: i['status'] == TransactionStatus.COMPLETED and get(i, 'tender.type') != TenderType.CASH, item['transactions'])
+                item['totalPayments'] = sum(map(lambda i: i['tender']['amount'], transactions))
+                item['totalPayments'] += get(item, 'endingCashCount.total', 0)
 
                 if(item.get('sales') is not None):
-                    endingCashTotal = get(item, 'endingCashOnHand.total', 0)
-                    difference = (item['sales']['totalNetSales']) - endingCashTotal
-                    cashLoss = difference if difference > 0 else 0
-                    cashGain = difference * -1 if difference < 0 else 0
-                    item['sales']['cashGain'] = cashGain
-                    item['sales']['cashLoss'] = cashLoss
+                    openingFundTotal = get(item, 'openingFund.total', 0)
+                    difference = item['totalPayments'] - openingFundTotal - item['sales']['totalNetSales']
+                    item['sales']['cashDifference'] = difference
 
                 transactionSummary = {}
-                transactions = filter(lambda i: i['tenderType'] is not None and i['status'] == 'completed', item['transactions'])
-                for key, value in groupby(transactions, lambda i: i['tenderType']):
-                    transactionSummary[key] = sum(map(lambda i: i['totalNetSales'], value))
+                transactions = filter(lambda i: get(i, 'tender.type') is not None and i['status'] == 'completed', item['transactions'])
+                for key, value in groupby(transactions, lambda i: get(i, 'tender.type')):
+                    total = sum(map(lambda i: i['totalNetSales'], value))
+                    total += transactionSummary.get(key, 0)
+                    transactionSummary[key] = total
                 item['transactionSummary'] = transactionSummary                
 
                 reports.append(item)

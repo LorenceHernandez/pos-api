@@ -73,7 +73,7 @@ def _authenticate():
       AuditLog(
         action=AuditCode.USER_LOGIN_ERR_INCORRECT_CRED,  
         userId=str(user[0]['_id']),
-        message='Wrong entered password'
+        message='Entered wrong password'
       )
     )
     return {
