@@ -29,7 +29,10 @@ def convert_to_bytes(workbook: openpyxl.Workbook):
     output.seek(0)
     return output
 
-def append_base_header(worksheet, user_id, branch):
+def append_base_header(worksheet, user_id, data):
+
+    branch = data[0]['branch'] if len(data) > 0 else None
+
     worksheet.cell(1, 1, "MMG-ALBAY")
     worksheet.cell(2, 1, upper_case(branch['streetAddress']))
     worksheet.cell(3, 1, 'NON-VAT REG TIN ' + branch['tin'])
@@ -51,7 +54,7 @@ def export_discount_reports(workbook: openpyxl.Workbook, type: MemberType, repor
     # workbook = load_sheet(templateName)
     worksheet = workbook.active
 
-    append_base_header(worksheet, user_id)
+    append_base_header(worksheet, user_id, reports)
 
     if(type == MemberType.NAAC):
         append_naac_reports(worksheet, reports)
@@ -103,8 +106,7 @@ def append_solo_parent_reports(worksheet, reports):
 def export_sales_reports(workbook, sales, user_id):
     worksheet = workbook.active
     
-    branch = sales[0]['branch'] if len(sales) > 0 else None
-    append_base_header(worksheet, user_id, branch)
+    append_base_header(worksheet, user_id, sales)
     append_sales_reports(worksheet, sales)
     return convert_to_bytes(workbook)
 
@@ -131,7 +133,7 @@ def append_sales_reports(worksheet, sales):
         worksheet.cell(row, col + 15, clip(discountSummary.get(MemberType.SOLO_PARENT.value, 0)))
 
         discountSummary = sale['salesAdjustment']
-        worksheet.cell(row, col + 19, clip(discountSummary.get(TransactionStatus.REFUNDED.value, 0) * -1))
+        worksheet.cell(row, col + 19, clip(discountSummary.get(TransactionStatus.REFUNDED.value, 0)))
 
         worksheet.cell(row, col + 27, clip(sale['totalNetSales']))
         worksheet.cell(row, col + 28, clip(sale['cashDifference']))

@@ -126,9 +126,12 @@ def check_connection():
     connection = is_internet_connected()
     return { 'is_connected': connection }
 
-def row(p, label: str, value):
-    if(isinstance(value, numbers.Number) and not isinstance(value, bool)):
-        value = "{:.2f}".format(value)
+def clip(value):
+    return "{:.2f}".format(value)
+
+def row(p, label: str, value, transform=True):
+    if(transform and isinstance(value, numbers.Number) and not isinstance(value, bool)):
+        value = clip(value)
 
     if(not isinstance(value, str)):
         value = str(value)
@@ -207,7 +210,7 @@ def print_receipt():
         if(transaction['status'] == 'completed'):
             row(p, "Invoice #: ", str(transaction["invoiceNumber"]).zfill(6))
         else:
-            row(p, "Serial #: ", str(transaction["serialNumber"]).zfill(6))
+            # row(p, "Serial #: ", str(transaction["serialNumber"]).zfill(6))
             row(p, "Reference #: ", str(transaction["invoiceNumber"]).zfill(6))
 
         line(p)
@@ -220,7 +223,7 @@ def print_receipt():
         row(p, "TIN: ", customer.get("tin_number") or "---")
 
         if(companyCopy):
-            row(p, "Age: ", customer["age"])
+            row(p, "Age: ", customer["age"], transform=False)
             row(p, "Birth Date: ", str(customer["birthDate"]).split("T")[0])
         else:
             row(p, "Age: ", "---")
@@ -243,8 +246,8 @@ def print_receipt():
                 p.text(f'> {package["name"]} \n')
 
             for item in list(items):
-                amount = item['price'] if transaction['status'] == 'completed' else item['price'] * -1
-                p.textln(str(indented + item["name"][:22]).ljust(23) + f'({item["quantity"]})'.center(5) + str(amount).center(6) + str(amount).rjust(6))
+                amount = item['price'] if transaction['status'] != 'refunded' else item['price'] * -1
+                p.textln(str((indented + item["name"])[:22]).ljust(23) + f'({item["quantity"]})'.center(5) + str(amount).center(6) + str(amount).rjust(6))
             
             if(package is not None):
                 discounts = list(filter(lambda i: i.get('packageId') == package['_id'] and i['memberType'] is None, transaction['discounts']))
@@ -255,18 +258,20 @@ def print_receipt():
 
         line(p)
         p.set(align='left', bold=True)
-        row(p, "Total Sales: ", transaction["totalSalesWithoutMemberDiscount"])
+        totalSales = transaction['totalSalesWithoutMemberDiscount'] if transaction['status'] != 'refunded' else transaction['totalSalesWithoutMemberDiscount'] * -1
+        row(p, "Total Sales: ", totalSales)
         p.set(bold=False)
 
-        row(p, "Less: SC/PWD/NAAC/MOV/SP ", f'({transaction["totalMemberDiscount"]})')
-        row(p, "Less: Withholding Tax ", "(0)")
+        row(p, "Less: SC/PWD/NAAC/MOV/SP ", f'({clip(transaction["totalMemberDiscount"])})')
+        row(p, "Less: Withholding Tax ", "(0.00)")
         
         p.set(bold=True)
-        row(p, "TOTAL AMOUNT DUE: ", transaction["totalNetSales"])
+        totalNetSales = transaction['totalNetSales'] if transaction['status'] != 'refunded' else transaction['totalNetSales'] * -1
+        row(p, "TOTAL AMOUNT DUE: ", totalNetSales)
         
         p.set(bold=False)
-        row(p, "Tender Amount: ", transaction["tenderAmount"])
-        row(p, "Tender Type: ", upper_case(transaction["tenderType"]))
+        row(p, "Tender Amount: ", get(transaction, 'tender.amount'))
+        row(p, "Tender Type: ", upper_case(get(transaction, 'tender.type')))
         row(p, "Change: ", transaction["change"])
 
 
@@ -284,12 +289,13 @@ def print_receipt():
         row(p, "ID (SC/PWD/NAAC/MOV/SP): ", f'{customerTypeId}\n')
         row(p, "Signature: ", f'{("_" * 10)}\n')
 
+        p.set(align="center")
+        p.textln('Supplier:')
         p.set(align="center", bold=True)
-        p.text('SUPPLIER\n')
         p.text(dvote['name'].upper() + '\n')
         p.set(align="center", bold=False)
-        p.text('Address: ' + dvote['address'] + '\n')
-        p.text('Vat Reg. TIN: ' + dvote['tin'] + '\n')
+        p.textln('VAT REG TIN ' + dvote['tin'])
+        p.textln(upper_case(dvote['address']))
         p.text('Accred No: ' + dvote['accredNo'] + '\n')
         p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
         p.text('Valid Until: ' + '---' + '\n')
@@ -373,21 +379,16 @@ def print_report():
         row(p, "MIN: ", "---")
         row(p, "SN: ", "---")
 
-        row(p, "Report: ", data["date"])
         
         if(type == 'X_REPORT'):
             cashier = data['cashier']
             row(p, "Cashier: ", start_case(cashier["first_name"] + " " + cashier["last_name"]))
-        else:
-            row(p, "Z-Counter #: ", str(1))
             
-                
+        row(p, "Report Date: ", data["date"])
         if(type == 'X_REPORT'):
-            timeOutDate = ' - '+ timeOutDate.strftime("%I:%M%p") if timeOutDate is not None else ''
+            timeOutDate = timeOutDate.strftime("%I:%M%p") if timeOutDate is not None else ''
             row(p, "Time In: ", timeInDate.strftime("%I:%M%p"))
             row(p, "Time Out: ", timeOutDate)
-        else:
-            row(p, "Reset Counter: ", "0")
             
         row(p, "Beg. Invoice #: ", str(sales["invoiceStartNumber"]).zfill(6))
         row(p, "End. Invoice #: ", str(sales["invoiceEndNumber"]).zfill(6))
@@ -398,10 +399,12 @@ def print_report():
             row(p, "End. Cancel #: ", str(cancel.get('ending', 0)).zfill(6))
             row(p, "Beg. Refund #: ", str(refund.get('beginning', 0)).zfill(6))
             row(p, "End. Refund #: ", str(refund.get('ending', 0)).zfill(6))
-            
+            row(p, "Z-Counter #: ", str(1))
+            row(p, "Reset Counter: ", "0")
+
             line(p)
-            row(p, "Present Accumulated Sales: ", 0)
-            row(p, "Previous Accumulated Sales: ", 0)
+            row(p, "Present Accumulated Sales: ", sales['presentAccumulatedSales'])
+            row(p, "Previous Accumulated Sales: ", sales['previousAccumulatedSales'])
             row(p, "Sales for the Day: ", sales['totalSalesWithoutMemberDiscount'])
             
         line(p)
@@ -409,42 +412,68 @@ def print_report():
         row(p, "Less Discount: ", sales["totalMemberDiscount"])
         row(p, "Less Cancelled: ", salesAdjustment.get('cancelled', 0))
         row(p, "Less Refunded: ", salesAdjustment.get('refunded', 0))
-        row(p, "Less VAT Adjustment: ", 0)
+        # row(p, "Less VAT Adjustment: ", 0)
         row(p, "Net Sales: ", sales["totalNetSales"])
 
-        line(p)
-        title(p, "DISCOUNT SUMMARY")
-        row(p, "SC Discount: ", discountSummary.get('senior_citizen', 0))
-        row(p, "PWD Discount: ", discountSummary.get('pwd', 0))
-        row(p, "NAAC Discount: ", discountSummary.get('naac', 0))
-        row(p, "Solo Parent Discount: ", discountSummary.get('solo_parent', 0))
-        
+        if(type == 'Z_REPORT'):
+            line(p)
+            title(p, "DISCOUNT SUMMARY")
+            row(p, "SC Discount: ", discountSummary.get('senior_citizen', 0))
+            row(p, "PWD Discount: ", discountSummary.get('pwd', 0))
+            row(p, "NAAC Discount: ", discountSummary.get('naac', 0))
+            row(p, "Solo Parent Discount: ", discountSummary.get('solo_parent', 0))
+            
         line(p)
         title(p, "SALES ADJUSTMENT")
         row(p, "Cancel: ", salesAdjustment.get('cancelled', 0))
         row(p, "Refund: ", salesAdjustment.get('refunded', 0))
 
+        endingCashCount = data.get('endingCashCount')
+
         line(p)
         title(p, "CASH IN DRAWER COUNT")
+        if(endingCashCount is not None):
+
+            def toFloat(i):
+                val = str(i).split('M')
+                if(len(val) >= 1):
+                    val = val[1].replace('P', '.')
+                    return float(val)
+                return 0.00
+                
+
+            keys = list(endingCashCount.keys())
+            keys = list(filter(lambda i: i.startswith('M'), keys))
+            keys = list(map(toFloat, keys))
+            keys = list(sorted(keys, reverse=True))
+
+            for key in keys:
+                formattedKey = f'M{int(key)}' if key >= 1 else f'M{key}'.replace('.', 'P')
+                value = endingCashCount[formattedKey]
+                result = clip(value * key)
+                key = f'{clip(key)}:'
+                length = MAX_CHAR_PER_ROW - len(key) - len(result)
+                p.textln(key + str(value).center(length) + result)
 
         line(p)
         title(p, "TRANSACTION SUMMARY")
-        row(p, "Cash In Drawer: ", transactionSummary.get('cash'))
-        row(p, "Cheque: ", transactionSummary.get('cheque'))
+        row(p, "Cash In Drawer: ", get(data, 'endingCashCount.total', 0))
+        row(p, "Cheque: ", transactionSummary.get('cheque', 0))
         row(p, "Credit Card: ", 0)
         row(p, "Gift Certificate: ", 0)
-        row(p, "Opening Fund: ", get(sales, 'openingFund.total', 0))
+        row(p, "Opening Fund: ", get(data, 'openingFund.total', 0))
         row(p, "Less Withdrawal: ", 0)
-        row(p, "Payments Received: ", sales.get('totalPayments', 0))
+        row(p, "Payments Received: ", data.get('totalPayments', 0))
         row(p, "Short/Over: ", sales.get('cashDifference', 0))
 
         p.textln()
-        p.set(bold=True, align='center')
-        p.text('SUPPLIER\n')
+        p.set(align="center")
+        p.textln('Supplier:')
+        p.set(align="center", bold=True)
         p.text(dvote['name'].upper() + '\n')
-        p.set(bold=False, align='center')
-        p.text('Address: ' + dvote['address'] + '\n')
-        p.text('Vat Reg. TIN: ' + dvote['tin'] + '\n')
+        p.set(align="center", bold=False)
+        p.textln('VAT REG TIN ' + dvote['tin'])
+        p.textln(upper_case(dvote['address']))
         p.text('Accred No: ' + dvote['accredNo'] + '\n')
         p.text('Date Issued: ' + dvote['dateIssued'] + '\n')
         p.text('Valid Until: ' + '---' + '\n')

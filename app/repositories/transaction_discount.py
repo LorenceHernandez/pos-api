@@ -18,7 +18,7 @@ class TransactionDiscountRepository(Repository):
                     '$addFields': {
                         'transactionId': {'$toObjectId': '$transactionId' },
                         'customerId': {'$toObjectId': '$customerId' },
-                        'customerId': {'$toObjectId': '$branchId' },
+                        'branchId': {'$toObjectId': '$branchId' },
                     }
                 },
                 { 
