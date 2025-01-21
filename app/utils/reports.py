@@ -114,6 +114,10 @@ def append_sales_reports(worksheet, sales):
     default_row = 17
     def clip(value):
         return "{:.2f}".format(value)
+    
+    totalSales = sum(map(lambda i: i['totalNetSales'], sales))
+    worksheet.cell(11, 1, f'Total: {clip(totalSales)}')
+
     for index, sale in enumerate(sales):
         default_col = 0
         col = default_col
