@@ -11,12 +11,12 @@ if(JWT_SECRET_KEY is None):
 
 
 LOCAL_DATABASE_URL = os.getenv('LOCAL_DATABASE_URL')
-LOCAL_DATABASE = os.getenv('LOCAL_DATABASE')
+DATABASE = os.getenv('DATABASE')
 
 REMOTE_DATABASE_URL = os.getenv('REMOTE_DATABASE_URL')
-REMOTE_DATABASE = os.getenv('REMOTE_DATABASE')
+# REMOTE_DATABASE = os.getenv('REMOTE_DATABASE')
 
-BACKUP_DATABASE = os.getenv('BACKUP_DATABASE')
+# BACKUP_DATABASE = os.getenv('BACKUP_DATABASE')
 
 ENVIRONMENT = os.getenv('APP_ENV') 
 print('CURRENT_ENVIRONMENT: ', ENVIRONMENT)
@@ -33,3 +33,6 @@ IS_PRODUCTION = ENVIRONMENT == 'production'
 if IS_PRODUCTION is not True:
     if LOCAL_DATABASE_URL is None:
         raise Exception('LOCAL_DATABASE_URL is None')
+else:
+    if REMOTE_DATABASE_URL is None:
+        raise Exception('REMOTE_DATABASE_URL is None')

@@ -3,13 +3,14 @@ services:
   app:
     image: chrisn0tdev/pos-client
     ports:
-      - "4000:5173"
+      - "8000:5173"
     depends_on:
       - proxy
     env_file: 
       - .env
     environment:
       - VITE_APP_SERVER_URL=http://proxy:5001
+      - VITE_APP_SERVER_PORT=5000
       - VITE_APP_ENV=internal-production
     restart: always
     
@@ -17,7 +18,7 @@ services:
     build: ./
     image: chrisn0tdev/pos-app
     ports:
-      - "5000:5000"
+      - "8001:5000"
     depends_on:
       - mongo
     networks:
@@ -38,7 +39,7 @@ services:
     # devices:
     #   - /dev/ttyS3
     ports:
-      - "5001:5001" 
+      - "8002:5001" 
     depends_on:
       - mongo
       - server
@@ -68,8 +69,8 @@ services:
 
   mongo:
     image: mongo
-    # ports:
-    #   - "27018:27017" 
+    ports:
+      - "27018:27017" 
     volumes:
       - mongo-data:/data/db
     networks:

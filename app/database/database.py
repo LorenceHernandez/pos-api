@@ -1,7 +1,7 @@
 
 import abc
 import pymongo
-from app.config import BACKUP_DATABASE, ENVIRONMENT, IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_LOCAL_DEVELOPMENT, IS_PRODUCTION, LOCAL_DATABASE, LOCAL_DATABASE_URL, REMOTE_DATABASE, REMOTE_DATABASE_URL
+from app.config import DATABASE, ENVIRONMENT, IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_LOCAL_DEVELOPMENT, IS_PRODUCTION, LOCAL_DATABASE_URL, REMOTE_DATABASE_URL
 
 class Database(abc.ABC):
     def __init__(self, config):
@@ -30,22 +30,22 @@ class MongoDB(Database):
 
 dev_database = MongoDB({ 
     "uri": LOCAL_DATABASE_URL, 
-    "database": REMOTE_DATABASE, 
+    "database": DATABASE, 
 })
 
 remote_database = MongoDB({ 
     "uri": REMOTE_DATABASE_URL, 
-    "database": REMOTE_DATABASE, 
+    "database": DATABASE, 
 })
 
 backup_database = MongoDB({ 
     "uri": LOCAL_DATABASE_URL, 
-    "database": BACKUP_DATABASE, 
+    "database": DATABASE, 
 })
 
 internal_prod_database = MongoDB({ 
     "uri": LOCAL_DATABASE_URL, 
-    "database": LOCAL_DATABASE, 
+    "database": DATABASE, 
 })
 
 def get_current_database():
@@ -59,6 +59,6 @@ def get_current_database():
         return dev_database
     
 def get_current_backup_database():
-    if IS_INTERNAL_PRODUCTION:
-        return backup_database
+    # if IS_INTERNAL_PRODUCTION:
+    #     return backup_database
     return None

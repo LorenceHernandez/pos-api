@@ -1,6 +1,7 @@
 from bson.json_util import dumps, loads
 from bson.objectid import ObjectId
 from flask import Blueprint, g, request
+from app.config import IS_INTERNAL_PRODUCTION
 
 from app.database.config import discounts
 from app.new_models.Discount import Discount, DiscountType, MemberType
@@ -18,6 +19,9 @@ def _get_discounts():
     Discount(memberType=MemberType.SOLO_PARENT, name="Solo Parent Member 20%", type=DiscountType.PERCENTAGE, value=20),
     Discount(memberType=MemberType.NAAC, name="NAAC Member 20%", type=DiscountType.PERCENTAGE, value=20),
   ]
+
+  if(IS_INTERNAL_PRODUCTION):
+    initialDiscounts = []
 
   if(len(res) == 0 or len(list(filter(lambda i: i.get('memberType') is not None, res))) == 0):
     discounts.insert_many(map(
