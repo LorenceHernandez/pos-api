@@ -73,12 +73,12 @@ def display_welcome():
 display_welcome()
 
 def is_internet_connected():
-    return False
-    # try:
-    #     socket.create_connection(("www.google.com", 80))
-    #     return True
-    # except OSError:
-    #     return False
+    # return False
+    try:
+        socket.create_connection(("www.google.com", 80))
+        return True
+    except OSError:
+        return False
 
 cors = CORS(app, origins=["*", "*"])
 @app.before_request
@@ -94,10 +94,10 @@ def proxy(path):
     print('Connection: ', connected)
     path = request.full_path
 
-    if connected:
-        target_url = CLOUD_SERVER_URL + path
-    else:
-        target_url = LOCAL_SERVER_URL + path
+    # if connected:
+    #     target_url = CLOUD_SERVER_URL + path
+    # else:
+    target_url = LOCAL_SERVER_URL + path
     # target_url = LOCAL_SERVER_URL + path
     # print('Target URL: ', target_url)
 
@@ -340,8 +340,8 @@ def print_report():
         if(data.get('timeOut') is not None):
             timeOutDate = datetime.datetime.fromisoformat(data['timeOut'])
 
-    beginningCashTotal = get(data, 'beginningCashOnHand.total', 0)
-    endingCashTotal = get(data, 'endingCashOnHand.total', 0)
+    cashierReport = data if type == 'X_REPORT' else data['cashierReport']
+    withdraw = get(cashierReport, 'withdraw', 0)
     sales = data if type == 'Z_REPORT' else data['sales']
     
     salesAdjustment = data['salesAdjustment']
@@ -462,7 +462,7 @@ def print_report():
         row(p, "Credit Card: ", 0)
         row(p, "Gift Certificate: ", 0)
         row(p, "Opening Fund: ", get(data, 'openingFund.total', 0))
-        row(p, "Less Withdrawal: ", 0)
+        row(p, "Less Withdrawal: ", withdraw)
         row(p, "Payments Received: ", data.get('totalPayments', 0))
         row(p, "Short/Over: ", sales.get('cashDifference', 0))
 

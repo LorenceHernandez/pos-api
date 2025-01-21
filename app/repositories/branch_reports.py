@@ -60,6 +60,7 @@ class BranchReportRepository(BackupRepository):
                 *self._create_serial_number_range_query("cancelledNumber", TransactionStatus.CANCELLED),
                 *self._create_serial_number_range_query("refundedNumber", TransactionStatus.REFUNDED),
                 
+                *self._create_cashier_report_query(),
                 *self._create_branch_report_query(),
                 *self._create_gross_sales_query("previousAccumulatedSales", False),
                 *self._create_gross_sales_query("presentAccumulatedSales"),
@@ -160,6 +161,8 @@ class BranchReportRepository(BackupRepository):
                 openingFundTotal = get(item, 'openingFund.total', 0)
                 difference = item['totalPayments'] - openingFundTotal - item['totalNetSales']
                 item['cashDifference'] = difference
+
+                item['totalPayments'] -= get(item, 'cashierReport.withdraw', 0)
 
                 transactionSummary = {}
                 transactions = filter(lambda i: get(i, 'tender.type') is not None and i['status'] == 'completed', item['transactions'])
@@ -337,6 +340,35 @@ class BranchReportRepository(BackupRepository):
                                     "_id": None,
                                     "beginning": { "$min": "$serialNumber" },
                                     "ending": { "$max": "$serialNumber" },
+                                }
+                            },
+                        ],
+                        "as": name
+                    }
+                },
+                { "$unwind": {
+                    'path': f"${name}",
+                    'preserveNullAndEmptyArrays': True    
+                }},
+        ]
+    
+    def _create_cashier_report_query(self, name = "cashierReport"):
+        return [
+            {
+                    "$lookup": {
+                        "from": self._cashier_report_collection,
+                        "let": {
+                            "branchId": "$branchId",
+                            "date": "$date"
+                        },
+                        "pipeline": [
+                            self._defaultFilter,
+                           { 
+                                '$group': {
+                                    "_id": None,
+                                    "timeIn": { "$min": "$serialNumber" },
+                                    "timeOut": { "$max": "$serialNumber" },
+                                    "withdraw": { "$sum": "$withdraw" },
                                 }
                             },
                         ],

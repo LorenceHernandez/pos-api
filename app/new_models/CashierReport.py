@@ -23,6 +23,7 @@ class TimeOutCashierReport(BaseModel):
     id: str
     branchId: str
     endingCashCount: CashCount
+    withdraw: Optional[float] = 0.0
     timeOut: str = Field(default_factory=getLocalTimeStr)
     date: str = Field(default_factory=getLocalDateStr)
 

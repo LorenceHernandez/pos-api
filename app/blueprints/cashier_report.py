@@ -114,7 +114,7 @@ def time_out_report(user_id):
 
 
     result = reportRepository.update_one_bare(query, {
-        **model.model_dump(exclude={'endingCashCount'}),
+        **model.model_dump(exclude={'endingCashCount', 'id'}),
         "endingCashCountId": str(cashCount.inserted_id)
     }) 
    
