@@ -10,7 +10,7 @@ from app.blueprints.audit_log import audit_log_bp
 from app.blueprints.reports import discount_reports_bp
 from app.blueprints.cashier_report import cashier_report_bp
 from app.blueprints.branch_report import branch_report_bp
-from app.blueprints.sales import sales_bp
+from app.blueprints.branch import branch_bp
 from app.blueprints.transaction import transaction_bp
 from app.cas_app.blueprints.accounts_group import accounts_group_bp
 from app.cas_app.blueprints.accounts_type import accounts_type_bp
@@ -120,8 +120,8 @@ app = Flask(__name__)
 cors = CORS(app, origins=["*", "*"])
 app.register_blueprint(discount_reports_bp)
 app.register_blueprint(cashier_report_bp)
-app.register_blueprint(sales_bp)
 app.register_blueprint(branch_report_bp)
+app.register_blueprint(branch_bp)
 app.register_blueprint(transaction_bp)
 app.register_blueprint(item_bp)
 app.register_blueprint(inventory_bp)
