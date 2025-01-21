@@ -174,7 +174,9 @@ def v3_cancel_transaction(user_id):
             if(not transaction):
                 return jsonify({'message': 'Transaction not found nor allowed for cancellation', 'data': transaction })
             
-            transactionRepository.update_one_bare({ "_id": transaction["_id"] }, { "status": TransactionStatus.CANCELLED })
+            updateQuery =  { "status": TransactionStatus.CANCELLED }
+            transactionRepository.update_one_bare({ "_id": transaction["_id"] }, updateQuery)
+            discountRepository.update_many_bare({ "transactionId": str(transaction["_id"]) }, updateQuery)
 
             transaction = omit(transaction, "_id")
             transaction['cashierId'] = user_id
@@ -200,7 +202,9 @@ def v3_cancel_transaction(user_id):
             if(not transaction):
                 return jsonify({'message': 'Transaction not found nor refundable', 'data': transaction })
 
+            updateQuery =  { "status": TransactionStatus.REFUNDED }
             transactionRepository.update_one_bare({ "_id": transaction["_id"] }, { "status": TransactionStatus.REFUNDED })
+            discountRepository.update_many_bare({ "transactionId": str(transaction["_id"]) }, updateQuery)
 
             transaction = omit(transaction, "_id")
             transaction['cashierId'] = user_id
