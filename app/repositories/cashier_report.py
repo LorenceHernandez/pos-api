@@ -10,11 +10,14 @@ from app.new_models.Transaction import TenderType, TransactionStatus
 from app.repositories.base import BackupRepository, Repository
 from app.repositories.report_cash_count import CashCountRepository
 from app.repositories.transaction import TransactionRepository
+from app.repositories.transaction_discount import TransactionDiscountRepository
 
 class CashierReportRepository(Repository):
     _collection = 'cashier_reports'
     _transaction_collection = TransactionRepository()._collection
     _cash_count_collection = CashCountRepository()._collection
+    _transaction_discount_collection = TransactionDiscountRepository()._collection
+
 
     def find(self, query={}, *args):
 
@@ -140,7 +143,7 @@ class CashierReportRepository(Repository):
                 },
                 {
                     "$lookup": {
-                        "from": 'transaction_discount',
+                        "from": self._transaction_discount_collection,
                         "let": {
                             "branchId": "$branchId",
                             "cashierId": "$cashierId",

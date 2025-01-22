@@ -5,8 +5,8 @@ from app.repositories.base import Repository
 from app.repositories.transaction import TransactionRepository
 
 
-class TransactionDiscountRepository(Repository):
-    _collection = 'transaction_discounts'
+class TransactionItemRepository(Repository):
+    _collection = 'transaction_items'
     _transaction_collection = TransactionRepository()._collection
 
 

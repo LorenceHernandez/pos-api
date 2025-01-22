@@ -11,6 +11,7 @@ from app.blueprints.reports import discount_reports_bp
 from app.blueprints.cashier_report import cashier_report_bp
 from app.blueprints.branch_report import branch_report_bp
 from app.blueprints.branch import branch_bp
+from app.blueprints.category import category_bp as category_pos_bp
 from app.blueprints.transaction import transaction_bp
 from app.cas_app.blueprints.accounts_group import accounts_group_bp
 from app.cas_app.blueprints.accounts_type import accounts_type_bp
@@ -125,6 +126,7 @@ app.register_blueprint(branch_bp)
 app.register_blueprint(transaction_bp)
 app.register_blueprint(item_bp)
 app.register_blueprint(inventory_bp)
+app.register_blueprint(category_pos_bp)
 app.register_blueprint(category_bp)
 app.register_blueprint(supplier_bp)
 app.register_blueprint(audit_log_bp)

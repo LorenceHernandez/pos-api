@@ -10,4 +10,4 @@ class Labtest(BaseModel):
     description: Optional[str] = None
     price: float = Field(gt=1)
     quantity: int = Field(ge=1, default=1)
-    # categoryId: str = None
+    categoryId: Optional[str] = None

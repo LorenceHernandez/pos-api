@@ -9,6 +9,7 @@ from app.new_models.Transaction import ChequeTender, CreateCashTransaction, Crea
 from app.new_models.Transaction import CreateRefundTransaction, CreateTransaction, CreateCancelledTransaction, TransactionStatus
 from app.repositories.transaction import TransactionRepository
 from app.repositories.transaction_discount import TransactionDiscountRepository
+from app.repositories.transaction_item import TransactionItemRepository
 from app.services.Transaction import TransactionService
 from app.utils.utils import getLocalDateStr, getLocalTimeStr
 
@@ -16,6 +17,7 @@ api = '/v2/transactions'
 transaction_bp = Blueprint('transactions', __name__)
 transactionRepository = TransactionRepository()
 discountRepository = TransactionDiscountRepository()
+itemRepository = TransactionItemRepository()
 
 @transaction_bp.get(api)
 @authorized
@@ -125,7 +127,7 @@ def v3_create_transaction(user_id):
             model = CreateCashTransaction(**args)
 
         model.invoiceNumber = transactionRepository._get_next_sequence({ "type": "INVOICE_NUMBER", "cashierId": user_id })
-        data = model.model_dump(by_alias=True, exclude={'discounts'})
+        data = model.model_dump(by_alias=True, exclude={'discounts', 'transactionItems'})
         result = transactionRepository.insert_one(data)
 
         discounts = list(map(
@@ -146,8 +148,22 @@ def v3_create_transaction(user_id):
             }, 
             model.discounts
         ))
+        
         if(len(discounts) > 0):
             discountRepository.insert_many(discounts)
+
+        transactionItems = list(map(
+            lambda i: { 
+                **i.model_dump(exclude='id'),
+                'transactionId': result['_id'],
+                **model.model_dump(include={'date'})
+            }, 
+            model.transactionItems
+        ))
+
+        if(len(transactionItems) > 0):
+            itemRepository.insert_many(transactionItems)
+
 
         result = transactionRepository.find_one({ '_id': ObjectId(result['_id']) })
         return jsonify({'message': 'Transaction created successfully', 'data': result })

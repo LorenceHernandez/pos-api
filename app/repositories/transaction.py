@@ -2,13 +2,14 @@
 
 
 from bson import ObjectId
-from app.new_models.Transaction import CreateTransaction, TransactionStatus
 from app.repositories.base import BackupRepository
 from app.utils.utils import getLocalDateStr
 
 
 class TransactionRepository(BackupRepository):
     _collection = 'new_transactions'
+    _transaction_discount_collection = "transaction_discounts"
+    _transaction_item_collection = "transaction_items"
 
     def find(self, query={}, *args, agreggate=True):
         if(not agreggate): 
@@ -32,6 +33,14 @@ class TransactionRepository(BackupRepository):
                         'localField': 'cashierId',
                         'foreignField': '_id',
                         'as': 'cashier'
+                    }, 
+                },
+                { 
+                    '$lookup': {
+                        'from': self._transaction_item_collection,
+                        'localField': '_id',
+                        'foreignField': 'transactionId',
+                        'as': 'transactionItems'
                     }, 
                 },
                 { 
@@ -68,7 +77,7 @@ class TransactionRepository(BackupRepository):
                 },
                 { 
                     '$lookup': {
-                        'from': 'transaction_discount',
+                        'from': self._transaction_discount_collection,
                         'localField': '_id',
                         'foreignField': 'transactionId',
                         'as': 'discounts'
@@ -118,6 +127,7 @@ class TransactionRepository(BackupRepository):
                         'requestedById': 0,
                         'customerId': 0,
                         "discounts._id": 0,
+                        "transactionItems._id": 0,
                         'cashier': {
                             'password': 0,
                         }
