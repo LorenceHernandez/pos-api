@@ -11,7 +11,7 @@ from app.filters.date_filter import DateFilter
 from app.middlewares.authorized_attribute import authorized
 from app.new_models.AuditLog import AuditCode, AuditLog
 from app.new_models.CashierReport import TimeInCashierReport, TimeOutCashierReport
-from app.new_models.Sales import GenerateBranchReport, GetBranchReportQuery
+from app.new_models.BranchReport import GenerateBranchReport, GetBranchReportQuery
 from app.new_models.Transaction import TransactionStatus
 from app.repositories.audit_log import AuditLogRepository
 from app.repositories.branch_reports import BranchReportRepository
