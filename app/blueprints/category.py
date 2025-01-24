@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 
 from app.middlewares.authorized_attribute import authorized
-from app.new_models.Filter import BranchFilter, DateFilter
+from app.new_models.Filter import BranchFilter, DateRangeFilter
 from app.repositories.audit_log import AuditLogRepository
 from app.repositories.category import CategoryRepository
 
@@ -21,7 +21,7 @@ def get_categoy_reports(user_id):
     params = request.args.to_dict()
 
     try:
-        dateFilter = DateFilter(**params)
+        dateFilter = DateRangeFilter(**params)
         branchFilter = BranchFilter(**params)
         query = { 
             **dateFilter.transform(),

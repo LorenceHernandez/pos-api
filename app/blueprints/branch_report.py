@@ -2,21 +2,18 @@
 
 
 from datetime import timedelta
-from bson import ObjectId
-from flask import Blueprint, jsonify, request,g
+from flask import Blueprint, jsonify, request
 from pydantic import ValidationError
 from pydash import omit 
 
-from app.filters.date_filter import DateFilter
 from app.middlewares.authorized_attribute import authorized
 from app.new_models.AuditLog import AuditCode, AuditLog
-from app.new_models.CashierReport import TimeInCashierReport, TimeOutCashierReport
-from app.new_models.Sales import GenerateBranchReport, GetBranchReportQuery
+from app.new_models.BranchReport import GenerateBranchReport, GetBranchReportQuery
 from app.new_models.Transaction import TransactionStatus
 from app.repositories.audit_log import AuditLogRepository
 from app.repositories.branch_reports import BranchReportRepository
 from app.repositories.transaction import TransactionRepository
-from app.utils.utils import getLocalDateStr, getLocalTime, getLocalTimeStr
+from app.utils.utils import getLocalTime, getLocalTimeStr
 
 api = '/v2/branch-reports'
 branch_report_bp = Blueprint('branch-reports', __name__)
@@ -34,10 +31,14 @@ def get_reports(user_id):
     try:
         model = GetBranchReportQuery(**omit(params, 'branchIds'), branchIds=branchIds)
         query = { 
-            **omit(model.model_dump(exclude_none=True), 'branchIds'),  
-            "branchId": { "$in": model.branchIds }
+            **model.model_dump(exclude_none=True, exclude={'branchIds'}),  
+            "branchId": { "$in": model.branchIds },
+            # "date": {
+            #     "$gte": str(model.startDate),
+            #     "$lte": str(model.endDate)
+            # }
         }
-        reports = reportRepository.find(query)
+        reports = reportRepository.find(query, { "branchId": "$branchId" })
         return jsonify({ 'data': reports })
     except ValidationError as e:
         return jsonify({'message': 'Unable to get reports', 'error': e.errors(include_input=False)}), 500

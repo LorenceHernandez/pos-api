@@ -9,7 +9,7 @@ from pydash import omit
 from app.middlewares.authorized_attribute import authorized
 from app.new_models.AuditLog import AuditCode, AuditLog
 from app.new_models.BranchReport import GenerateBranchReport, GetBranchReportQuery
-from app.new_models.Filter import DateFilter
+from app.new_models.Filter import DateRangeFilter
 from app.new_models.Transaction import TransactionStatus
 from app.repositories.audit_log import AuditLogRepository
 from app.repositories.branch import BranchRepository
@@ -29,7 +29,7 @@ def get_branch_reports(user_id):
     params = request.args.to_dict()
 
     try:
-        model = DateFilter(**params)
+        model = DateRangeFilter(**params)
         query = { 
             **model.transform()
         }

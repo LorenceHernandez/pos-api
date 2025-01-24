@@ -13,6 +13,7 @@ from app.repositories.cashier_report import CashierReportRepository
 from app.repositories.report_cash_count import CashCountRepository
 from app.repositories.transaction import TransactionRepository
 from app.new_models.CashCount import _cash_keys, CashCount
+from app.repositories.transaction_discount import TransactionDiscountRepository
 from app.utils.utils import getLocalDateStr, getLocalTime
 
 class BranchReportRepository(BackupRepository):
@@ -20,6 +21,8 @@ class BranchReportRepository(BackupRepository):
     _transaction_collection = TransactionRepository()._collection
     _cashier_report_collection = CashierReportRepository()._collection
     _cash_count_collection = CashCountRepository()._collection
+    _transaction_discount_collection = TransactionDiscountRepository()._collection
+
 
     _defaultFilter = {
                 "$match": {
@@ -33,16 +36,17 @@ class BranchReportRepository(BackupRepository):
             }
 
 
-    def find(self, query={}, *args):
-     
+    def find(self, query={}, groupBy={}, *args):
         try:
-            
+            if(not groupBy):
+                groupBy = { "branchId": "$branchId", "date": "$date"  }
+
             data = list(self._db[self._transaction_collection].aggregate([
                 { '$match': query },
                 { '$match': { "status": { "$in": [TransactionStatus.COMPLETED, TransactionStatus.REFUNDED] } } },
                 {
                     "$group": {
-                        "_id": { "branchId": "$branchId", "date": "$date"  },
+                        "_id": groupBy,
                         'date': { '$first': '$date' },
                         'branchId': { '$first': '$branchId' },
                         "totalGrossSales": { "$sum": "$totalGrossSales" },
@@ -84,7 +88,7 @@ class BranchReportRepository(BackupRepository):
                 },
                 {
                     "$lookup": {
-                        "from": 'transaction_discount',
+                        "from": self._transaction_discount_collection,
                         "let": {
                             "branchId": "$branchId",
                             "date": "$date"
