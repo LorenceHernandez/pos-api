@@ -3,8 +3,9 @@
 
 from itertools import groupby
 
+from bson import ObjectId
 from pydash import get
-from app.new_models.Filter import DateRangeFilter
+from app.new_models.Filter import DateRangeFilter, ReportFilter
 from app.new_models.Transaction import TransactionStatus
 from app.repositories.base import Repository
 from app.repositories.transaction import TransactionRepository
@@ -147,6 +148,45 @@ class CategoryRepository(Repository):
             }
         except:
             raise
+    
+    def find_payment_types(self, query=ReportFilter, *args):
+        transactionItemsQuery = []
+        for branchId in query.branchIds:
+            transactionItemsQuery = [
+                *transactionItemsQuery,
+                *self._create_transaction_items_query(f'{branchId}.transactionItems', { 
+                    "branchId": branchId,
+                    **query.dateRangeFilter.transform()
+                }, branchId=branchId)
+            ]
+
+        try: 
+            data = list(self._db[self._collection].aggregate([
+                {
+                    "$addFields": {
+                        "_id": {"$toString": "$_id"}
+                    }
+                },
+                *transactionItemsQuery,
+                *args,
+            ]))
+
+            categories = []
+            for item in data:
+                for branchId in query.branchIds:
+                    transactionSummary = {}
+                    transactionItems = list(filter(lambda i: get(i, 'transaction.tender.type') is not None and get(i, 'transaction.status') == 'completed', item[branchId]['transactionItems']))
+                    for key, value in groupby(transactionItems, lambda i: get(i, 'transaction.tender.type')):
+                        total = sum(map(lambda i: get(i, 'price'), value))
+                        total += transactionSummary.get(key, 0)
+                        transactionSummary[key] = total
+
+                    item[branchId]['transactionSummary'] = transactionSummary
+                    item[branchId]['transactionSummary']['total'] = sum(map(lambda i: get(i, 'price'), transactionItems))
+                categories.append(item)
+            return categories
+        except:
+            raise
 
     
     def _get_transaction_summary(self, transactionItems):
@@ -166,8 +206,26 @@ class CategoryRepository(Repository):
             return finalValue * 100
         return ((finalValue - startValue) / startValue) * 100
 
-    def _create_transaction_items_query(self, name, query):
+    def _create_transaction_items_query(self, name, query, branchId=None):
+        branchQuery = []
+
+        if(branchId is not None):
+            branchQuery = [
+                { 
+                    '$lookup': {
+                        'from': 'branches',
+                        'pipeline': [
+                            { "$match": { "_id": ObjectId(branchId) } },
+                            { "$addFields": { "_id": { "$toString": "$_id" } } }
+                        ],
+                        'as': f'{branchId}.branch'
+                    }
+                },
+                { "$unwind": f'${branchId}.branch' },
+            ]
+
         return [
+            *branchQuery,
             {
                 "$lookup": {
                     "from": self._transaction_item_collection,
@@ -200,7 +258,7 @@ class CategoryRepository(Repository):
                                     { '$match': query },
                                     {
                                         "$addFields": {
-                                            "_id": {"$toString": "$_id"}
+                                            "_id": {"$toString": "$_id"},
                                         }
                                     },
                                     {

@@ -126,14 +126,25 @@ def get_comparative_report(user_id):
 
     try:
         filter = ComparativeReportFilter(dateRangeFilter=DateRangeFilter(**params), **params)
-
-        
         reports = categoryRepository.compare_category_sales(
             omit(filter.transform(), 'date'),
             filter.date1Filter,
             filter.date2Filter
         )
+        return jsonify({ 'data': reports })
+    except ValidationError as e:
+        return jsonify({'message': 'Unable to get reports', 'error': e.errors(include_input=False)}), 500
+    except Exception as e:
+        return jsonify({'message': 'Unable to get reports', 'error': repr(e)}), 500
 
+@v2_reports_bp.route(api + '/payment')
+@authorized
+def get_payement_types_report(user_id):
+    params = request.args.to_dict()
+
+    try:
+        filter = ReportFilter(dateRangeFilter=DateRangeFilter(**params), **params)
+        reports = categoryRepository.find_payment_types(filter)
         return jsonify({ 'data': reports })
     except ValidationError as e:
         return jsonify({'message': 'Unable to get reports', 'error': e.errors(include_input=False)}), 500
