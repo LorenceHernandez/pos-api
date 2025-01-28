@@ -252,14 +252,14 @@ class CashierReportRepository(Repository):
                 
                 transactions = filter(lambda i: i['status'] == TransactionStatus.COMPLETED and get(i, 'tender.type') != TenderType.CASH, item['transactions'])
                 item['totalPayments'] = sum(map(lambda i: i['tender']['amount'], transactions))
-                item['totalPayments'] += get(item, 'endingCashCount.total', 0)
+                item['totalPayments'] += get(item, 'endingCashCount.total') or 0
 
                 if(item.get('sales') is not None):
-                    openingFundTotal = get(item, 'openingFund.total', 0)
+                    openingFundTotal = get(item, 'openingFund.total') or 0
                     difference = item['totalPayments'] - openingFundTotal - item['sales']['totalNetSales']
                     item['sales']['cashDifference'] = difference
                 
-                item['totalPayments'] -= get(item, 'withdraw', 0)
+                item['totalPayments'] -= get(item, 'withdraw') or 0
 
                 transactionSummary = {}
                 transactions = filter(lambda i: get(i, 'tender.type') is not None and i['status'] == 'completed', item['transactions'])
