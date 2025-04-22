@@ -24,7 +24,7 @@ from app.cas_app.blueprints.journal_entries import journal_entry_bp
 from app.cas_app.blueprints.payments import payment_bp
 from app.cas_app.blueprints.purchase_invoice import purchase_invoice_bp
 from app.cas_app.blueprints.purchase_orders import purchase_order_bp
-from app.cas_app.blueprints.purchaseOrderReceipt import \
+from app.cas_app.blueprints.purchase_order_receipt import \
     purchase_order_receipt_bp
 from app.cas_app.blueprints.receipts import receipts_bp
 from app.cas_app.blueprints.reports import reports_bp
