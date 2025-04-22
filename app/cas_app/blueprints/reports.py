@@ -1,6 +1,7 @@
 
 from bson import ObjectId
 from flask import Blueprint
+from pydash import get
 
 from app.cas_app.models.AccountsType import AccountsType
 from app.cas_app.models.ChartAccount import ChartAccount
@@ -171,3 +172,182 @@ def get_profit_loss(user_id):
 
     except Exception as e:
         return {'message': repr(e) }, 500
+
+
+@reports_bp.get(api + '/general-ledger')
+@authorized
+def get_general_ledger(user_id):
+    
+    query = {}
+
+    def _create_match_accounting_query(table_name, id="$_id"):
+        return [
+            { 
+                '$lookup': {
+                    'from': table_name,
+                    "let": {
+                        "accountId": id,
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$gt": [
+                                        {
+                                            "$size": {
+                                                "$filter": {
+                                                    "input": "$accounting",
+                                                    "as": "item",
+                                                    "cond": {
+                                                        "$or": [
+                                                            { "$eq": [ "$$item.account_code_debit", "$$accountId" ] },
+                                                            { "$eq": [ "$$item.account_code_credit", "$$accountId" ] },
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        0 
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            '$addFields': {
+                                '_id': {'$toString': '$_id' },
+                            }
+                        },
+                    ],
+                    "as": table_name
+                }, 
+            },
+        ]
+
+    result = []
+    data = list(chart_of_accounts.aggregate([
+        { '$match': query },
+        {
+            '$addFields': {
+                '_id': {'$toString': '$_id' },
+            }
+        },
+        *_create_match_accounting_query('payments'),
+        *_create_match_accounting_query('purchase_invoices'),
+        *_create_match_accounting_query('receipts'),
+        *_create_match_accounting_query('sales_invoices'),
+        {
+            "$match": {
+                "$expr": {
+                    "$or": [
+                        { "$gt": [{"$size": "$payments"}, 0] },
+                        { "$gt": [{"$size": "$purchase_invoices"}, 0] },
+                        { "$gt": [{"$size": "$receipts"}, 0] },
+                        { "$gt": [{"$size": "$sales_invoices"}, 0] },
+                    ]
+                }
+            }
+        }
+    ]))
+
+    for item in data:
+        pairs = {
+            "payments": lambda i: get(i, 'totalAmountPaid', 0),
+            "purchase_invoices": lambda i: get(i, 'totalAmount', 0),
+            "receipts": lambda i: get(i, 'totalAmountPaid', 0),
+            "sales_invoices": lambda i: get(i, 'total', 0),
+        }
+
+        def sumAllTransactions(debit=True):
+            sum = 0
+            for key, fn in pairs.items():
+                transactions = get(item, key, [])
+                for transaction in transactions:
+                    accounting_key = 'account_code_debit' if debit else 'account_code_credit'
+                    accounting = get(transaction, 'accounting', [])
+                    
+                    for account in accounting:
+                        if(account[accounting_key] == item['_id']):
+                            sum += fn(transaction)
+
+            return sum
+
+        overallTotalDebit = sumAllTransactions(True)
+        overallTotalCredit = sumAllTransactions(False)
+
+        item['overallTotalDebit'] = overallTotalDebit
+        item['overallTotalCredit'] = overallTotalCredit
+        result.append(item)
+    return result
+    
+
+@reports_bp.get(api + '/general-entries')
+@authorized
+def get_general_entries(user_id):
+    query = {}
+    result = []
+    data = list(chart_of_accounts.aggregate([
+        { '$match': query },
+        {
+            '$addFields': {
+                '_id': {'$toString': '$_id' },
+            }
+        },
+        { 
+            '$lookup': {
+                'from': 'journal_entries',
+                'let': {
+                    "accountId": "$_id"
+                },
+                "pipeline": [
+                    {
+                        "$match": {
+                            "$expr": {
+                                "$and": [
+                                    { 
+                                        "$or": [
+                                            { "$eq": ["$accounting.account_code_debit", "$$accountId"] },
+                                            { "$eq": ["$accounting.account_code_credit", "$$accountId"] },
+                                        ] 
+                                    },
+                                    { "$ne": ["$status", "Draft"] }
+                                ]
+                            }
+                        }
+                    },
+                     {
+                        '$addFields': {
+                            '_id': {'$toString': '$_id' },
+                        }
+                    },
+                ],
+                'as': 'journal_entries'
+            }, 
+        },
+        {
+            "$match": {
+                "$expr": {
+                    "$or": [
+                        { "$gt": [{"$size": "$journal_entries"}, 0] },
+                    ]
+                }
+            }
+        }
+    ]))
+
+    for item in data:
+
+        item['journal_entries'] = list(map(lambda i: ({ **i, "isDebit": i['accounting']['account_code_debit'] == item['_id'] }), item['journal_entries']))
+
+        get_entries_by = lambda key: list(filter(lambda i: i['accounting'][key] == item['_id'], item['journal_entries']))
+        
+        debitEntries = get_entries_by('account_code_debit')
+        totalDebit = sum(map(lambda i: get(i, 'total', 0), debitEntries))
+        
+        creditEntries = get_entries_by('account_code_credit')
+        totalCredit = sum(map(lambda i: get(i, 'total', 0), creditEntries))
+
+        item['totalDebit'] = totalDebit
+        item['totalCredit'] = totalCredit
+        result.append(item)
+
+    return result
