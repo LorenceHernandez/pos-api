@@ -1,6 +1,7 @@
 
 import json
 import os
+import threading
 from flask_socketio import SocketIO
 
 from dotenv import load_dotenv
@@ -33,7 +34,7 @@ from app.cas_app.blueprints.reports import reports_bp
 from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
-from app.socket import create_socket_instance
+from app.socket import connect_cloud_socket, create_socket_instance
 from app.utils.utils import getLocalTime
 
 load_dotenv(override=True)
@@ -410,11 +411,13 @@ app.register_blueprint(get_summary_income)
 app.register_blueprint(get_betalife_reports)
 app.register_blueprint(get_reports)
 
+
 if __name__ == '__main__':
    host = "0.0.0.0"
    port = 5000
-   
+
    if(not config.IS_PRODUCTION):
+      threading.Thread(target=connect_cloud_socket).start()
       app.run(host, port, debug=config.IS_DEVELOPMENT)
    else:
       socket = create_socket_instance(app)

@@ -1,20 +1,44 @@
 
 
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, disconnect
 from flask import Flask, request
-
+import socketio
 from app import config
 
 
-socketio = SocketIO(debug=True, cors_allowed_origins='*')
+socket = SocketIO(debug=True, cors_allowed_origins='*')
 
-def handle_connected():
-   print(f'\nClient ID {request.headers.get("api-id")}')
-   print(f'Client connected {request.headers}')
+def handle_connected(id):
+   print(f'\nClient ID {id}')
+   print(f'Client API ID {request.headers.get("api-id")}')
+   print(f'Client IP {request.headers.get('referer')}')
+
+   apiId = request.headers.get("api-id")
+   apiKey = request.headers.get("api-key")
+
+   if(not apiId or not apiKey):
+      disconnect(id)
 
 def create_socket_instance(app: Flask):
-   
-   socketio.init_app(app)
-   socketio.on_event('connect', handle_connected)
+   socket.init_app(app)
+   socket.on_event('connect', handle_connected)
 
-   return socketio
+   return socket
+
+def connect_cloud_socket():
+   try:
+      socket = socketio.SimpleClient()
+      
+      socket.connect(config.CLOUD_SERVER_URL, headers={
+         'api-id': config.BRANCH_ID,
+         'api-key': config.BRANCH_SECRET_KEY
+      })
+
+      def on_connect():
+         print('Server connected to Cloud Server')
+
+      socket.call('connect', on_connect)
+
+   except Exception as e:
+        print(f"Error connecting to Cloud Server: {e}")
+   
