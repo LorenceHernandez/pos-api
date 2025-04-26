@@ -1,11 +1,13 @@
 
 import json
 import os
+from flask_socketio import SocketIO
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS, cross_origin
 
+from app import config
 from app.blueprints.audit_log import audit_log_bp
 from app.blueprints.reports import discount_reports_bp
 from app.blueprints.cashier_report import cashier_report_bp
@@ -31,6 +33,7 @@ from app.cas_app.blueprints.reports import reports_bp
 from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
+from app.socket import create_socket_instance
 from app.utils.utils import getLocalTime
 
 load_dotenv(override=True)
@@ -116,9 +119,8 @@ HOST = os.getenv('HOST')
 JWT_SECRET = os.getenv('JWT_SECRET_KEY')
 
 app = Flask(__name__)
-
-
 cors = CORS(app, origins=["*", "*"])
+
 app.register_blueprint(discount_reports_bp)
 app.register_blueprint(cashier_report_bp)
 app.register_blueprint(branch_report_bp)
@@ -408,7 +410,14 @@ app.register_blueprint(get_summary_income)
 app.register_blueprint(get_betalife_reports)
 app.register_blueprint(get_reports)
 
-
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", port=5000, debug=IS_DEVELOPMENT)
+   host = "0.0.0.0"
+   port = 5000
+   
+   if(not config.IS_PRODUCTION):
+      app.run(host, port, debug=config.IS_DEVELOPMENT)
+   else:
+      socket = create_socket_instance(app)
+      socket.run(app, host, port)
+   
    
