@@ -1,7 +1,7 @@
 
 from bson import ObjectId
 from flask import Blueprint
-from pydash import get
+from pydash import get, omit
 
 from app.cas_app.models.AccountsType import AccountsType
 from app.cas_app.models.ChartAccount import ChartAccount
@@ -246,11 +246,11 @@ def get_general_ledger(user_id):
                     ]
                 }
             }
-        }
+        },
     ]))
 
     for item in data:
-        pairs = {
+        keys = {
             "payments": lambda i: get(i, 'totalAmountPaid', 0),
             "purchase_invoices": lambda i: get(i, 'totalAmount', 0),
             "receipts": lambda i: get(i, 'totalAmountPaid', 0),
@@ -259,7 +259,7 @@ def get_general_ledger(user_id):
 
         def sumAllTransactions(debit=True):
             sum = 0
-            for key, fn in pairs.items():
+            for key, fn in keys.items():
                 transactions = get(item, key, [])
                 for transaction in transactions:
                     accounting_key = 'account_code_debit' if debit else 'account_code_credit'
@@ -277,6 +277,20 @@ def get_general_ledger(user_id):
         item['overallTotalDebit'] = overallTotalDebit
         item['overallTotalCredit'] = overallTotalCredit
         result.append(item)
+
+    keys = ['payments', 'purchase_invoices', 'receipts', 'sales_invoices']
+    for index, item in enumerate(result):
+        transactions = []
+        
+        for key in keys:
+            data = map(lambda i: { **i, 'type': key }, item.get(key, []))
+            transactions.extend(list(data))
+            result[index] = omit(result[index], key)
+        
+        transactions = sorted(transactions, key=lambda i: ObjectId(i['_id']).generation_time)
+        result[index]['transactions'] = transactions
+
+
     return result
     
 
