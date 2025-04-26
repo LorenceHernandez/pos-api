@@ -11,12 +11,13 @@ socket = SocketIO(debug=True, cors_allowed_origins='*')
 def handle_connected(id):
    print(f'\nClient ID {id}')
    print(f'Client API ID {request.headers.get("api-id")}')
-   print(f'Client IP {request.headers.get('referer')}')
+   print(f'Client IP {request.headers.get("referer")}')
 
    apiId = request.headers.get("api-id")
    apiKey = request.headers.get("api-key")
 
    if(not apiId or not apiKey):
+      print(f'\nDisconnected Client ID {id}: Missing API ID and KEY')
       disconnect(id)
 
 def create_socket_instance(app: Flask):
