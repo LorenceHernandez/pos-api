@@ -14,9 +14,12 @@ def notify_user_created(user):
     socket_server.emit(event['name'], event['data'], room=event['namespace'])
     
     ids = get_disconnected_branch_ids(connected_keys)
-    print(client_event_queues)
     append_event_queue(ids, event)
 
-def get_disconnected_branch_ids(connectedIds: set[str] = []) -> list:
-    connectedIds = map(lambda i: ObjectId(i), connectedIds)
-    return branch_repository.find({ '_id': { '$nin': connectedIds } })
+    print(f"Re-emitted event: {event['name']} to IDS: {ids}")
+
+
+def get_disconnected_branch_ids(connected_ids: set) -> list:
+    connected_ids = list(map(lambda i: ObjectId(i), list(connected_ids)))
+    branches = list(branch_repository.find({ '_id': { '$nin': connected_ids } }))
+    return list(map(lambda i: str(i['_id']), branches))
