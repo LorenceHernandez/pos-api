@@ -1,7 +1,10 @@
 
 
+from datetime import datetime
 from flask_socketio import SocketIO, disconnect
 from flask import Flask, request, session
+
+from app.utils.utils import getLocalTimeStr
 
 
 socket_server = SocketIO(debug=True, cors_allowed_origins='*')
@@ -13,6 +16,7 @@ def handle_connected():
    id = get_client_sid()
    key = get_api_key()
 
+   print(getLocalTimeStr())
    print(f'\nClient ID {id}')
    print(f'Client API ID {key}')
 
