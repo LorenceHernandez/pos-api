@@ -34,7 +34,7 @@ from app.cas_app.blueprints.reports import reports_bp
 from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
-from app.sockets.server.index import create_socket_instance
+from app.sockets.server.index import init_socket_instance
 from app.sockets.client.index import connect_cloud_socket
 from app.utils.utils import getLocalTime
 
@@ -418,10 +418,13 @@ if __name__ == '__main__':
    port = 5000
 
    if(not config.IS_PRODUCTION):
-      threading.Thread(target=connect_cloud_socket).start()
+      thread = threading.Thread(target=connect_cloud_socket)
+      thread.daemon = True
+      thread.start()
+
       app.run(host, port, debug=config.IS_DEVELOPMENT)
    else:
-      socket = create_socket_instance(app)
+      socket = init_socket_instance(app)
       socket.run(app, host, port)
    
    

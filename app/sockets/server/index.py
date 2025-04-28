@@ -7,7 +7,7 @@ from flask import Flask, request, session
 from app.utils.utils import getLocalTimeStr
 
 
-socket_server = SocketIO(debug=True, cors_allowed_origins='*')
+socket_server = SocketIO(debug=True, cors_allowed_origins='*', logger=True)
 client_event_queues: dict[list] = {}
 connected_keys = set()
 
@@ -16,8 +16,9 @@ def handle_connected():
    id = get_client_sid()
    key = get_api_key()
 
+   print()
    print(getLocalTimeStr())
-   print(f'\nClient ID {id}')
+   print(f'Client ID {id}')
    print(f'Client API ID {key}')
 
    if(not key):
@@ -59,7 +60,7 @@ def append_event_queue(keys, event):
          client_event_queues[key] = []
       client_event_queues[key].append(event)
 
-def create_socket_instance(app: Flask):
+def init_socket_instance(app: Flask):
    socket_server.init_app(app)
    return socket_server
 

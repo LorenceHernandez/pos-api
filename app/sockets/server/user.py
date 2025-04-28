@@ -9,16 +9,23 @@ def notify_user_created(user):
     event = {
         'name': 'create-user',
         'data': user,
-        'namespace': namespace
     }
-    socket_server.emit(event['name'], event['data'], namespace=event['namespace'])
+    
+    def callback():
+        print()
+        print(f"Emitted event: {event['name']} to IDS: {connected_keys}")
+        print(f"To process event: {event['name']} to IDS: {ids}")
+        print()
+
+    socket_server.emit(
+        event['name'], 
+        event['data'], 
+        callback=callback
+    )
     
     ids = get_disconnected_branch_ids(connected_keys)
     append_event_queue(ids, event)
 
-    print(f"Emitted event: {event['name']} to IDS: {connected_keys}")
-    print(f"To process event: {event['name']} to IDS: {ids}")
-    print()
 
 
 def get_disconnected_branch_ids(connected_ids: set) -> list:
