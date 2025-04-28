@@ -6,7 +6,7 @@ from flask import Flask, request, session
 
 socket_server = SocketIO(debug=True, cors_allowed_origins='*')
 client_event_queues: dict[list] = {}
-connected_keys: set[str] = []
+connected_keys = set()
 
 @socket_server.on('connect')
 def handle_connected():
