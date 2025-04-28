@@ -60,7 +60,7 @@ def append_event_queue(keys, event):
       event_queue_repository.insert_one({ 'key': key, **event })
 
 def remove_event_queue(id):
-   event_queue_repository.delete_one(id)
+   event_queue_repository.delete_one({ '_id': id })
 
 def get_event_queues(key):
    return event_queue_repository.find({ 'key': key })

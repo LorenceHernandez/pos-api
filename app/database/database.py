@@ -34,8 +34,8 @@ dev_database = MongoDB({
 })
 
 cache_database = MongoDB({ 
-    "uri": LOCAL_DATABASE_URL, 
-    "database": "cache", 
+    "uri": REMOTE_DATABASE_URL, 
+    "database": DATABASE, 
 })
 
 remote_database = MongoDB({ 
