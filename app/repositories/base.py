@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import pymongo
 from app.config import IS_DEVELOPMENT, IS_INTERNAL_PRODUCTION, IS_PRODUCTION
-from app.database.database import get_current_backup_database, get_current_database, remote_database, backup_database, internal_prod_database
+from app.database.database import get_current_backup_database, get_current_database, remote_database, backup_database, internal_prod_database, cache_database
 
 
 # if IS_DEVELOPMENT:
@@ -74,6 +74,12 @@ class Repository(abc.ABC):
         except:
             raise
     
+    def delete_one(self, query, *args, **kwargs):
+        try:
+            return self._db[self._collection].delete_one(query, *args, **kwargs)
+        except:
+            raise
+
     def _get_next_sequence(self, data):
         counter = self._db['counters'].find_one_and_update(
             data,
@@ -82,6 +88,13 @@ class Repository(abc.ABC):
             return_document=True
         )
         return counter['seq']
+
+
+class EventQueueRepository(Repository):
+    _collection = 'event_queues'
+    def __init__(self):
+        current_database = cache_database
+        self._db = current_database.connect()
 
 class BackupRepository(Repository):
     _backup_db = None

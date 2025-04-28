@@ -11,21 +11,18 @@ def notify_user_created(user):
         'data': user,
     }
     
-    def callback():
-        print()
-        print(f"Emitted event: {event['name']} to IDS: {connected_keys}")
-        print(f"To process event: {event['name']} to IDS: {ids}")
-        print()
-
     socket_server.emit(
         event['name'], 
-        event['data'], 
-        callback=callback
+        args=event['data'], 
     )
     
     ids = get_disconnected_branch_ids(connected_keys)
     append_event_queue(ids, event)
 
+    print()
+    print(f"Emitted event: {event['name']} to IDS: {connected_keys}")
+    print(f"To process event: {event['name']} to IDS: {ids}")
+    print()
 
 
 def get_disconnected_branch_ids(connected_ids: set) -> list:
