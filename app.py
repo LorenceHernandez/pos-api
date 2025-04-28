@@ -34,7 +34,8 @@ from app.cas_app.blueprints.reports import reports_bp
 from app.cas_app.blueprints.sales_invoices import sales_invoice_bp
 from app.cas_app.blueprints.supplier import supplier_bp
 from app.config import IS_DEVELOPMENT
-from app.socket import connect_cloud_socket, create_socket_instance
+from app.sockets.server.index import create_socket_instance
+from app.sockets.client.index import connect_cloud_socket
 from app.utils.utils import getLocalTime
 
 load_dotenv(override=True)

@@ -9,7 +9,9 @@ from flask import Blueprint, g, request
 
 from app.database.config import users
 from app.database.store import insert_one
+from app.sockets.server.user import notify_user_created
 from app.utils.utils import getLocalTime
+from app.sockets.server.index import socket_server
 
 register = Blueprint("/user/register", __name__)
 
@@ -62,6 +64,10 @@ def _create_account():
      })
      
      if doc.inserted_id:
+         created_user = users.find({ '_id': doc.inserted_id })
+         created_user['_id'] = str(doc.inserted_id)
+         notify_user_created(created_user)
+         
          return {
             'message': 'User successfully registered',
             'code': 2,
