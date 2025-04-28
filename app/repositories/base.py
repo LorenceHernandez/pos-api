@@ -93,7 +93,7 @@ class Repository(abc.ABC):
 class EventQueueRepository(Repository):
     _collection = 'event_queues'
     def __init__(self):
-        current_database = cache_database
+        current_database = remote_database
         self._db = current_database.connect()
 
 class BackupRepository(Repository):
