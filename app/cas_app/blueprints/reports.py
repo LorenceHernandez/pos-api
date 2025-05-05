@@ -81,6 +81,121 @@ def get_trial_balance(user_id):
 @reports_bp.get(api + '/balance-sheet')
 @authorized
 def get_balance_sheet(user_id):
+
+
+    query = {
+        'accountType': { '$in': ['672b37e3010d1f46fd840169', '672b3865010d1f46fd840170'] }
+    }
+        
+    def _create_match_accounting_query(table_name, id="$_id"):
+        return [
+            { 
+                '$lookup': {
+                    'from': table_name,
+                    "let": {
+                        "accountId": id,
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$gt": [
+                                        {
+                                            "$size": {
+                                                "$filter": {
+                                                    "input": "$accounting",
+                                                    "as": "item",
+                                                    "cond": {
+                                                        "$or": [
+                                                            { "$eq": [ "$$item.account_code_debit", "$$accountId" ] },
+                                                            { "$eq": [ "$$item.account_code_credit", "$$accountId" ] },
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        0 
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            '$addFields': {
+                                '_id': {'$toString': '$_id' },
+                            }
+                        },
+                    ],
+                    "as": table_name
+                }, 
+            },
+        ]
+
+    result = []
+    data = list(chart_of_accounts.aggregate([
+        { '$match': query },
+        {
+            '$addFields': {
+                '_id': {'$toString': '$_id' },
+            }
+        },
+        *_create_match_accounting_query('payments'),
+        *_create_match_accounting_query('purchase_invoices'),
+        *_create_match_accounting_query('receipts'),
+        *_create_match_accounting_query('sales_invoices'),
+        {
+            "$match": {
+                "$expr": {
+                    "$or": [
+                        { "$gt": [{"$size": "$payments"}, 0] },
+                        { "$gt": [{"$size": "$purchase_invoices"}, 0] },
+                        { "$gt": [{"$size": "$receipts"}, 0] },
+                        { "$gt": [{"$size": "$sales_invoices"}, 0] },
+                    ]
+                }
+            }
+        },
+    ]))
+
+    for item in data:
+        keys = {
+            "payments": lambda i: get(i, 'totalAmountPaid', 0),
+            "purchase_invoices": lambda i: get(i, 'totalAmount', 0),
+            "receipts": lambda i: get(i, 'totalAmountPaid', 0),
+            "sales_invoices": lambda i: get(i, 'total', 0),
+        }
+
+        def sumAllTransactions(debit=True):
+            sum = 0
+            for key, fn in keys.items():
+                transactions = get(item, key, [])
+                for transaction in transactions:
+                    accounting_key = 'account_code_debit' if debit else 'account_code_credit'
+                    accounting = get(transaction, 'accounting', [])
+                    
+                    for account in accounting:
+                        if(account[accounting_key] == item['_id']):
+                            sum += fn(transaction)
+
+            return sum
+
+        overallTotalDebit = sumAllTransactions(True)
+        overallTotalCredit = sumAllTransactions(False)
+
+        item['overallTotalDebit'] = overallTotalDebit
+        item['overallTotalCredit'] = overallTotalCredit
+        result.append(item)
+
+    keys = ['payments', 'purchase_invoices', 'receipts', 'sales_invoices']
+    for index, item in enumerate(result):
+        for key in keys:
+            result[index] = omit(result[index], key)
+        
+    return result
+
+
+@reports_bp.get(api + '/balance-sheet2')
+@authorized
+def get_balance_sheet2(user_id):
     account_code_credit = 'account_code_credit'
     account_code_debit = 'account_code_debit'
     groups = ['liabilities', 'member-equity', 'assets']
